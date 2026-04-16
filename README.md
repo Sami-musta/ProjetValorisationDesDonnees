@@ -1,6 +1,6 @@
 # AirValo — Valorisation des données Airbnb du canton de Vaud
 
-> **Projet académique** — HEIG-VD, cours *Valorisation des données* (2026)
+> **Projet académique** — Master of Science HES-SO en Business Administration, orientation *Management des Systèmes d'Information*
 > Application web décisionnelle pour **futurs hôtes Airbnb** en Suisse romande, centrée sur le canton de Vaud.
 
 AirValo croise quatre sources de données ouvertes (Inside Airbnb, OFS, Atlas statistique Vaud, OpenStreetMap) pour aider un propriétaire à **évaluer la viabilité d'un lancement Airbnb** : score d'attractivité territoriale, simulation de revenus, comparaison de communes, cadre réglementaire.
@@ -112,26 +112,5 @@ python compute_attractivity.py  # produit vaud_attractivity.json, vaud_pois.json
 - **Simulateur de lancement** — comparaison à la cohorte d'annonces actives, fallback progressif en 5 niveaux (commune-strict → commune-loose → district-strict → district-loose → commune-any) pour garantir un résultat sur toutes les communes du canton
 - **Pondération** transparente et ajustable via `attractivity_weights.json`
 
----
 
-## 🗺️ Roadmap
 
-- **V2** — Tests automatisés, audit Lighthouse, accessibilité WCAG AA, internationalisation FR/EN/DE
-- **V3** — Mise à jour trimestrielle automatisée (GitHub Actions), intégration prix immobiliers dynamiques
-- **V4** — Modèle de pricing dynamique (ML), alertes de marché, recommandations personnalisées
-- **V5** — Comptes utilisateurs, extension cantonale (Genève, Valais), API publique
-
----
-
-## 👤 Auteur
-
-**Sami Musta** — HEIG-VD, filière ingénierie des médias
-Projet réalisé dans le cadre du cours *Valorisation des données* (2026)
-
-## 📝 Licence
-
-Code sous licence **MIT**. Les données conservent leur licence d'origine (voir tableau ci-dessus).
-
----
-
-*Déclaration d'usage de l'IA : ChatGPT / Claude ont été utilisés comme assistants de développement (génération de code, relecture, documentation) dans le respect des règles d'intégrité académique du cours.*

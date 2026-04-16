@@ -12,6 +12,20 @@ ENV/
 .mypy_cache/
 .ruff_cache/
 
+# ---- Raw Data (too large for GitHub) ----
+GenevaData/
+VaudData/
+ZurichData/
+OtherData/
+*.csv
+*.csv.gz
+*.xlsx
+*.pdf
+
+# ---- Temporary output files ----
+inspect_output.txt
+pdf_content.txt
+
 # ---- OS / Editors ----
 .DS_Store
 Thumbs.db
@@ -36,3 +50,6 @@ node_modules/
 # ---- Logs ----
 *.log
 npm-debug.log*
+
+# Local Netlify folder
+.netlify
