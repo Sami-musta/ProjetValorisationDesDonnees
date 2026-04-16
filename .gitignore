@@ -12,6 +12,11 @@ ENV/
 .mypy_cache/
 .ruff_cache/
 
+# ---- Fichiers exclus ----
+*.pdf
+inspect_output.txt
+pdf_content.txt
+read_pdf.py
 # ---- OS / Editors ----
 .DS_Store
 Thumbs.db
