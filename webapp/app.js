@@ -1,0 +1,1558 @@
+/* ═══════════════════════════════════════════
+   AirValo PRO — App Logic v3
+   French labels, theme toggle, thin chart borders
+   ═══════════════════════════════════════════ */
+
+let activeCity = 'vaud';
+let activeView = 'overview';
+let map = null;
+let mapMarkers = [];
+let charts = {};
+const cityData = {};
+
+const CITY_META = {
+    geneva: { lat: 46.2044, lng: 6.1432, zoom: 12, label: 'Genève' },
+    zurich: { lat: 47.3769, lng: 8.5417, zoom: 12, label: 'Zurich' },
+    vaud:   { lat: 46.5197, lng: 6.6323, zoom: 10, label: 'Vaud' },
+};
+
+// Chart.js global config
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#717171';
+// Airbnb Chart Colors
+const C = {
+    coral:     'rgba(255, 90, 95, 0.85)',
+    coralBg:   'rgba(255, 90, 95, 0.4)',
+    teal:      'rgba(0, 166, 153, 0.85)',
+    tealBg:    'rgba(0, 166, 153, 0.4)',
+    orange:    'rgba(252, 100, 45, 0.85)',
+    orangeBg:  'rgba(252, 100, 45, 0.4)',
+    pink:      'rgba(227, 28, 95, 0.85)',
+    yellow:    'rgba(255, 180, 0, 0.85)',
+    yellowBg:  'rgba(255, 180, 0, 0.4)',
+    green:     'rgba(0, 132, 137, 0.85)',
+    greenBg:   'rgba(0, 132, 137, 0.12)',
+    purple:    'rgba(145, 70, 105, 0.85)',
+    purpleBg:  'rgba(145, 70, 105, 0.12)',
+};
+
+function getChartTextColor() {
+    return document.body.getAttribute('data-theme') === 'dark' ? '#A0A8C0' : '#717171';
+}
+function getChartGridColor() {
+    return document.body.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+}
+
+// ─── Absolute score color scale (4 tiers, monotonic heat) ───
+// Used EVERYWHERE a score appears so the user always sees the same mapping:
+//   map dots, detail card, legends, recommendations.
+const SCORE_TIERS = [
+    { min: 0,  max: 30,  color: '#94a3b8', label: 'Limité',    hint: 'Potentiel faible' },
+    { min: 30, max: 50,  color: '#fbbf24', label: 'Moyen',     hint: 'À surveiller' },
+    { min: 50, max: 70,  color: '#fb7185', label: 'Bon',       hint: 'Intéressant' },
+    { min: 70, max: 101, color: '#FF5A5F', label: 'Excellent', hint: 'Top potentiel' },
+];
+function getScoreColor(score) {
+    const s = Number(score) || 0;
+    for (const t of SCORE_TIERS) if (s >= t.min && s < t.max) return t.color;
+    return SCORE_TIERS[SCORE_TIERS.length - 1].color;
+}
+function getScoreTierIndex(score) {
+    const s = Number(score) || 0;
+    for (let i = 0; i < SCORE_TIERS.length; i++) {
+        if (s >= SCORE_TIERS[i].min && s < SCORE_TIERS[i].max) return i;
+    }
+    return SCORE_TIERS.length - 1;
+}
+// Percentile of `value` within `sortedAsc`, 0..100. Uses binary search.
+function percentileRank(sortedAsc, value) {
+    if (!sortedAsc.length) return 0;
+    let lo = 0, hi = sortedAsc.length;
+    while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (sortedAsc[mid] < value) lo = mid + 1; else hi = mid;
+    }
+    return (lo / sortedAsc.length) * 100;
+}
+
+// ─── Init ───
+document.addEventListener('DOMContentLoaded', () => {
+    // Load saved theme
+    const saved = localStorage.getItem('airvalo-theme');
+    if (saved === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+    setupNavigation();
+    setupSliders();
+    setupThemeToggle();
+    setupCustomDropdowns();
+    loadCity(activeCity);
+});
+
+// ═══════════════════════════════════════════
+// CUSTOM AIRBNB DROPDOWNS
+// ═══════════════════════════════════════════
+function setupCustomDropdowns() {
+    // Toggle dropdown on filter-group click if it contains a dropdown
+    document.querySelectorAll('.filter-group').forEach(group => {
+        const dd = group.querySelector('.custom-dropdown');
+        if (dd) {
+            group.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const wasOpen = dd.classList.contains('open');
+                // Close all first
+                document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+                if (!wasOpen) dd.classList.add('open');
+            });
+        }
+    });
+
+    // Item selection
+    document.querySelectorAll('.custom-dropdown .dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dd = item.closest('.custom-dropdown');
+            const sel = document.getElementById(dd.dataset.for);
+            
+            // Update hidden select
+            sel.value = item.dataset.value;
+            sel.dispatchEvent(new Event('change'));
+            
+            // Update UI
+            dd.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            // Update trigger text
+            dd.querySelector('.trigger-text').textContent = item.textContent;
+
+            // Close
+            dd.classList.remove('open');
+        });
+    });
+
+    // Click outside closes all
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+    });
+
+    // Escape key closes all
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+    });
+
+    // Prevent clicks inside panel from closing
+    document.querySelectorAll('.dropdown-panel').forEach(panel => {
+        panel.addEventListener('click', (e) => e.stopPropagation());
+    });
+}
+
+// ═══════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════
+function setupThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    updateThemeIcon();
+    btn.addEventListener('click', () => {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('airvalo-theme', 'light');
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('airvalo-theme', 'dark');
+        }
+        updateThemeIcon();
+        updateChartColors();
+    });
+}
+function updateThemeIcon() {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    btn.textContent = isDark ? '☀️' : '🌙';
+    btn.title = isDark ? 'Mode clair' : 'Mode sombre';
+}
+function updateChartColors() {
+    Chart.defaults.color = getChartTextColor();
+    Chart.defaults.borderColor = getChartGridColor();
+    // Re-render current view
+    const data = cityData[activeCity];
+    if (data) {
+        if (activeView === 'overview') renderOverview(data);
+        if (activeView === 'analysis') renderAnalysis();
+    }
+}
+
+// ═══════════════════════════════════════════
+// SLIDER TRACK FILL
+// ═══════════════════════════════════════════
+function setupSliders() {
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        updateSliderTrack(slider);
+        slider.addEventListener('input', () => updateSliderTrack(slider));
+    });
+}
+function updateSliderTrack(slider) {
+    const min = parseFloat(slider.min), max = parseFloat(slider.max), val = parseFloat(slider.value);
+    slider.style.setProperty('--slider-pct', ((val - min) / (max - min)) * 100 + '%');
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function setupNavigation() {
+    // ── Desktop nav tabs ──
+    document.querySelectorAll('.nav-tabs .nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.nav-tabs .nav-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            // Sync mobile menu
+            document.querySelectorAll('.mobile-menu-item').forEach(m => m.classList.remove('active'));
+            const mobileMatch = document.querySelector(`.mobile-menu-item[data-view="${tab.dataset.view}"]`);
+            if (mobileMatch) mobileMatch.classList.add('active');
+            switchView(tab.dataset.view);
+        });
+    });
+
+    // ── Mobile burger menu ──
+    const burgerBtn = document.getElementById('burger-btn');
+    const mobileOverlay = document.getElementById('mobile-menu-overlay');
+    const mobileDropdown = document.getElementById('mobile-menu-dropdown');
+
+    function openMobileMenu() {
+        mobileOverlay.classList.add('show');
+        mobileDropdown.classList.add('show');
+    }
+    function closeMobileMenu() {
+        mobileOverlay.classList.remove('show');
+        mobileDropdown.classList.remove('show');
+    }
+
+    if (burgerBtn) {
+        burgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (mobileDropdown.classList.contains('show')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        });
+    }
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // ── In-page CTA buttons (hero, etc.) — `data-go-view` avoids colliding
+    //    with the existing `data-view` handlers on nav tabs / mobile items.
+    document.querySelectorAll('[data-go-view]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.goView;
+            // Sync nav active states so the chrome reflects where we landed
+            document.querySelectorAll('.nav-tabs .nav-tab').forEach(t => t.classList.remove('active'));
+            const navMatch = document.querySelector(`.nav-tabs .nav-tab[data-view="${target}"]`);
+            if (navMatch) navMatch.classList.add('active');
+            document.querySelectorAll('.mobile-menu-item').forEach(m => m.classList.remove('active'));
+            const mobMatch = document.querySelector(`.mobile-menu-item[data-view="${target}"]`);
+            if (mobMatch) mobMatch.classList.add('active');
+            switchView(target);
+        });
+    });
+
+    // ── Mobile menu items ──
+    document.querySelectorAll('.mobile-menu-item[data-view]').forEach(item => {
+        item.addEventListener('click', () => {
+            // Update mobile active state
+            document.querySelectorAll('.mobile-menu-item').forEach(m => m.classList.remove('active'));
+            item.classList.add('active');
+            // Sync desktop nav tabs
+            document.querySelectorAll('.nav-tabs .nav-tab').forEach(t => t.classList.remove('active'));
+            const desktopMatch = document.querySelector(`.nav-tabs .nav-tab[data-view="${item.dataset.view}"]`);
+            if (desktopMatch) desktopMatch.classList.add('active');
+            switchView(item.dataset.view);
+            closeMobileMenu();
+        });
+    });
+    // ── City selectors (desktop + mobile) ──
+    function selectCity(city) {
+        document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.mobile-city-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(`.city-btn[data-city="${city}"]`).forEach(b => b.classList.add('active'));
+        document.querySelectorAll(`.mobile-city-btn[data-city="${city}"]`).forEach(b => b.classList.add('active'));
+        if (city !== activeCity) { activeCity = city; loadCity(activeCity); }
+    }
+    document.querySelectorAll('.city-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectCity(btn.dataset.city));
+    });
+    document.querySelectorAll('.mobile-city-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectCity(btn.dataset.city));
+    });
+    // Map filters
+    ['map-min-score', 'map-min-price'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => { document.getElementById(id + '-val').textContent = el.value; renderMap(); });
+    });
+    ['map-color-by', 'map-room-type'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', renderMap);
+    });
+    // Analysis filters
+    ['analysis-nh', 'analysis-type'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', renderAnalysis);
+    });
+    ['analysis-max-price', 'analysis-min-score'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => { document.getElementById(id + '-val').textContent = el.value; renderAnalysis(); });
+    });
+}
+
+function switchView(viewId) {
+    activeView = viewId;
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewId)?.classList.add('active');
+    if (viewId === 'map') setTimeout(() => { if (!map) initMap(); else map.invalidateSize(); renderMap(); }, 100);
+    if (viewId === 'analysis') renderAnalysis();
+    if (viewId === 'attractivity') renderAttractivity();
+    if (viewId === 'simulator') setupSimulator();
+}
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
+async function loadCity(cityId) {
+    if (!cityData[cityId]) {
+        try {
+            // Cache-bust all data fetches so pipeline reruns are picked up
+            // without forcing the user to hard-reload. Using `no-store` ensures
+            // neither memory nor disk cache returns stale pipeline output.
+            const noCache = { cache: 'no-store' };
+            const fetches = [
+                fetch(`data/${cityId}_listings.json`, noCache).then(r => r.json()),
+                fetch(`data/${cityId}_neighborhoods.json`, noCache).then(r => r.json()),
+                fetch(`data/${cityId}_property_types.json`, noCache).then(r => r.json()),
+                fetch(`data/${cityId}_seasonal.json`, noCache).then(r => r.json()),
+            ];
+            const [listings, neighborhoods, propertyTypes, seasonal] = await Promise.all(fetches);
+            cityData[cityId] = { listings, neighborhoods, propertyTypes, seasonal };
+
+            // Load attractivity data for Vaud
+            if (cityId === 'vaud') {
+                try {
+                    const [attractivity, weights] = await Promise.all([
+                        fetch('data/vaud_attractivity.json', noCache).then(r => r.json()),
+                        fetch('data/attractivity_weights.json', noCache).then(r => r.json()),
+                    ]);
+                    cityData[cityId].attractivity = attractivity;
+                    cityData[cityId].attractivityWeights = weights;
+                } catch (e) { console.warn('Attractivity data not available:', e); }
+            }
+        } catch (e) { console.error('Erreur chargement:', cityId, e); return; }
+    }
+    // Show/hide attractivity tab
+    const hasAttractivity = !!cityData[cityId]?.attractivity;
+    const navTab = document.getElementById('nav-tab-attractivity');
+    const mobileTab = document.getElementById('mobile-tab-attractivity');
+    if (navTab) navTab.classList.toggle('hidden', !hasAttractivity);
+    if (mobileTab) mobileTab.classList.toggle('hidden', !hasAttractivity);
+    // If switching away from vaud while on attractivity view, go to overview
+    if (!hasAttractivity && activeView === 'attractivity') switchView('overview');
+    // Hero title is static editorial copy ("Le Canton de Vaud, vu par la donnée") —
+    // no longer overwritten from JS since the city selector is Vaud-only.
+    populateAnalysisNhDropdown();
+    populateSimulatorCommunes();
+    renderOverview(cityData[cityId]);
+    if (activeView === 'map') { map?.setView([CITY_META[cityId].lat, CITY_META[cityId].lng], CITY_META[cityId].zoom); renderMap(); }
+    if (activeView === 'analysis') renderAnalysis();
+    if (activeView === 'attractivity') renderAttractivity();
+}
+
+function populateAnalysisNhDropdown() {
+    const sel = document.getElementById('analysis-nh');
+    if (!sel) return;
+    const data = cityData[activeCity];
+    if (!data?.neighborhoods) return;
+
+    // Update hidden select
+    sel.innerHTML = '<option value="all">Tous les quartiers</option>';
+    data.neighborhoods.forEach(n => { const o = document.createElement('option'); o.value = n.nh; o.textContent = n.nh; sel.appendChild(o); });
+
+    // Update custom dropdown panel
+    const dd = document.querySelector('.custom-dropdown[data-for="analysis-nh"]');
+    if (!dd) return;
+    const panel = dd.querySelector('.dropdown-panel');
+    panel.innerHTML = '';
+
+    // Add "all" option
+    const allItem = document.createElement('div');
+    allItem.className = 'dropdown-item active';
+    allItem.dataset.value = 'all';
+    allItem.innerHTML = `<div class="dd-icon-box">📍</div><div class="dd-text-box"><span class="dd-title">Tous les quartiers</span><span class="dd-subtitle">Vue globale de la ville</span></div>`;
+    panel.appendChild(allItem);
+
+    // Add neighborhood options
+    data.neighborhoods.forEach(n => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        item.dataset.value = n.nh;
+        const icon = n.avg_score > 60 ? '🌟' : (n.avg_score > 40 ? '⭐' : '📍');
+        item.innerHTML = `<div class="dd-icon-box">${icon}</div><div class="dd-text-box"><span class="dd-title">${n.nh}</span><span class="dd-subtitle">Score : ${n.avg_score.toFixed(1)} | CHF ${Math.round(n.avg_revenue).toLocaleString('fr-CH')}</span></div>`;
+        panel.appendChild(item);
+    });
+
+    // Re-attach click handlers for new items
+    panel.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sel.value = item.dataset.value;
+            sel.dispatchEvent(new Event('change'));
+            panel.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            const titleSpan = item.querySelector('.dd-title');
+            dd.querySelector('.trigger-text').textContent = titleSpan ? titleSpan.textContent : item.textContent;
+            dd.classList.remove('open');
+        });
+    });
+
+    // Reset trigger text
+    dd.querySelector('.trigger-text').textContent = 'Tous les quartiers';
+}
+
+// ═══════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════
+function renderOverview(data) {
+    const { listings, neighborhoods, propertyTypes } = data;
+    const n = listings.length;
+    let sS = 0, sR = 0, sO = 0, sP = 0;
+    listings.forEach(l => { sS += l.score; sR += l.revenue; sO += l.occupancy; sP += l.price; });
+    animateValue('kpi-score', n > 0 ? (sS / n).toFixed(1) : '0');
+    animateValue('kpi-revenue', `CHF ${n > 0 ? Math.round(sR / n).toLocaleString() : '0'}`);
+    animateValue('kpi-occupancy', n > 0 ? Math.round(sO / n).toString() : '0');
+    animateValue('kpi-price', `CHF ${n > 0 ? Math.round(sP / n).toLocaleString() : '0'}`);
+    animateValue('kpi-listings', n.toLocaleString());
+    renderTopNhChart(neighborhoods.slice(0, 8));
+    renderPropertyTypeChart(propertyTypes);
+
+    // AI Recommendation — filter neighborhoods with >= 3 listings for reliability
+    const reliableNh = neighborhoods.filter(n => n.count >= 3);
+    const bestNh = reliableNh.length > 0 ? reliableNh[0] : (neighborhoods.length > 0 ? neighborhoods[0] : null);
+    if (bestNh) {
+        // Find best property type
+        const bestType = propertyTypes.reduce((a, b) => a.avg_revenue > b.avg_revenue ? a : b, propertyTypes[0]);
+        const typeLabels = { 'Entire home/apt': 'logements entiers', 'Private room': 'chambres privées', 'Shared room': 'chambres partagées', 'Hotel room': 'chambres d\'hôtel' };
+        const recommendedType = typeLabels[bestType?.type] || 'logements entiers';
+
+        document.getElementById('recommendation-text').innerHTML =
+            `<p class="rec-content">D'après notre algorithme, <strong>${bestNh.nh}</strong> est le quartier n°1 pour investir` +
+            `${bestNh.count < 10 ? ` <span style="font-size:11px;color:var(--text-muted);">(${bestNh.count} annonces analysées)</span>` : ` parmi ${bestNh.count} annonces`}.` +
+            ` Privilégiez les <strong>${recommendedType}</strong> pour maximiser le rendement.</p>` +
+            `<div class="rec-stats">` +
+                `<div class="rec-stat"><span class="rec-stat-label">Score</span><span class="rec-stat-value">${bestNh.avg_score}/100</span></div>` +
+                `<div class="rec-stat"><span class="rec-stat-label">Revenu annuel moy.</span><span class="rec-stat-value">CHF ${Math.round(bestNh.avg_revenue).toLocaleString()}</span></div>` +
+                `<div class="rec-stat"><span class="rec-stat-label">Occupation</span><span class="rec-stat-value">${Math.round(bestNh.avg_occupancy)} jours/an</span></div>` +
+                (bestNh.prix_m2 ? `<div class="rec-stat"><span class="rec-stat-label">Prix immobilier/m²</span><span class="rec-stat-value">CHF ${bestNh.prix_m2.toLocaleString()}</span></div>` : '') +
+                `<div class="rec-stat"><span class="rec-stat-label">Tarif médian/nuit</span><span class="rec-stat-value">CHF ${bestNh.median_price}</span></div>` +
+            `</div>` +
+            (bestNh.count < 5 ? `<p class="rec-note">* Peu d'annonces dans ce quartier — résultats à interpréter avec prudence.</p>` : '');
+    }
+}
+function animateValue(id, text) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('animate-in'); void el.offsetWidth;
+    el.textContent = text; el.classList.add('animate-in');
+}
+
+// ═══════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null; } }
+
+function renderTopNhChart(nh) {
+    destroyChart('topNh');
+    const ctx = document.getElementById('chart-top-nh');
+    if (!ctx) return;
+    const gridColor = getChartGridColor();
+    charts.topNh = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: nh.map(n => n.nh.length > 18 ? n.nh.substring(0, 18) + '…' : n.nh),
+            datasets: [
+                { label: 'Score d\'investissement', data: nh.map(n => n.avg_score),
+                  backgroundColor: nh.map((_, i) => i === 0 ? C.coral : C.coralBg),
+                  borderColor: nh.map(() => 'rgba(255,90,95,0.4)'),
+                  borderWidth: 0, borderRadius: 6, yAxisID: 'y' },
+                { label: 'Revenu moyen (CHF)', data: nh.map(n => n.avg_revenue), type: 'line',
+                  borderColor: C.teal, backgroundColor: C.tealBg, pointBackgroundColor: C.teal,
+                  borderWidth: 2, pointRadius: 3, tension: 0.4, yAxisID: 'y1', fill: true }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } },
+            scales: {
+                y:  { beginAtZero: true, position: 'left', title: { display: true, text: 'Score' }, grid: { color: gridColor } },
+                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Revenu (CHF)' }, grid: { display: false } },
+                x:  { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } }
+            }
+        }
+    });
+}
+
+function renderPropertyTypeChart(pt) {
+    destroyChart('propType');
+    const ctx = document.getElementById('chart-property-type');
+    if (!ctx) return;
+    const colors = [C.coral, C.teal, C.orange, C.purple];
+    charts.propType = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: pt.map(p => p.type),
+            datasets: [{ label: 'Revenu moyen (CHF)', data: pt.map(p => p.avg_revenue),
+                backgroundColor: pt.map((_, i) => colors[i % colors.length]), borderWidth: 0, borderRadius: 8 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { afterLabel: ctx => { const d = pt[ctx.dataIndex]; return `Score: ${d.avg_score} | Annonces: ${d.count} | Occ: ${d.avg_occupancy}j`; } } } },
+            scales: { x: { beginAtZero: true, grid: { color: getChartGridColor() } }, y: { grid: { display: false } } }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════
+function initMap() {
+    const meta = CITY_META[activeCity];
+    map = L.map('map-container', { zoomControl: false, attributionControl: false }).setView([meta.lat, meta.lng], meta.zoom);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+}
+
+function renderMap() {
+    if (!map) return;
+    const data = cityData[activeCity];
+    if (!data?.listings) return;
+    mapMarkers.forEach(m => map.removeLayer(m)); mapMarkers = [];
+
+    const colorBy = document.getElementById('map-color-by')?.value || 'score';
+    const roomFilter = document.getElementById('map-room-type')?.value || 'all';
+    const minScore = parseInt(document.getElementById('map-min-score')?.value || '0', 10);
+    const minPrice = parseInt(document.getElementById('map-min-price')?.value || '0', 10);
+
+    let filtered = data.listings.filter(l => l.score >= minScore && l.price >= minPrice);
+    if (roomFilter !== 'all') filtered = filtered.filter(l => l.type === roomFilter);
+
+    // Precompute ABSOLUTE distribution for non-score metrics (computed once on the
+    // full canton dataset, NOT on the filtered subset) so the colour of any dot is
+    // stable whatever filter the user applies. For 'score' we use fixed tiers.
+    const allValsSorted = colorBy !== 'score'
+        ? data.listings.map(l => Number(l[colorBy]) || 0).sort((a, b) => a - b)
+        : null;
+
+    const meta = CITY_META[activeCity];
+    map.setView([meta.lat, meta.lng], meta.zoom);
+
+    filtered.forEach(l => {
+        const raw = Number(l[colorBy]) || 0;
+        // Map EVERY metric to a 0..100 "goodness" so we can reuse SCORE_TIERS.
+        // - score: identity
+        // - revenue / occupancy: higher = better → percentile rank
+        // - price: lower = better for an investor (cheaper acquisition / night)
+        //          → invert the percentile so cheap biens get high tiers
+        let goodness;
+        if (colorBy === 'score') goodness = raw;
+        else {
+            const pct = percentileRank(allValsSorted, raw);
+            goodness = colorBy === 'price' ? (100 - pct) : pct;
+        }
+        const color = getScoreColor(goodness);
+        const tierIdx = getScoreTierIndex(goodness);
+        const radius = 5 + tierIdx * 2; // 5, 7, 9, 11 — bigger = better
+        const circle = L.circleMarker([l.lat, l.lng], {
+            radius, color, fillColor: color,
+            fillOpacity: 0.65, weight: 1.5,
+            opacity: 0.9,
+        }).addTo(map);
+        circle.on('click', () => showMapDetail(l));
+        circle.bindTooltip(
+            `<strong style="color:${color}">Score ${l.score}/100</strong><br>` +
+            `CHF ${l.price}/nuit · CHF ${Math.round(l.revenue).toLocaleString()}/an`
+        );
+        mapMarkers.push(circle);
+    });
+    renderMapLegend(colorBy);
+    document.getElementById('map-detail')?.classList.add('hidden');
+}
+
+function renderMapLegend(metricKey) {
+    const el = document.getElementById('map-legend');
+    if (!el) return;
+    const metricLabels = {
+        score:     "Score d'investissement",
+        revenue:   'Revenu annuel',
+        price:     'Prix par nuit',
+        occupancy: 'Occupation annuelle',
+    };
+    const metricHints = {
+        score:     'Combinaison pondérée de 6 facteurs : revenu, occupation, attractivité, saturation, rendement et stabilité.',
+        revenue:   'Quartiles sur tous les biens du Canton — plus haut = mieux.',
+        occupancy: "Quartiles sur tous les biens du Canton — plus de nuitées = mieux.",
+        price:     "Quartiles inversés : les biens les moins chers sont colorés comme 'meilleurs' (coût d'acquisition nuitée plus bas).",
+    };
+    // Range labels differ by metric
+    const rangeLabels = metricKey === 'score'
+        ? ['0 – 30', '30 – 50', '50 – 70', '70 – 100']
+        : metricKey === 'price'
+            ? ['Top 25% cher', '25 – 50%', '50 – 75%', 'Top 25% abordable']
+            : ['Bas 25%', '25 – 50%', '50 – 75%', 'Top 25%'];
+    el.innerHTML = `
+        <div class="ml-head">
+            <span class="ml-eyebrow">Légende carte</span>
+            <span class="ml-metric">${metricLabels[metricKey] || metricKey}</span>
+        </div>
+        <div class="ml-scale">
+            ${SCORE_TIERS.map((t, i) => `
+                <div class="ml-step">
+                    <span class="ml-dot" style="background:${t.color};width:${10 + i * 3}px;height:${10 + i * 3}px;"></span>
+                    <span class="ml-range">${rangeLabels[i]}</span>
+                    <span class="ml-label">${t.label}</span>
+                </div>
+            `).join('')}
+        </div>
+        <p class="ml-hint">${metricHints[metricKey] || ''}</p>
+        <p class="ml-tip">La taille du point suit le même niveau — plus c'est gros, plus le potentiel est fort.</p>
+    `;
+}
+
+function showMapDetail(l) {
+    const card = document.getElementById('map-detail');
+    if (!card) return;
+    card.classList.remove('hidden');
+    // Some Airbnb hosts write titles all-lowercase ("chambre privée dans villa
+    // paisible") which reads like a comment. Force a proper sentence start —
+    // keep existing internal casing (NYON, Airbnb, etc.) to preserve intent.
+    const rawName = (l.name || ('Annonce #' + l.id)).trim();
+    const prettyName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : rawName;
+    document.getElementById('detail-name').textContent = prettyName;
+    document.getElementById('detail-score').textContent = l.score + '/100';
+    document.getElementById('detail-score').style.color = getScoreColor(l.score);
+    document.getElementById('detail-price').textContent = 'CHF ' + l.price;
+
+    // Attractivity sub-scores (Vaud only)
+    const attractDiv = document.getElementById('detail-attractivity');
+    const barsDiv = document.getElementById('detail-attract-bars');
+    if (attractDiv && barsDiv && l.cultural !== undefined) {
+        attractDiv.classList.remove('hidden');
+        const factors = [
+            { label: 'Culture', score: l.cultural, color: '#9b59b6' },
+            { label: 'Sport', score: l.sports, color: '#27ae60' },
+            { label: 'Resto', score: l.restaurant, color: '#e67e22' },
+            { label: 'Emploi', score: l.employment, color: '#3498db' },
+        ];
+        barsDiv.innerHTML = factors.map(f => `
+            <div class="da-bar">
+                <span class="da-label">${f.label}</span>
+                <div class="da-track"><div class="da-fill" style="width:${f.score}%;background:${f.color};"></div></div>
+                <span class="da-val">${f.score.toFixed(0)}</span>
+            </div>
+        `).join('');
+    } else if (attractDiv) {
+        attractDiv.classList.add('hidden');
+    }
+    document.getElementById('detail-revenue').textContent = 'CHF ' + l.revenue.toLocaleString();
+    document.getElementById('detail-occupancy').textContent = l.occupancy + ' jours';
+    document.getElementById('detail-type').textContent = l.type;
+    const prixEl = document.getElementById('detail-prix-m2');
+    if (prixEl) prixEl.textContent = l.prix_m2 ? 'CHF ' + Number(l.prix_m2).toLocaleString() : '—';
+}
+
+// ═══════════════════════════════════════════
+// ANALYSIS (with filters)
+// ═══════════════════════════════════════════
+function getFilteredListings() {
+    const data = cityData[activeCity];
+    if (!data?.listings) return [];
+    const nhF = document.getElementById('analysis-nh')?.value || 'all';
+    const typeF = document.getElementById('analysis-type')?.value || 'all';
+    const maxP = parseFloat(document.getElementById('analysis-max-price')?.value || '1000');
+    const minScore = parseFloat(document.getElementById('analysis-min-score')?.value || '0');
+    return data.listings.filter(l => {
+        if (nhF !== 'all' && l.nh !== nhF) return false;
+        if (typeF !== 'all' && l.type !== typeF) return false;
+        if (l.price > maxP) return false;
+        if (l.score < minScore) return false;
+        return true;
+    });
+}
+
+function renderAnalysis() {
+    const data = cityData[activeCity];
+    if (!data) return;
+    const filtered = getFilteredListings();
+    const n = filtered.length;
+    let sR = 0, sO = 0, sS = 0;
+    filtered.forEach(l => { sR += l.revenue; sO += l.occupancy; sS += l.score; });
+    animateValue('analysis-kpi-count', n.toLocaleString());
+    animateValue('analysis-kpi-revenue', `CHF ${n > 0 ? Math.round(sR / n).toLocaleString() : '0'}`);
+    animateValue('analysis-kpi-occ', n > 0 ? Math.round(sO / n).toString() : '0');
+    animateValue('analysis-kpi-score', n > 0 ? (sS / n).toFixed(1) : '0');
+
+    // Neighborhood aggregation from filtered
+    const nhMap = {};
+    filtered.forEach(l => {
+        if (!nhMap[l.nh]) nhMap[l.nh] = { count: 0, sR: 0, sO: 0, sS: 0 };
+        nhMap[l.nh].count++; nhMap[l.nh].sR += l.revenue; nhMap[l.nh].sO += l.occupancy; nhMap[l.nh].sS += l.score;
+    });
+    const filteredNh = Object.entries(nhMap).map(([nh, d]) => ({
+        nh, count: d.count,
+        avg_revenue: d.sR / d.count, avg_occupancy: d.sO / d.count, avg_score: d.sS / d.count,
+    })).sort((a, b) => b.avg_score - a.avg_score);
+
+    // AI Recommendation — prefer neighborhoods with >= 3 listings
+    const recContainer = document.getElementById('ai-recommendation-container');
+    const recText = document.getElementById('ai-rec-text');
+    const reliableFilteredNh = filteredNh.filter(nh => nh.count >= 3);
+    const bestForRec = reliableFilteredNh.length > 0 ? reliableFilteredNh[0] : (filteredNh.length > 0 ? filteredNh[0] : null);
+
+    if (bestForRec) {
+        const best = bestForRec;
+        const bestListings = filtered.filter(l => l.nh === best.nh);
+
+        const prices = [];
+        const typeCounts = {};
+        bestListings.forEach(l => {
+            if (l.price > 0) prices.push(l.price);
+            typeCounts[l.type] = (typeCounts[l.type] || 0) + 1;
+        });
+
+        prices.sort((a, b) => a - b);
+        const medianPrice = prices.length ? prices[Math.floor(prices.length / 2)] : 0;
+
+        const topType = Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])[0];
+        const typeLabels = { 'Entire home/apt': 'logements entiers', 'Private room': 'chambres privées', 'Shared room': 'chambres partagées', 'Hotel room': 'chambres d\'hôtel' };
+        const recommendedType = typeLabels[topType] || 'logements entiers';
+
+        recText.innerHTML =
+            `<p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">` +
+            `D'après notre algorithme, <strong>${best.nh}</strong> se classe n°1 avec un score de <strong style="color:var(--airbnb-coral);">${best.avg_score.toFixed(1)}/100</strong>` +
+            `${best.count < 10 ? ` <span style="font-size:11px;color:var(--text-muted);">(${best.count} annonces)</span>` : ` parmi ${best.count} annonces`}. ` +
+            `Revenu annuel moyen : <strong style="color:var(--airbnb-coral);">CHF ${Math.round(best.avg_revenue).toLocaleString()}</strong> | ` +
+            `Occupation : <strong style="color:var(--airbnb-coral);">${Math.round(best.avg_occupancy)} jours</strong> | ` +
+            `Tarif médian : <strong style="color:var(--airbnb-coral);">CHF ${medianPrice}</strong>. ` +
+            `Privilégiez les <strong style="color:var(--airbnb-coral);">${recommendedType}</strong>.` +
+            `</p>` +
+            (best.count < 5 ? `<p style="font-size:11px;color:var(--text-muted);margin-top:6px;font-style:italic;">* Peu d'annonces — résultats à interpréter avec prudence.</p>` : '');
+        recContainer.style.display = 'block';
+    } else {
+        recContainer.style.display = 'none';
+    }
+
+    // Type distribution
+    const typeMap = {};
+    filtered.forEach(l => { typeMap[l.type] = (typeMap[l.type] || 0) + 1; });
+    const filteredTypes = Object.entries(typeMap).map(([type, count]) => ({ type, count }));
+
+    renderSeasonalChart(data.seasonal);
+    renderRadarChart(data.neighborhoods);
+    renderDoughnutChart(filteredTypes);
+    renderNhComparisonChart(filteredNh);
+}
+
+function renderSeasonalChart(seasonal) {
+    destroyChart('seasonal');
+    const ctx = document.getElementById('chart-seasonal');
+    if (!ctx || !seasonal?.length) return;
+
+    const hasPrice = seasonal.some(s => s.avg_price > 0);
+    const datasets = [];
+    const scales = { x: { grid: { display: false } } };
+
+    if (hasPrice) {
+        datasets.push({
+            label: 'Prix moyen (CHF)', data: seasonal.map(s => s.avg_price),
+            borderColor: C.coral, backgroundColor: C.coralBg, borderWidth: 2, pointRadius: 3, tension: 0.4, fill: true, yAxisID: 'y'
+        });
+        scales.y = { beginAtZero: true, position: 'left', title: { display: true, text: 'Prix (CHF)' }, grid: { color: getChartGridColor() } };
+    }
+
+    datasets.push({
+        label: 'Taux d\'occupation (%)', data: seasonal.map(s => s.occupancy_rate),
+        borderColor: C.teal, backgroundColor: C.tealBg, borderWidth: 2, pointRadius: 4, tension: 0.4, fill: true,
+        yAxisID: hasPrice ? 'y1' : 'y'
+    });
+
+    if (hasPrice) {
+        scales.y1 = { beginAtZero: true, max: 100, position: 'right', title: { display: true, text: 'Occupation (%)' }, grid: { display: false } };
+    } else {
+        scales.y = { beginAtZero: true, max: 100, position: 'left', title: { display: true, text: 'Occupation (%)' }, grid: { color: getChartGridColor() } };
+    }
+
+    charts.seasonal = new Chart(ctx, {
+        type: 'line',
+        data: { labels: seasonal.map(s => s.month), datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } } },
+            scales
+        }
+    });
+}
+
+function renderRadarChart(neighborhoods) {
+    destroyChart('radar');
+    const ctx = document.getElementById('chart-radar');
+    if (!ctx || !neighborhoods?.length) return;
+    const nhF = document.getElementById('analysis-nh')?.value || 'all';
+    const top = nhF !== 'all' ? (neighborhoods.find(n => n.nh === nhF) || neighborhoods[0]) : neighborhoods[0];
+    charts.radar = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Revenu', 'Occupation', 'Attractivité', 'Saturation', 'Rendement', 'Stabilité'],
+            datasets: [{ label: top.nh, data: [
+                    top.avg_rev_score || 0,
+                    top.avg_occ_score || 0,
+                    top.avg_attract_score || 0,
+                    top.avg_saturation_score || 0,
+                    top.avg_yield_score || 0,
+                    top.avg_stability_score || 0
+                ],
+                borderColor: C.coral, backgroundColor: C.coralBg, pointBackgroundColor: C.coral, borderWidth: 2, pointRadius: 3 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { r: { min: 0, max: 100, ticks: { stepSize: 20, color: getChartTextColor(), backdropColor: 'transparent' },
+                grid: { color: getChartGridColor(), lineWidth: 0.5 }, pointLabels: { color: getChartTextColor(), font: { size: 11 } },
+                angleLines: { color: getChartGridColor(), lineWidth: 0.5 } } },
+            plugins: { legend: { labels: { color: '#FF5A5F', font: { weight: 'bold' } } } }
+        }
+    });
+}
+
+function renderDoughnutChart(types) {
+    destroyChart('doughnut');
+    const ctx = document.getElementById('chart-doughnut');
+    if (!ctx || !types) return;
+    const colors = [C.coral, C.teal, C.orange, C.purple, C.yellow];
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    charts.doughnut = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: types.map(p => p.type),
+            datasets: [{ data: types.map(p => p.count),
+                backgroundColor: types.map((_, i) => colors[i % colors.length]),
+                borderColor: isDark ? 'rgba(22,33,62,0.6)' : 'rgba(255,255,255,0.8)',
+                borderWidth: 1.5 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } }
+        }
+    });
+}
+
+function renderNhComparisonChart(neighborhoods) {
+    destroyChart('nhComparison');
+    const ctx = document.getElementById('chart-nh-comparison');
+    if (!ctx || !neighborhoods) return;
+    const top = neighborhoods.slice(0, 12);
+    charts.nhComparison = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: top.map(n => n.nh.length > 20 ? n.nh.substring(0, 20) + '…' : n.nh),
+            datasets: [
+                { label: 'Score d\'investissement', data: top.map(n => n.avg_score.toFixed(1)),
+                  backgroundColor: C.coral, borderColor: C.coral, borderWidth: 0, borderRadius: 4, yAxisID: 'y' },
+                { label: 'Revenu moyen (CHF)', data: top.map(n => Math.round(n.avg_revenue)),
+                  backgroundColor: C.teal, borderColor: C.teal, borderWidth: 0, borderRadius: 4, yAxisID: 'y1' },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } },
+            scales: {
+                y:  { beginAtZero: true, max: 100, position: 'left',  title: { display: true, text: 'Score' }, grid: { color: getChartGridColor() } },
+                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Revenu (CHF)' }, grid: { display: false } },
+                x:  { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } }
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════
+// ATTRACTIVITY VIEW (Vaud only)
+// ═══════════════════════════════════════════
+function renderAttractivity() {
+    const data = cityData[activeCity];
+    if (!data?.attractivity) return;
+    const attractivity = data.attractivity;
+    const weightsConfig = data.attractivityWeights;
+
+    // Render weight bars
+    renderWeightBars(weightsConfig);
+
+    // Render district ranking cards
+    renderDistrictCards(attractivity, weightsConfig);
+
+    // Render charts
+    renderAttractivityRadar(attractivity, weightsConfig);
+    renderAttractivityBar(attractivity);
+    renderPoiStackedChart(attractivity, weightsConfig);
+}
+
+function renderWeightBars(config) {
+    const container = document.getElementById('weight-bars');
+    if (!container) return;
+    const cats = config.categories;
+    const weights = config.weights;
+    container.innerHTML = '';
+
+    for (const [key, cat] of Object.entries(cats)) {
+        const pct = (weights[key] * 100).toFixed(0);
+        const item = document.createElement('div');
+        item.className = 'weight-bar-item';
+        item.innerHTML = `
+            <div class="wb-icon">${cat.icon}</div>
+            <span class="wb-label">${cat.label}</span>
+            <div class="wb-track">
+                <div class="wb-fill" style="width: ${pct}%; background: ${cat.color};"></div>
+            </div>
+            <span class="wb-value" style="color: ${cat.color};">${pct}%</span>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${cat.description}</span>
+        `;
+        container.appendChild(item);
+    }
+}
+
+function renderDistrictCards(attractivity, config) {
+    const container = document.getElementById('attractivity-ranking');
+    if (!container) return;
+    container.innerHTML = '';
+    const cats = config.categories;
+
+    attractivity.forEach((d, i) => {
+        const rankColors = ['#FF5A5F', '#00A699', '#FC642D', '#914669', '#FFB400',
+                           '#008489', '#767676', '#767676', '#767676', '#767676'];
+        const card = document.createElement('div');
+        card.className = 'district-card';
+        card.innerHTML = `
+            <div class="dc-header">
+                <div class="dc-rank">
+                    <div class="dc-rank-num" style="background: ${rankColors[i] || '#767676'};">${i + 1}</div>
+                    <span class="dc-name">${d.district}</span>
+                </div>
+                <div class="dc-score-big">${d.attractivity_score.toFixed(1)}<span>/100</span></div>
+            </div>
+            <div class="dc-bars">
+                ${Object.entries(cats).map(([key, cat]) => {
+                    const score = d[key + '_score'] || 0;
+                    return `
+                    <div class="dc-bar-item">
+                        <div class="dc-bar-label">
+                            <span>${cat.icon} ${cat.label}</span>
+                            <span style="font-weight:600;">${score.toFixed(0)}</span>
+                        </div>
+                        <div class="dc-bar-track">
+                            <div class="dc-bar-fill" style="width: ${score}%; background: ${cat.color};"></div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+            <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted);">
+                ${d.n_communes} communes | ${d.total_pois} POIs
+                (${d.cultural_count} culture, ${d.sports_count} sport, ${d.restaurant_count} resto, ${d.employment_count} emploi)
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderAttractivityRadar(attractivity, config) {
+    destroyChart('attractRadar');
+    const ctx = document.getElementById('chart-attractivity-radar');
+    if (!ctx) return;
+    const cats = config.categories;
+    const labels = Object.values(cats).map(c => c.label);
+    const catKeys = Object.keys(cats);
+    const colors = [C.coral, C.teal, C.orange, C.purple, C.yellow, C.green,
+                    'rgba(100,100,100,0.6)', 'rgba(150,150,150,0.5)', 'rgba(180,180,180,0.4)', 'rgba(200,200,200,0.3)'];
+    const bgColors = [C.coralBg, C.tealBg, C.orangeBg, C.purpleBg, C.yellowBg, C.greenBg,
+                      'rgba(100,100,100,0.1)', 'rgba(150,150,150,0.1)', 'rgba(180,180,180,0.1)', 'rgba(200,200,200,0.1)'];
+
+    // Show top 5 districts
+    const top = attractivity.slice(0, 5);
+    const datasets = top.map((d, i) => ({
+        label: d.district,
+        data: catKeys.map(k => d[k + '_score'] || 0),
+        borderColor: colors[i],
+        backgroundColor: bgColors[i],
+        pointBackgroundColor: colors[i],
+        borderWidth: 2,
+        pointRadius: 3,
+    }));
+
+    charts.attractRadar = new Chart(ctx, {
+        type: 'radar',
+        data: { labels, datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                r: {
+                    min: 0, max: 100, ticks: { stepSize: 25, color: getChartTextColor(), backdropColor: 'transparent' },
+                    grid: { color: getChartGridColor(), lineWidth: 0.5 },
+                    pointLabels: { color: getChartTextColor(), font: { size: 12 } },
+                    angleLines: { color: getChartGridColor(), lineWidth: 0.5 }
+                }
+            },
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } }
+        }
+    });
+}
+
+function renderAttractivityBar(attractivity) {
+    destroyChart('attractBar');
+    const ctx = document.getElementById('chart-attractivity-bar');
+    if (!ctx) return;
+
+    const sorted = [...attractivity].sort((a, b) => b.attractivity_score - a.attractivity_score);
+    const rankColors = sorted.map((_, i) => i === 0 ? C.coral : i < 3 ? C.teal : C.orangeBg);
+
+    charts.attractBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted.map(d => d.district),
+            datasets: [{
+                label: 'Score d\'attractivite',
+                data: sorted.map(d => d.attractivity_score),
+                backgroundColor: rankColors,
+                borderWidth: 0,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: (ctx) => {
+                            const d = sorted[ctx.dataIndex];
+                            return `Culture: ${d.cultural_score.toFixed(0)} | Sport: ${d.sports_score.toFixed(0)} | Resto: ${d.restaurant_score.toFixed(0)} | Emploi: ${d.employment_score.toFixed(0)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { beginAtZero: true, max: 100, grid: { color: getChartGridColor() }, title: { display: true, text: 'Score d\'attractivite (0-100)' } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderPoiStackedChart(attractivity, config) {
+    destroyChart('poiStacked');
+    const ctx = document.getElementById('chart-poi-stacked');
+    if (!ctx) return;
+    const cats = config.categories;
+    const sorted = [...attractivity].sort((a, b) => b.total_pois - a.total_pois);
+
+    const datasets = Object.entries(cats).map(([key, cat]) => ({
+        label: cat.label,
+        data: sorted.map(d => d[key + '_count']),
+        backgroundColor: cat.color,
+        borderWidth: 0,
+        borderRadius: 2,
+    }));
+
+    charts.poiStacked = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: sorted.map(d => d.district), datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } },
+            scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, font: { size: 11 } } },
+                y: { stacked: true, beginAtZero: true, grid: { color: getChartGridColor() }, title: { display: true, text: 'Nombre de POIs' } }
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════
+// LAUNCH SIMULATOR
+// ───────────────────────────────────────────
+// Decisional tool for users who want to LAUNCH their own Airbnb in Vaud.
+// Given a target commune + property profile, it mines comparable active
+// listings and returns:
+//   • Nightly price recommendation (P25 / P50 / P75 of comps)
+//   • Expected occupancy (median days booked / year)
+//   • Projected annual revenue (low / median / high)
+//   • Payback of the launch setup in months
+//   • Confidence badge based on how many comparables we found
+// ═══════════════════════════════════════════
+
+// ── Property profile definitions ──────────────────────────────────────────
+// Each profile maps to a bedrooms range + accommodates range used for the
+// comp filter. The label/desc are shown in the results header.
+const PROPERTY_PROFILES = {
+    studio: {
+        label: 'Studio', icon: '🛏️',
+        desc: '1 pièce · 1–3 personnes',
+        bedroomsMin: 0, bedroomsMax: 0,
+        accMin: 1,      accMax: 3,
+    },
+    appt2p: {
+        label: 'Appartement 2P', icon: '🏠',
+        desc: '1 chambre · 2–4 personnes',
+        bedroomsMin: 1, bedroomsMax: 1,
+        accMin: 2,      accMax: 4,
+    },
+    appt3p: {
+        label: 'Appartement 3P+', icon: '🏘️',
+        desc: '2–3 chambres · 4–7 personnes',
+        bedroomsMin: 2, bedroomsMax: 3,
+        accMin: 4,      accMax: 7,
+    },
+    maison: {
+        label: 'Maison / Chalet', icon: '🏡',
+        desc: '4+ chambres · 6–12 personnes',
+        bedroomsMin: 4, bedroomsMax: 99,
+        accMin: 6,      accMax: 99,
+    },
+};
+
+// ── Budget preset definitions ──────────────────────────────────────────────
+// `mid` is the value used in the payback calculation (midpoint of the range).
+const BUDGET_PRESETS = {
+    5500:  { tier: 'Basique',  range: '3k – 8k CHF',    mid: 5500  },
+    13000: { tier: 'Confort',  range: '8k – 18k CHF',   mid: 13000 },
+    29000: { tier: 'Premium',  range: '18k – 40k CHF',  mid: 29000 },
+};
+
+let simState = {
+    commune:     null,
+    roomType:    'Entire home/apt',
+    profile:     'appt2p',      // key of PROPERTY_PROFILES
+    setupBudget: 13000,         // mid-value of Confort preset
+    wired:       false,
+};
+
+function populateSimulatorCommunes() {
+    const sel = document.getElementById('sim-commune');
+    if (!sel) return;
+    const data = cityData[activeCity];
+    if (!data?.listings) return;
+
+    // Count listings per commune (nh) and sort by volume so the most
+    // data-rich communes float to the top.
+    const countByNh = {};
+    data.listings.forEach(l => {
+        if (!l.nh) return;
+        countByNh[l.nh] = (countByNh[l.nh] || 0) + 1;
+    });
+    const communes = Object.entries(countByNh)
+        .map(([nh, n]) => ({ nh, n }))
+        .sort((a, b) => b.n - a.n);
+
+    sel.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '— Choisissez une commune —';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    sel.appendChild(placeholder);
+    communes.forEach(({ nh, n }) => {
+        const o = document.createElement('option');
+        o.value = nh;
+        o.textContent = `${nh}  ·  ${n} annonce${n > 1 ? 's' : ''}`;
+        sel.appendChild(o);
+    });
+}
+
+function setupSimulator() {
+    if (simState.wired) {
+        // Refresh commune dropdown in case city data reloaded
+        populateSimulatorCommunes();
+        return;
+    }
+    simState.wired = true;
+
+    // Commune select
+    const communeSel = document.getElementById('sim-commune');
+    if (communeSel) {
+        communeSel.addEventListener('change', () => {
+            simState.commune = communeSel.value || null;
+            updateCommuneHelp();
+        });
+    }
+
+    // Property profile tiles
+    document.querySelectorAll('#sim-profile .sim-profile-tile').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#sim-profile .sim-profile-tile').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            simState.profile = btn.dataset.profile;
+        });
+    });
+
+    // Room type
+    document.querySelectorAll('#sim-room-type .sim-radio').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#sim-room-type .sim-radio').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            simState.roomType = btn.dataset.value;
+        });
+    });
+
+    // Budget preset tiles
+    document.querySelectorAll('#sim-budget .sim-budget-tile').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#sim-budget .sim-budget-tile').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            simState.setupBudget = Number(btn.dataset.budget);
+        });
+    });
+
+    // Submit
+    const submit = document.getElementById('sim-submit');
+    if (submit) submit.addEventListener('click', runSimulator);
+}
+
+function updateCommuneHelp() {
+    const help = document.getElementById('sim-commune-help');
+    if (!help) return;
+    if (!simState.commune) {
+        help.textContent = 'Où comptez-vous lancer votre Airbnb\u00a0?';
+        return;
+    }
+    const data = cityData[activeCity];
+    const nComps = data?.listings?.filter(l => l.nh === simState.commune).length || 0;
+    help.textContent = `${nComps} annonce${nComps > 1 ? 's' : ''} active${nComps > 1 ? 's' : ''} dans cette commune`;
+}
+
+// ── Pure math helpers ──
+function median(arr) {
+    if (!arr.length) return 0;
+    const s = [...arr].sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function quantile(arr, q) {
+    if (!arr.length) return 0;
+    const s = [...arr].sort((a, b) => a - b);
+    const pos = (s.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    return s[base + 1] !== undefined ? s[base] + rest * (s[base + 1] - s[base]) : s[base];
+}
+
+// ── Comp selection: progressively widen the filter until we have enough ──
+// Uses profile-based ranges (not exact bedrooms/accommodates) so the filter
+// stays logically consistent even if individual listings have imprecise data.
+function findComparables() {
+    const data = cityData[activeCity];
+    if (!data?.listings) return { comps: [], scope: 'none' };
+    const all = data.listings;
+
+    if (!simState.commune) return { comps: [], scope: 'none' };
+
+    const prof = PROPERTY_PROFILES[simState.profile] || PROPERTY_PROFILES.appt2p;
+
+    // Find district of target commune
+    const sample = all.find(l => l.nh === simState.commune);
+    const targetDistrict = sample?.district;
+
+    const matchType       = l => l.type === simState.roomType;
+    const matchBedStrict  = l => {
+        const b = l.bedrooms ?? 0;
+        return b >= prof.bedroomsMin && b <= prof.bedroomsMax;
+    };
+    const matchBedLoose   = l => {
+        const b = l.bedrooms ?? 0;
+        return b >= Math.max(0, prof.bedroomsMin - 1) && b <= prof.bedroomsMax + 1;
+    };
+    const matchAccStrict  = l => {
+        const a = l.accommodates ?? 0;
+        return a >= prof.accMin && a <= prof.accMax;
+    };
+    const matchAccLoose   = l => {
+        const a = l.accommodates ?? 0;
+        return a >= Math.max(1, prof.accMin - 1) && a <= prof.accMax + 2;
+    };
+
+    // Tier 1 — same commune, exact profile range
+    let comps = all.filter(l =>
+        l.nh === simState.commune && matchType(l) && matchBedStrict(l) && matchAccStrict(l)
+    );
+    if (comps.length >= 5) return { comps, scope: 'commune-strict' };
+
+    // Tier 2 — same commune, ±1 bedroom / +2 acc tolerance
+    comps = all.filter(l =>
+        l.nh === simState.commune && matchType(l) && matchBedLoose(l) && matchAccLoose(l)
+    );
+    if (comps.length >= 5) return { comps, scope: 'commune-loose' };
+
+    // Tier 3 — same district, exact profile range
+    if (targetDistrict) {
+        comps = all.filter(l =>
+            l.district === targetDistrict && matchType(l) && matchBedStrict(l) && matchAccStrict(l)
+        );
+        if (comps.length >= 5) return { comps, scope: 'district-strict' };
+
+        // Tier 4 — same district, loose
+        comps = all.filter(l =>
+            l.district === targetDistrict && matchType(l) && matchBedLoose(l) && matchAccLoose(l)
+        );
+        if (comps.length >= 5) return { comps, scope: 'district-loose' };
+    }
+
+    // Tier 5 — last resort: same commune, any profile (low confidence)
+    comps = all.filter(l => l.nh === simState.commune && matchType(l));
+    if (comps.length > 0) return { comps, scope: 'commune-any' };
+
+    return { comps: [], scope: 'none' };
+}
+
+function scopeLabel(scope) {
+    switch (scope) {
+        case 'commune-strict': return 'Comparables exacts dans la commune';
+        case 'commune-loose':  return 'Comparables élargis dans la commune';
+        case 'district-strict':return 'Comparables exacts dans le district';
+        case 'district-loose': return 'Comparables élargis dans le district';
+        case 'commune-any':    return 'Données limitées — toute la commune';
+        default:               return 'Aucun comparable';
+    }
+}
+
+function confidenceFromScope(scope, n) {
+    if (scope === 'none' || n === 0) return { level: 'none', label: 'Données insuffisantes', hint: 'Moins de 5 comparables — résultats non fiables.', color: '#94a3b8' };
+
+    // Base level from sample size
+    let level, label, hint, color;
+    if (n < 5) {
+        level = 'low'; label = 'Confiance faible';  hint = `${n} comparables seulement — à interpréter avec prudence.`; color = '#fbbf24';
+    } else if (n < 15) {
+        level = 'med'; label = 'Confiance modérée'; hint = `${n} comparables — estimation raisonnable.`; color = '#fb7185';
+    } else {
+        level = 'high'; label = 'Confiance élevée'; hint = `${n} comparables analysés — estimation robuste.`; color = '#FF5A5F';
+    }
+
+    // Cap confidence when comps came from a looser scope (the profile match
+    // was relaxed to find them, so they're less representative).
+    const capBy = {
+        'commune-loose':  'high',  // same commune, ±1 bedroom / ±2 accommodates → still strong
+        'district-strict':'high',  // district-wide strict profile → still good
+        'district-loose': 'med',   // district-wide loose profile → cap to moderate
+        'commune-any':    'low',   // no profile match at all → cap to low
+    };
+    const cap = capBy[scope];
+    const order = { low: 0, med: 1, high: 2 };
+    if (cap && order[level] > order[cap]) {
+        level = cap;
+        if (cap === 'low') { label = 'Confiance faible';  color = '#fbbf24'; hint = `${n} annonces trouvées mais sans correspondance exacte au profil — indicatif uniquement.`; }
+        if (cap === 'med') { label = 'Confiance modérée'; color = '#fb7185'; hint = `${n} comparables trouvés via un périmètre élargi — estimation à valider.`; }
+    }
+
+    return { level, label, hint, color };
+}
+
+function runSimulator() {
+    if (!simState.commune) {
+        alert('Choisissez une commune avant de lancer la simulation.');
+        return;
+    }
+    const { comps, scope } = findComparables();
+    const container = document.getElementById('sim-results');
+    if (!container) return;
+
+    if (!comps.length) {
+        container.innerHTML = `
+            <div class="sim-empty glass">
+                <span class="eyebrow">Aucune donnée</span>
+                <h3>Pas de comparable pour ce projet</h3>
+                <p>Aucune annonce active ne correspond à <strong>${simState.commune}</strong> avec
+                ce type de location. Essayez une commune voisine ou un autre gabarit.</p>
+            </div>`;
+        return;
+    }
+
+    // ── Compute stats from comps ──
+    const prices   = comps.map(c => Number(c.price)   || 0).filter(v => v > 0);
+    const revenues = comps.map(c => Number(c.revenue) || 0).filter(v => v >= 0);
+    const occs     = comps.map(c => Number(c.occupancy) || 0).filter(v => v >= 0);
+    const scores   = comps.map(c => Number(c.score)   || 0);
+
+    const p25 = Math.round(quantile(prices, 0.25));
+    const p50 = Math.round(quantile(prices, 0.50));
+    const p75 = Math.round(quantile(prices, 0.75));
+    const medOcc = Math.round(median(occs));
+    const revLow = Math.round(quantile(revenues, 0.25));
+    const revMed = Math.round(median(revenues));
+    const revHigh= Math.round(quantile(revenues, 0.75));
+    const avgScore = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
+
+    // Payback (months). Guard against div-by-zero.
+    const paybackMonths = revMed > 0 ? (simState.setupBudget / revMed) * 12 : null;
+    const paybackLabel = paybackMonths == null
+        ? '—'
+        : (paybackMonths < 12
+            ? `${paybackMonths.toFixed(1)} mois`
+            : `${(paybackMonths / 12).toFixed(1)} ans`);
+    const paybackSub = paybackMonths == null
+        ? 'Revenu projeté insuffisant pour calculer le payback.'
+        : (paybackMonths < 12
+            ? 'Remboursement en moins d\'un an — excellent.'
+            : paybackMonths < 24
+                ? 'Remboursement sous 2 ans — très bon.'
+                : paybackMonths < 48
+                    ? 'Remboursement entre 2 et 4 ans — correct.'
+                    : 'Remboursement long — vérifiez vos hypothèses.');
+
+    const confidence  = confidenceFromScope(scope, comps.length);
+    const scopeMsg    = scopeLabel(scope);
+    const prof        = PROPERTY_PROFILES[simState.profile] || PROPERTY_PROFILES.appt2p;
+    const budgetPreset= BUDGET_PRESETS[simState.setupBudget] || BUDGET_PRESETS[13000];
+    const roomLabel   = simState.roomType === 'Entire home/apt' ? 'Logement entier' : 'Chambre privée';
+
+    // Criteria summary for the transparency strip
+    const criteriaDesc = `${prof.label} · ${roomLabel} · ${prof.desc}`;
+
+    // Top 3 comparables — mix of high-score AND highest-revenue so the user
+    // sees the best AND the most lucrative ones (not just score-ranked).
+    const byScore   = [...comps].sort((a, b) => b.score - a.score).slice(0, 2);
+    const byRevenue = [...comps].sort((a, b) => b.revenue - a.revenue).slice(0, 1);
+    const topComps  = [...new Map([...byScore, ...byRevenue].map(c => [c.id, c])).values()];
+
+    const topCompsHtml = topComps.map(c => {
+        const rawName = (c.name || ('Annonce #' + c.id)).trim();
+        const prettyName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : rawName;
+        const bedLabel = c.bedrooms === 0 ? 'Studio' : `${c.bedrooms} ch.`;
+        const accLabel = `${c.accommodates} pers.`;
+        return `
+            <div class="sim-comp">
+                <div class="sim-comp-head">
+                    <span class="sim-comp-name" title="${prettyName.replace(/"/g, '&quot;')}">${prettyName}</span>
+                    <span class="sim-comp-score" style="background:${getScoreColor(c.score)}">${Math.round(c.score)}</span>
+                </div>
+                <div class="sim-comp-meta">${bedLabel} · ${accLabel}</div>
+                <div class="sim-comp-stats">
+                    <span><strong>CHF ${Math.round(c.price)}</strong> /nuit</span>
+                    <span><strong>${Math.round(c.occupancy)}</strong> j/an</span>
+                    <span><strong>CHF ${Math.round(c.revenue).toLocaleString('fr-CH')}</strong> /an</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="sim-result-header glass reveal-up">
+            <div class="sim-result-head-left">
+                <span class="eyebrow">Votre simulation</span>
+                <h2>${simState.commune}</h2>
+                <div class="sim-profile-pills">
+                    <span class="sim-pill">${prof.icon} ${prof.label}</span>
+                    <span class="sim-pill">${roomLabel}</span>
+                    <span class="sim-pill">Setup ${budgetPreset.range}</span>
+                </div>
+            </div>
+            <div class="sim-confidence" data-level="${confidence.level}">
+                <span class="sim-conf-dot" style="background:${confidence.color}"></span>
+                <div>
+                    <span class="sim-conf-label">${confidence.label}</span>
+                    <span class="sim-conf-hint">${confidence.hint}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sim-cards">
+            <!-- Price recommendation -->
+            <div class="sim-card glass reveal-up" style="animation-delay:.05s">
+                <span class="eyebrow">Prix conseillé /nuit</span>
+                <div class="sim-price-main">CHF ${p50}</div>
+                <div class="sim-price-range">
+                    <div class="sim-price-bar">
+                        <div class="sim-price-dot" style="left:0%"></div>
+                        <div class="sim-price-dot" style="left:50%"></div>
+                        <div class="sim-price-dot" style="left:100%"></div>
+                    </div>
+                    <div class="sim-price-labels">
+                        <span>CHF ${p25}<br><em>bas (P25)</em></span>
+                        <span>CHF ${p50}<br><em>médiane</em></span>
+                        <span>CHF ${p75}<br><em>haut (P75)</em></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Occupancy -->
+            <div class="sim-card glass reveal-up" style="animation-delay:.1s">
+                <span class="eyebrow">Occupation attendue</span>
+                <div class="sim-big-number">${medOcc}<span class="sim-unit"> j/an</span></div>
+                <div class="sim-bar-track">
+                    <div class="sim-bar-fill" style="width:${Math.min(100, (medOcc / 365) * 100).toFixed(1)}%"></div>
+                </div>
+                <div class="sim-card-hint">Soit <strong>${Math.round((medOcc / 365) * 100)}%</strong> de l'année — médiane des comps.</div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="sim-card glass reveal-up" style="animation-delay:.15s">
+                <span class="eyebrow">Revenu brut annuel projeté</span>
+                <div class="sim-big-number">CHF ${revMed.toLocaleString('fr-CH')}</div>
+                <div class="sim-revenue-range">
+                    <span>Bas<strong>${revLow.toLocaleString('fr-CH')}</strong></span>
+                    <span>Médiane<strong>${revMed.toLocaleString('fr-CH')}</strong></span>
+                    <span>Haut<strong>${revHigh.toLocaleString('fr-CH')}</strong></span>
+                </div>
+                <div class="sim-card-hint">Revenu brut, avant frais Airbnb (~3%), charges et impôts.</div>
+            </div>
+
+            <!-- Payback -->
+            <div class="sim-card glass reveal-up" style="animation-delay:.2s">
+                <span class="eyebrow">Remboursement du setup</span>
+                <div class="sim-big-number">${paybackLabel}</div>
+                <div class="sim-card-hint">${paybackSub}</div>
+            </div>
+        </div>
+
+        <!-- Criteria + confidence transparency strip -->
+        <div class="sim-scope-strip glass reveal-up" style="animation-delay:.25s">
+            <div class="sim-scope-criteria">
+                <span class="eyebrow">Critères de recherche</span>
+                <strong>${criteriaDesc}</strong>
+                <span class="sim-scope-count">· ${comps.length} comparable${comps.length > 1 ? 's' : ''} · ${scopeMsg}</span>
+            </div>
+            <div class="sim-scope-score">
+                <span class="eyebrow">Score AirValo moyen</span>
+                <strong style="color:${getScoreColor(avgScore)}">${avgScore}<span class="sim-unit">/100</span></strong>
+            </div>
+        </div>
+
+        <!-- Top comparables -->
+        <div class="sim-comps-panel glass reveal-up" style="animation-delay:.3s">
+            <div class="sim-comps-header">
+                <span class="eyebrow">Annonces de référence</span>
+                <h3>Les comps utilisés pour cette simulation</h3>
+                <p class="sim-comps-explain">Ces annonces actives sur Airbnb correspondent à votre profil et à votre commune. Elles servent de données de marché — ce ne sont pas des biens à acheter.</p>
+            </div>
+            <div class="sim-comps-grid">
+                ${topCompsHtml}
+            </div>
+            <button type="button" class="btn-link" data-go-view="map">
+                Voir toutes les annonces comparables sur la carte <span aria-hidden="true">→</span>
+            </button>
+        </div>
+    `;
+
+    // Re-wire [data-go-view] for the button we just injected
+    container.querySelectorAll('[data-go-view]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.goView;
+            document.querySelectorAll('.nav-tabs .nav-tab').forEach(t => t.classList.remove('active'));
+            const navMatch = document.querySelector(`.nav-tabs .nav-tab[data-view="${target}"]`);
+            if (navMatch) navMatch.classList.add('active');
+            switchView(target);
+        });
+    });
+}

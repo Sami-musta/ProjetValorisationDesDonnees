@@ -1,0 +1,159 @@
+﻿=== DETAILED LISTINGS (listings.csv.gz) ===
+Shape: (2719, 79)
+
+ALL COLUMNS (79):
+  id: 2719/2719 non-null | sample: 42515
+  listing_url: 2719/2719 non-null | sample: https://www.airbnb.com/rooms/42515
+  scrape_id: 2719/2719 non-null | sample: 20250928035237
+  last_scraped: 2719/2719 non-null | sample: 2025-09-28
+  source: 2719/2719 non-null | sample: city scrape
+  name: 2719/2719 non-null | sample: Geneva center - Hosting females
+  description: 2619/2719 non-null | sample: Spacious studio with washer/dryer, Wi-fi, supermarket and gym in the same building, cleaner + ironing, cable HDTV, everything you need! Great public transport to UN, IO's, bus stop on your doorstep and the lake just a stone's throw away.
+  neighborhood_overview: 933/2719 non-null | sample: This is the most sought after area in Geneva: the lake is practically on your doorstep, with a boat taxi (2chf/ride) taking you to the other side of the lake. You can run or roll along the promenade; there's a free bike rental offered by the city a stone's throw from the flat, by the Jardin Anglais. Chill out in the Bodega Tapas Bar across the street, or go for Cocktails at the nearby l'Atelier. The following morning, have a vegetarian brunch at Clou de Giraffe or Pain Quotidien. Two much loved restaurants, Da Paolo and L'esquisse, are on the same street. I guarantee you won't be thirsty or hungry in this neighbourhood!
+  picture_url: 2719/2719 non-null | sample: https://a0.muscache.com/pictures/10640277/ff1da5fd_original.jpg
+  host_id: 2719/2719 non-null | sample: 185647
+  host_url: 2719/2719 non-null | sample: https://www.airbnb.com/users/show/185647
+  host_name: 2719/2719 non-null | sample: Noelle
+  host_since: 2719/2719 non-null | sample: 2010-07-30
+  host_location: 2136/2719 non-null | sample: Geneva, Switzerland
+  host_about: 1294/2719 non-null | sample: Hi, I am a Management consultant professional, working with multinational and Big 4 firms as Program Manager / Strategy alignment / Business Analyst and Project Management Office (PMO) manager.  
+I love living in the center of the city, where there are loads of cultural events, parks,  the lake to enjoy and do biking, jogging, walking, saying, skiing , etc.  
+
+It is also a pleasant experience to share and get to know another culture. 
+  host_response_time: 2075/2719 non-null | sample: within a day
+  host_response_rate: 2075/2719 non-null | sample: 100%
+  host_acceptance_rate: 2183/2719 non-null | sample: 71%
+  host_is_superhost: 2688/2719 non-null | sample: f
+  host_thumbnail_url: 2719/2719 non-null | sample: https://a0.muscache.com/im/users/185647/profile_pic/1316167292/original.jpg?aki_policy=profile_small
+  host_picture_url: 2719/2719 non-null | sample: https://a0.muscache.com/im/users/185647/profile_pic/1316167292/original.jpg?aki_policy=profile_x_medium
+  host_neighbourhood: 28/2719 non-null | sample: French Riviera
+  host_listings_count: 2719/2719 non-null | sample: 1
+  host_total_listings_count: 2719/2719 non-null | sample: 1
+  host_verifications: 2719/2719 non-null | sample: ['email', 'phone']
+  host_has_profile_pic: 2719/2719 non-null | sample: t
+  host_identity_verified: 2719/2719 non-null | sample: t
+  neighbourhood: 933/2719 non-null | sample: Geneva, Switzerland
+  neighbourhood_cleansed: 2719/2719 non-null | sample: Commune de GenÞve
+  neighbourhood_group_cleansed: 0/2719 non-null | sample: N/A
+  latitude: 2719/2719 non-null | sample: 46.20198
+  longitude: 2719/2719 non-null | sample: 6.15672
+  property_type: 2719/2719 non-null | sample: Private room in rental unit
+  room_type: 2719/2719 non-null | sample: Private room
+  accommodates: 2719/2719 non-null | sample: 1
+  bathrooms: 2058/2719 non-null | sample: 1.5
+  bathrooms_text: 2716/2719 non-null | sample: 1.5 shared baths
+  bedrooms: 2515/2719 non-null | sample: 1.0
+  beds: 2049/2719 non-null | sample: 1.0
+  amenities: 2719/2719 non-null | sample: ["Elevator", "Bathtub", "Stove", "Iron", "Host greets you", "Dryer", "Shared hot tub", "Hair dryer", "Cooking basics", "Hangers", "Oven", "Wifi", "Refrigerator", "Hot water", "Essentials", "Paid washer \u2013 In building", "Heating", "Dishes and silverware", "TV with standard cable", "Kitchen"]
+  price: 2029/2719 non-null | sample: $89.00
+  minimum_nights: 2719/2719 non-null | sample: 3
+  maximum_nights: 2719/2719 non-null | sample: 1125
+  minimum_minimum_nights: 2719/2719 non-null | sample: 3
+  maximum_minimum_nights: 2719/2719 non-null | sample: 3
+  minimum_maximum_nights: 2719/2719 non-null | sample: 1125
+  maximum_maximum_nights: 2719/2719 non-null | sample: 1125
+  minimum_nights_avg_ntm: 2719/2719 non-null | sample: 3.0
+  maximum_nights_avg_ntm: 2719/2719 non-null | sample: 1125.0
+  calendar_updated: 0/2719 non-null | sample: N/A
+  has_availability: 2634/2719 non-null | sample: t
+  availability_30: 2719/2719 non-null | sample: 26
+  availability_60: 2719/2719 non-null | sample: 56
+  availability_90: 2719/2719 non-null | sample: 86
+  availability_365: 2719/2719 non-null | sample: 361
+  calendar_last_scraped: 2719/2719 non-null | sample: 2025-09-28
+  number_of_reviews: 2719/2719 non-null | sample: 82
+  number_of_reviews_ltm: 2719/2719 non-null | sample: 4
+  number_of_reviews_l30d: 2719/2719 non-null | sample: 0
+  availability_eoy: 2719/2719 non-null | sample: 91
+  number_of_reviews_ly: 2719/2719 non-null | sample: 6
+  estimated_occupancy_l365d: 2719/2719 non-null | sample: 24
+  estimated_revenue_l365d: 2029/2719 non-null | sample: 2136.0
+  first_review: 2104/2719 non-null | sample: 2011-09-24
+  last_review: 2104/2719 non-null | sample: 2025-07-11
+  review_scores_rating: 2104/2719 non-null | sample: 4.75
+  review_scores_accuracy: 2104/2719 non-null | sample: 4.71
+  review_scores_cleanliness: 2104/2719 non-null | sample: 4.79
+  review_scores_checkin: 2104/2719 non-null | sample: 4.86
+  review_scores_communication: 2104/2719 non-null | sample: 4.85
+  review_scores_location: 2104/2719 non-null | sample: 4.86
+  review_scores_value: 2104/2719 non-null | sample: 4.55
+  license: 2/2719 non-null | sample: Available with a mobility lease only ("bail mobilitÚ")
+  instant_bookable: 2719/2719 non-null | sample: f
+  calculated_host_listings_count: 2719/2719 non-null | sample: 1
+  calculated_host_listings_count_entire_homes: 2719/2719 non-null | sample: 0
+  calculated_host_listings_count_private_rooms: 2719/2719 non-null | sample: 1
+  calculated_host_listings_count_shared_rooms: 2719/2719 non-null | sample: 0
+  reviews_per_month: 2104/2719 non-null | sample: 0.48
+
+=== CALENDAR DATA ===
+Columns: ['listing_id', 'date', 'available', 'price', 'adjusted_price', 'minimum_nights', 'maximum_nights']
+   listing_id        date  ... minimum_nights  maximum_nights
+0    27592713  2025-09-28  ...              3              31
+1    27592713  2025-09-29  ...              3              31
+2    27592713  2025-09-30  ...              3              31
+3    27592713  2025-10-01  ...              3              31
+4    27592713  2025-10-02  ...              3              31
+5    27592713  2025-10-03  ...              3              31
+6    27592713  2025-10-04  ...              3              31
+7    27592713  2025-10-05  ...              3              31
+8    27592713  2025-10-06  ...              3              31
+9    27592713  2025-10-07  ...              3              31
+
+[10 rows x 7 columns]
+
+=== REVIEWS DATA ===
+Columns: ['listing_id', 'date']
+   listing_id        date
+0       42515  2011-09-24
+1       42515  2012-05-17
+2       42515  2012-05-27
+3       42515  2012-09-21
+4       42515  2013-02-19
+
+=== NEIGHBOURHOODS ===
+    neighbourhood_group       neighbourhood
+0                   NaN       Aire-la-Ville
+1                   NaN             AniÞres
+2                   NaN              Avully
+3                   NaN               Avusy
+4                   NaN           Bardonnex
+5                   NaN            Bellevue
+6                   NaN              Bernex
+7                   NaN             Carouge
+8                   NaN            Cartigny
+9                   NaN             CÚligny
+10                  NaN              Chancy
+11                  NaN     ChÛne-Bougeries
+12                  NaN         ChÛne-Bourg
+13                  NaN             Choulex
+14                  NaN        Collex-Bossy
+15                  NaN  Collonge-Bellerive
+16                  NaN             Cologny
+17                  NaN   Commune de GenÞve
+18                  NaN           Confignon
+19                  NaN             Corsier
+20                  NaN            Dardagny
+21                  NaN             Genthod
+22                  NaN      Grand-Saconnex
+23                  NaN                  Gy
+24                  NaN            Hermance
+25                  NaN               Jussy
+26                  NaN            Laconnex
+27                  NaN               Lancy
+28                  NaN             Meinier
+29                  NaN              Meyrin
+30                  NaN                Onex
+31                  NaN       Perly-Certoux
+32                  NaN     Plan-les-Ouates
+33                  NaN     Pregny-ChambÚsy
+34                  NaN            Presinge
+35                  NaN            Puplinge
+36                  NaN              Russin
+37                  NaN             Satigny
+38                  NaN               Soral
+39                  NaN              Th¶nex
+40                  NaN             Troinex
+41                  NaN         Vandoeuvres
+42                  NaN             Vernier
+43                  NaN             Versoix
+44                  NaN             Veyrier

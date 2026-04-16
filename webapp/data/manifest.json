@@ -1,0 +1,12 @@
+{
+  "cities": [
+    "vaud"
+  ],
+  "city_meta": {
+    "vaud": {
+      "lat": 46.5197,
+      "lng": 6.6323,
+      "zoom": 10
+    }
+  }
+}

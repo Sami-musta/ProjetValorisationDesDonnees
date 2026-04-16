@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirValo PROJECT | Intelligence d'investissement Airbnb en Suisse</title>
+    <meta name="description"
+        content="Plateforme d'intelligence pour investisseurs Airbnb — Canton de Vaud, Suisse">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Cache-bust local stylesheet so style edits are picked up without hard-reload -->
+    <link rel="stylesheet" href="style.css?v=20260415c">
+</head>
+
+<body>
+
+    <div class="bg-mesh"></div>
+    <div class="bg-noise"></div>
+
+    <div class="app-shell">
+        <!-- ─── Navigation ─── -->
+        <nav class="top-nav">
+            <button type="button" class="nav-brand" data-go-view="overview" aria-label="Retour à l'accueil">
+                <div class="brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9.5L12 3L21 9.5V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V9.5Z" stroke="#FF5A5F"
+                            stroke-width="2" fill="none" />
+                        <path d="M9 21V12H15V21" stroke="#FF5A5F" stroke-width="2" />
+                    </svg>
+                </div>
+                <span class="brand-name">AirValo</span>
+                <span class="brand-badge">PROJECT</span>
+            </button>
+
+            <div class="nav-tabs" id="nav-tabs">
+                <button class="nav-tab active" data-view="overview">
+                    <span class="tab-icon">📊</span> Aperçu
+                </button>
+                <button class="nav-tab" data-view="map">
+                    <span class="tab-icon">🗺️</span> Carte
+                </button>
+                <button class="nav-tab" data-view="analysis">
+                    <span class="tab-icon">📈</span> Analyse
+                </button>
+                <button class="nav-tab" data-view="simulator">
+                    <span class="tab-icon">🎛️</span> Simulateur
+                </button>
+                <button class="nav-tab hidden" data-view="attractivity" id="nav-tab-attractivity">
+                    <span class="tab-icon">🎯</span> Attractivité
+                </button>
+                <button class="nav-tab" data-view="regulations">
+                    <span class="tab-icon">⚖️</span> Règles
+                </button>
+                <button class="nav-tab" data-view="about">
+                    <span class="tab-icon">ℹ️</span> À propos
+                </button>
+            </div>
+
+            <div class="nav-city-selector">
+                <button class="city-btn active" data-city="vaud">🇨🇭 Canton de Vaud</button>
+            </div>
+
+            <div class="nav-right">
+                <button class="theme-toggle" id="theme-toggle" title="Mode sombre">🌙</button>
+                <button class="burger-btn" id="burger-btn" aria-label="Menu">
+                    <svg class="burger-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 8h28M2 16h28M2 24h28" fill="none" stroke="currentcolor" stroke-width="3"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu Dropdown -->
+        <div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+        <div class="mobile-menu-dropdown" id="mobile-menu-dropdown">
+            <!-- City selector (mobile only) -->
+            <div class="mobile-menu-section mobile-city-section">
+                <div class="mobile-city-selector">
+                    <button class="mobile-city-btn active" data-city="vaud">🇨🇭 Canton de Vaud</button>
+                </div>
+            </div>
+            <div class="mobile-menu-divider"></div>
+            <!-- Navigation -->
+            <div class="mobile-menu-section">
+                <button class="mobile-menu-item active" data-view="overview">
+                    <span class="mobile-menu-icon">📊</span>
+                    <span class="mobile-menu-label">Vue d'ensemble</span>
+                </button>
+                <button class="mobile-menu-item" data-view="map">
+                    <span class="mobile-menu-icon">🗺️</span>
+                    <span class="mobile-menu-label">Carte interactive</span>
+                </button>
+                <button class="mobile-menu-item" data-view="analysis">
+                    <span class="mobile-menu-icon">📈</span>
+                    <span class="mobile-menu-label">Analyse détaillée</span>
+                </button>
+                <button class="mobile-menu-item" data-view="simulator">
+                    <span class="mobile-menu-icon">🎛️</span>
+                    <span class="mobile-menu-label">Simulateur</span>
+                </button>
+                <button class="mobile-menu-item hidden" data-view="attractivity" id="mobile-tab-attractivity">
+                    <span class="mobile-menu-icon">🎯</span>
+                    <span class="mobile-menu-label">Attractivité</span>
+                </button>
+                <button class="mobile-menu-item" data-view="regulations">
+                    <span class="mobile-menu-icon">⚖️</span>
+                    <span class="mobile-menu-label">Réglementations</span>
+                </button>
+            </div>
+            <div class="mobile-menu-divider"></div>
+            <div class="mobile-menu-section">
+                <button class="mobile-menu-item" data-view="about">
+                    <span class="mobile-menu-icon">ℹ️</span>
+                    <span class="mobile-menu-label">À propos</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ─── Contenu ─── -->
+        <main class="content-area" id="content-area">
+
+            <!-- ════════ VUE : APERÇU ════════ -->
+            <section class="view active" id="view-overview">
+                <!-- Hero explainer — what AirValo does + primary CTA -->
+                <div class="hero-explainer reveal-up">
+                    <div class="hero-inner">
+                        <span class="eyebrow">Outil d'aide à la décision · Lancer son Airbnb</span>
+                        <h1 class="hero-title" id="overview-title">Lancez votre Airbnb en Vaud, en vous appuyant sur la donnée.</h1>
+                        <p class="hero-lead">
+                            AirValo agrège <strong>2 568 annonces Airbnb actives</strong>, <strong>8 500 points
+                            d'intérêt régionaux</strong> et les <strong>prix immobiliers par commune</strong> pour
+                            vous dire, commune par commune, <em>où</em>, <em>quoi</em> et <em>à quel prix</em>
+                            lancer votre location courte durée — et combien elle peut vraiment rapporter.
+                        </p>
+                        <div class="hero-ctas">
+                            <button class="btn-cta" data-go-view="simulator">
+                                <span>Simuler mon lancement</span>
+                                <span class="btn-arrow" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                </span>
+                            </button>
+                            <button class="btn-link" data-go-view="map">
+                                Explorer la carte
+                                <span aria-hidden="true">→</span>
+                            </button>
+                        </div>
+                        <div class="hero-steps">
+                            <div class="step">
+                                <span class="step-num">01 · Données</span>
+                                <span class="step-label">Sources publiques croisées</span>
+                                <span class="step-desc">Inside Airbnb · OpenStreetMap · Lookmove · OFS</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-num">02 · Score</span>
+                                <span class="step-label">Algorithme à 6 facteurs</span>
+                                <span class="step-desc">Revenu, occupation, attractivité, saturation, rendement, stabilité</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-num">03 · Décision</span>
+                                <span class="step-label">Simulateur de lancement</span>
+                                <span class="step-desc">Revenu projeté, prix conseillé et payback à partir de comps actifs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-row" id="kpi-row">
+                    <div class="kpi-card glass" data-kpi="score">
+                        <div class="kpi-icon">🏆</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Score d'investissement moyen</span>
+                            <span class="kpi-number" id="kpi-score">0</span>
+                            <span class="kpi-sub">/100</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="revenue">
+                        <div class="kpi-icon">💰</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Revenu annuel moyen</span>
+                            <span class="kpi-number" id="kpi-revenue">CHF 0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="occupancy">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Occupation moyenne</span>
+                            <span class="kpi-number" id="kpi-occupancy">0</span>
+                            <span class="kpi-sub">jours/an</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="price">
+                        <div class="kpi-icon">🏷️</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Tarif moyen par nuit</span>
+                            <span class="kpi-number" id="kpi-price">CHF 0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="listings">
+                        <div class="kpi-icon">🏠</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Annonces actives</span>
+                            <span class="kpi-number" id="kpi-listings">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-panel glass">
+                        <div class="panel-header">
+                            <h3>🏅 Meilleurs quartiers par score d'investissement</h3>
+                        </div>
+                        <div class="chart-container"><canvas id="chart-top-nh"></canvas></div>
+                    </div>
+                    <div class="chart-panel glass">
+                        <div class="panel-header">
+                            <h3>🏢 Revenu par type de bien</h3>
+                        </div>
+                        <div class="chart-container"><canvas id="chart-property-type"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="recommendation-panel glass coral-border">
+                    <div class="rec-header">
+                        <div class="rec-badge">✨ Recommandation IA</div>
+                        <span class="rec-score-help" id="rec-score-help" tabindex="0">
+                            Qu'est-ce que le Score ? ℹ️
+                            <span class="rec-tooltip">
+                                <strong>Score d'Investissement AirValo (0-100)</strong><br><br>
+                                Notre algorithme combine 6 facteurs :<br>
+                                <strong>1. Revenu (25%)</strong> — Revenu annuel estime par percentile<br>
+                                <strong>2. Occupation (20%)</strong> — Taux d'occupation sur 365 jours<br>
+                                <strong>3. Attractivite (20%)</strong> — Score base sur les POI (culture, sport,
+                                restaurants, emploi)<br>
+                                <strong>4. Saturation (15%)</strong> — Airbnb pour 1000 habitants (inverse)<br>
+                                <strong>5. Rendement (10%)</strong> — Ratio revenu / prix immobilier au m²<br>
+                                <strong>6. Stabilite (10%)</strong> — Regularite saisonniere des revenus<br><br>
+                                <em>Plus le score est eleve, plus le bien est interessant pour un investissement
+                                    locatif.</em>
+                            </span>
+                        </span>
+                    </div>
+                    <div id="recommendation-text">Chargement de l'analyse...</div>
+                </div>
+            </section>
+
+            <!-- ════════ VUE : CARTE ════════ -->
+            <section class="view" id="view-map">
+                <div class="map-toolbar glass filter-bar">
+                    <div class="filter-group">
+                        <label>Couleur par</label>
+                        <select id="map-color-by" style="display:none">
+                            <option value="score">Score d'investissement</option>
+                            <option value="revenue">Revenu</option>
+                            <option value="price">Prix</option>
+                            <option value="occupancy">Occupation</option>
+                        </select>
+                        <div class="custom-dropdown" data-for="map-color-by">
+                            <div class="dropdown-trigger"><span class="trigger-text">Score d'investissement</span></div>
+                            <div class="dropdown-panel">
+                                <div class="dropdown-item active" data-value="score">
+                                    <div class="dd-icon-box">🎯</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Score d'investissement</span>
+                                        <span class="dd-subtitle">Basé sur l'algorithme AirValo</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="revenue">
+                                    <div class="dd-icon-box">💰</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Revenu</span>
+                                        <span class="dd-subtitle">Revenu annuel généré</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="price">
+                                    <div class="dd-icon-box">🏷️</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Prix</span>
+                                        <span class="dd-subtitle">Tarif moyen par nuit</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="occupancy">
+                                    <div class="dd-icon-box">📅</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Occupation</span>
+                                        <span class="dd-subtitle">Nombre de jours loués par an</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-group">
+                        <label>Type de bien</label>
+                        <select id="map-room-type" style="display:none">
+                            <option value="all">Tous les types</option>
+                            <option value="Entire home/apt">Logement entier</option>
+                            <option value="Private room">Chambre privée</option>
+                            <option value="Shared room">Chambre partagée</option>
+                            <option value="Hotel room">Chambre d'hôtel</option>
+                        </select>
+                        <div class="custom-dropdown" data-for="map-room-type">
+                            <div class="dropdown-trigger"><span class="trigger-text">Tous les types</span></div>
+                            <div class="dropdown-panel">
+                                <div class="dropdown-item active" data-value="all">
+                                    <div class="dd-icon-box">🏘️</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Tous les types</span>
+                                        <span class="dd-subtitle">Afficher tous les biens</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Entire home/apt">
+                                    <div class="dd-icon-box">🏠</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Logement entier</span>
+                                        <span class="dd-subtitle">Les voyageurs ont le logement pour eux</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Private room">
+                                    <div class="dd-icon-box">🚪</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Chambre privée</span>
+                                        <span class="dd-subtitle">Les voyageurs ont leur propre chambre</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Shared room">
+                                    <div class="dd-icon-box">🛏️</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Chambre partagée</span>
+                                        <span class="dd-subtitle">Les voyageurs partagent une chambre</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Hotel room">
+                                    <div class="dd-icon-box">🏨</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Chambre d'hôtel</span>
+                                        <span class="dd-subtitle">Chambre dans un hôtel ou auberge</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-group">
+                        <label>Score min.</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="map-min-score" min="0" max="100" value="0">
+                            <span class="slider-value" id="map-min-score-val">0</span>
+                        </div>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-group">
+                        <label>Prix min.</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="map-min-price" min="0" max="500" value="0" step="10">
+                            <span class="slider-value" id="map-min-price-val">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="map-container"></div>
+
+                <!-- Fixed-position explainer legend rendered by renderMapLegend() -->
+                <div class="map-legend" id="map-legend"></div>
+
+                <div class="map-detail-card glass hidden" id="map-detail">
+                    <span class="detail-eyebrow">Annonce Airbnb</span>
+                    <h4 id="detail-name">-</h4>
+                    <div class="detail-grid">
+                        <div><span class="dl">Score</span><span class="dv" id="detail-score">-</span></div>
+                        <div><span class="dl">Prix/nuit</span><span class="dv" id="detail-price">-</span></div>
+                        <div><span class="dl">Revenu/an</span><span class="dv" id="detail-revenue">-</span></div>
+                        <div><span class="dl">Occupation</span><span class="dv" id="detail-occupancy">-</span></div>
+                        <div><span class="dl">Prix m²</span><span class="dv" id="detail-prix-m2">-</span></div>
+                        <div><span class="dl">Type</span><span class="dv" id="detail-type">-</span></div>
+                    </div>
+                    <div id="detail-attractivity" class="detail-attractivity hidden">
+                        <div class="detail-attract-label">Attractivité du district</div>
+                        <div class="detail-attract-bars" id="detail-attract-bars"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ════════ VUE : ANALYSE ════════ -->
+            <section class="view" id="view-analysis">
+                <div class="view-header">
+                    <h1>Analyse détaillée</h1>
+                    <p class="view-subtitle">Filtrez et explorez les données avec précision</p>
+                </div>
+
+                <div class="analysis-toolbar glass filter-bar">
+                    <div class="filter-group">
+                        <label>Quartier</label>
+                        <select id="analysis-nh" style="display:none">
+                            <option value="all">Tous les quartiers</option>
+                        </select>
+                        <div class="custom-dropdown" data-for="analysis-nh">
+                            <div class="dropdown-trigger"><span class="trigger-text">Tous les quartiers</span></div>
+                            <div class="dropdown-panel">
+                                <div class="dropdown-item active" data-value="all">Tous les quartiers</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-group">
+                        <label>Type de bien</label>
+                        <select id="analysis-type" style="display:none">
+                            <option value="all">Tous les types</option>
+                        </select>
+                        <div class="custom-dropdown" data-for="analysis-type">
+                            <div class="dropdown-trigger"><span class="trigger-text">Tous les types</span></div>
+                            <div class="dropdown-panel">
+                                <div class="dropdown-item active" data-value="all">
+                                    <div class="dd-icon-box">🏘️</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Tous les types</span>
+                                        <span class="dd-subtitle">Afficher tous les biens</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Entire home/apt">
+                                    <div class="dd-icon-box">🏠</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Logement entier</span>
+                                        <span class="dd-subtitle">Les voyageurs ont le logement pour eux</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Private room">
+                                    <div class="dd-icon-box">🚪</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Chambre privée</span>
+                                        <span class="dd-subtitle">Les voyageurs ont leur propre chambre</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Shared room">
+                                    <div class="dd-icon-box">🛏️</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Chambre partagée</span>
+                                        <span class="dd-subtitle">Les voyageurs partagent une chambre</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-item" data-value="Hotel room">
+                                    <div class="dd-icon-box">🏨</div>
+                                    <div class="dd-text-box">
+                                        <span class="dd-title">Chambre d'hôtel</span>
+                                        <span class="dd-subtitle">Chambre dans un hôtel ou auberge</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-group">
+                        <label>Prix max.</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="analysis-max-price" min="50" max="1000" value="1000" step="25">
+                            <span class="slider-value" id="analysis-max-price-val">1000</span>
+                        </div>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-group">
+                        <label>Score min.</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="analysis-min-score" min="0" max="100" value="0" step="5">
+                            <span class="slider-value" id="analysis-min-score-val">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPIs filtrés -->
+                <div class="kpi-grid">
+                    <div class="kpi-card glass" data-kpi="count">
+                        <div class="kpi-icon">🏠</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Annonces (filtrées)</span>
+                            <span class="kpi-number" id="analysis-kpi-count">0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="revenue">
+                        <div class="kpi-icon">💰</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Revenu moy. (filtré)</span>
+                            <span class="kpi-number" id="analysis-kpi-revenue">0</span>
+                            <span class="kpi-sub">par an</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="occupancy">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Occupation moy. (filtrée)</span>
+                            <span class="kpi-number" id="analysis-kpi-occ">0</span>
+                            <span class="kpi-sub">jours/an</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass" data-kpi="score">
+                        <div class="kpi-icon">🎯</div>
+                        <div class="kpi-info">
+                            <span class="kpi-label"
+                                title="Score AirValo sur 100 croisant potentiel financier, qualité et attractivité - Voir onglet 'À propos'">Score
+                                moyen (filtré) ℹ️</span>
+                            <span class="kpi-number" id="analysis-kpi-score">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ai-recommendation-container" style="display: none; margin-top: 20px;">
+                    <div class="about-card glass full-width"
+                        style="padding: 16px 20px; border: 1px solid var(--airbnb-coral-glow); background: var(--mesh-c1); border-radius: var(--radius-lg);">
+                        <h4
+                            style="font-size: 13px; color: var(--airbnb-coral); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            ✨ Recommandation IA
+                        </h4>
+                        <p id="ai-rec-text"
+                            style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;"></p>
+                    </div>
+                </div>
+
+                <div class="analysis-grid" style="margin-top: 20px;">
+                    <div class="chart-panel glass full-width">
+                        <div class="panel-header">
+                            <h3>📆 Tendances saisonnières — Prix & Occupation</h3>
+                        </div>
+                        <div class="chart-container tall"><canvas id="chart-seasonal"></canvas></div>
+                    </div>
+                    <div class="chart-panel glass">
+                        <div class="panel-header">
+                            <h3>⭐ Radar qualité — Meilleur quartier</h3>
+                        </div>
+                        <div class="chart-container square"><canvas id="chart-radar"></canvas></div>
+                    </div>
+                    <div class="chart-panel glass">
+                        <div class="panel-header">
+                            <h3>🏠 Répartition des annonces par type</h3>
+                        </div>
+                        <div class="chart-container square"><canvas id="chart-doughnut"></canvas></div>
+                    </div>
+                    <div class="chart-panel glass full-width">
+                        <div class="panel-header">
+                            <h3 title="Score AirValo sur 100 - Voir onglet 'À propos'">🏘️ Comparaison des quartiers —
+                                Score AirValo vs Revenu (filtré) ℹ️</h3>
+                        </div>
+                        <div class="chart-container tall"><canvas id="chart-nh-comparison"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ════════ VUE : SIMULATEUR DE LANCEMENT ════════ -->
+            <section class="view" id="view-simulator">
+                <div class="sim-hero reveal-up">
+                    <div class="sim-hero-inner">
+                        <span class="eyebrow">Simulateur de lancement</span>
+                        <h1 class="sim-title">Combien votre Airbnb peut-il rapporter&nbsp;?</h1>
+                        <p class="sim-lead">
+                            Décrivez le projet que vous envisagez. AirValo le confronte aux <strong>comparables
+                            actifs</strong> de la même commune et du même gabarit pour vous renvoyer le prix
+                            conseillé, le revenu projeté et la durée de remboursement de votre mise de départ.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="sim-grid">
+                    <!-- ─── Formulaire ─── -->
+                    <form class="sim-form glass" id="sim-form" onsubmit="return false;">
+                        <div class="sim-form-header">
+                            <span class="eyebrow">Votre projet</span>
+                            <h3>Décrivez le bien que vous voulez louer</h3>
+                        </div>
+
+                        <!-- Commune -->
+                        <div class="sim-field">
+                            <label for="sim-commune">Commune ciblée</label>
+                            <select id="sim-commune" class="sim-select"></select>
+                            <span class="sim-help" id="sim-commune-help">Où comptez-vous lancer votre Airbnb&nbsp;?</span>
+                        </div>
+
+                        <!-- Profil du bien -->
+                        <div class="sim-field">
+                            <label>Profil du bien à lancer</label>
+                            <div class="sim-profile-grid" id="sim-profile">
+                                <button type="button" class="sim-profile-tile" data-profile="studio">
+                                    <span class="profile-icon">🛏️</span>
+                                    <span class="profile-name">Studio</span>
+                                    <span class="profile-desc">1 pièce · 1–3 pers.</span>
+                                </button>
+                                <button type="button" class="sim-profile-tile active" data-profile="appt2p">
+                                    <span class="profile-icon">🏠</span>
+                                    <span class="profile-name">Appartement 2P</span>
+                                    <span class="profile-desc">1 chambre · 2–4 pers.</span>
+                                </button>
+                                <button type="button" class="sim-profile-tile" data-profile="appt3p">
+                                    <span class="profile-icon">🏘️</span>
+                                    <span class="profile-name">Appartement 3P+</span>
+                                    <span class="profile-desc">2–3 ch. · 4–7 pers.</span>
+                                </button>
+                                <button type="button" class="sim-profile-tile" data-profile="maison">
+                                    <span class="profile-icon">🏡</span>
+                                    <span class="profile-name">Maison / Chalet</span>
+                                    <span class="profile-desc">4+ ch. · 6–12 pers.</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Type de location -->
+                        <div class="sim-field">
+                            <label>Mode de mise en location</label>
+                            <div class="sim-radio-group" id="sim-room-type">
+                                <button type="button" class="sim-radio active" data-value="Entire home/apt">
+                                    <span class="radio-icon">🔑</span>
+                                    <span class="radio-label">Logement entier</span>
+                                </button>
+                                <button type="button" class="sim-radio" data-value="Private room">
+                                    <span class="radio-icon">🚪</span>
+                                    <span class="radio-label">Chambre privée</span>
+                                </button>
+                            </div>
+                            <span class="sim-help">Vous louez l'intégralité du logement, ou seulement une chambre chez vous&nbsp;?</span>
+                        </div>
+
+                        <!-- Budget de lancement -->
+                        <div class="sim-field">
+                            <label>Budget de lancement</label>
+                            <div class="sim-budget-grid" id="sim-budget">
+                                <button type="button" class="sim-budget-tile" data-budget="5500">
+                                    <span class="budget-tier">Basique</span>
+                                    <span class="budget-amount">3k – 8k CHF</span>
+                                    <ul class="budget-items">
+                                        <li>Mobilier IKEA</li>
+                                        <li>Boîte à clé</li>
+                                        <li>Linge de base</li>
+                                    </ul>
+                                </button>
+                                <button type="button" class="sim-budget-tile active" data-budget="13000">
+                                    <span class="budget-badge">Recommandé</span>
+                                    <span class="budget-tier">Confort</span>
+                                    <span class="budget-amount">8k – 18k CHF</span>
+                                    <ul class="budget-items">
+                                        <li>Mobilier soigné</li>
+                                        <li>Photos pro</li>
+                                        <li>Serrure connectée</li>
+                                        <li>Décoration &amp; styling</li>
+                                    </ul>
+                                </button>
+                                <button type="button" class="sim-budget-tile" data-budget="29000">
+                                    <span class="budget-tier">Premium</span>
+                                    <span class="budget-amount">18k – 40k CHF</span>
+                                    <ul class="budget-items">
+                                        <li>Design d'intérieur</li>
+                                        <li>Photos + visite 3D</li>
+                                        <li>Domotique</li>
+                                        <li>Conciergerie</li>
+                                    </ul>
+                                </button>
+                            </div>
+                            <span class="sim-help" id="sim-budget-help">Budget utilisé pour calculer le remboursement de votre mise de départ.</span>
+                        </div>
+
+                        <button type="button" class="sim-submit" id="sim-submit">
+                            <span>Lancer la simulation</span>
+                            <span class="btn-arrow" aria-hidden="true">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            </span>
+                        </button>
+                    </form>
+
+                    <!-- ─── Résultats ─── -->
+                    <div class="sim-results" id="sim-results">
+                        <div class="sim-placeholder glass">
+                            <div class="sim-placeholder-icon">🎛️</div>
+                            <h3>Votre simulation s'affichera ici</h3>
+                            <p>Renseignez votre projet à gauche puis cliquez sur <strong>Lancer la simulation</strong>.<br>
+                            AirValo analysera les annonces actives comparables et vous dira si votre projet tient la route.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ════════ VUE : ATTRACTIVITÉ ════════ -->
+            <section class="view" id="view-attractivity">
+                <div class="view-header">
+                    <h1>Attractivité des districts — Canton de Vaud</h1>
+                    <p class="view-subtitle">Score composite basé sur 4 facteurs : culture, sport, restauration et emploi</p>
+                </div>
+
+                <!-- Weight explanation -->
+                <div class="attractivity-weights glass">
+                    <h3>Pondération des facteurs</h3>
+                    <div class="weight-bars" id="weight-bars"></div>
+                </div>
+
+                <!-- District ranking -->
+                <div class="attractivity-ranking" id="attractivity-ranking"></div>
+
+                <!-- Charts row -->
+                <div class="charts-row" style="margin-top: 24px;">
+                    <div class="chart-panel glass">
+                        <div class="panel-header">
+                            <h3>Comparaison des districts par facteur</h3>
+                        </div>
+                        <div class="chart-container tall"><canvas id="chart-attractivity-radar"></canvas></div>
+                    </div>
+                    <div class="chart-panel glass">
+                        <div class="panel-header">
+                            <h3>Classement global d'attractivité</h3>
+                        </div>
+                        <div class="chart-container tall"><canvas id="chart-attractivity-bar"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- POI breakdown -->
+                <div class="chart-panel glass full-width" style="margin-top: 24px;">
+                    <div class="panel-header">
+                        <h3>Nombre de points d'intérêt par district et catégorie</h3>
+                    </div>
+                    <div class="chart-container tall"><canvas id="chart-poi-stacked"></canvas></div>
+                </div>
+            </section>
+
+            <!-- ════════ VUE : RÉGLEMENTATIONS ════════ -->
+            <section class="view" id="view-regulations">
+                <div class="view-header">
+                    <h1>⚖️ Réglementations & Réseau d'experts</h1>
+                    <p class="view-subtitle">Cadre légal pour la location courte durée en Suisse</p>
+                </div>
+                <div class="reg-grid">
+                    <div class="reg-card glass">
+                        <div class="reg-flag">🏳️ Vaud</div>
+                        <h3>Canton de Vaud</h3>
+                        <ul>
+                            <li><strong>Taxe de séjour :</strong> Variable par commune (CHF 1.30 à 5.50)</li>
+                            <li><strong>Montreux :</strong> Restrictions renforcées (protection du parc locatif)</li>
+                            <li><strong>Lausanne :</strong> Enregistrement obligatoire</li>
+                            <li><strong>Rural :</strong> Plus flexible dans les zones non-urbaines</li>
+                        </ul>
+                        <div class="reg-status moderate">🟡 Variable par commune</div>
+                    </div>
+                    <div class="reg-card glass expert-card">
+                        <h3>🤝 Réseau d'experts locaux</h3>
+                        <div class="expert-list">
+                            <div class="expert-item">
+                                <strong>Swisspitality</strong>
+                                <span>Conciergerie Airbnb — Genève & Vaud</span>
+                            </div>
+                            <div class="expert-item">
+                                <strong>GuestReady Switzerland</strong>
+                                <span>Gestion complète — Zurich & Genève</span>
+                            </div>
+                            <div class="expert-item">
+                                <strong>Luckey (by Airbnb)</strong>
+                                <span>Gestion location courte durée — Toute la Suisse</span>
+                            </div>
+                            <div class="expert-item">
+                                <strong>Régie du Rhône</strong>
+                                <span>Conseil juridique immobilier — Genève</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ════════ VUE : À PROPOS ════════ -->
+            <section class="view" id="view-about">
+                <div class="view-header">
+                    <h1>ℹ️ AirValo Project</h1>
+                    <p class="view-subtitle">Contexte, pipeline de donnees, methodologie et equipe</p>
+                </div>
+
+                <div class="about-grid">
+                    <!-- ── Contexte du projet ── -->
+                    <div class="about-card glass">
+                        <h3>📖 Contexte</h3>
+                        <p>
+                            <strong>AirValo</strong> est une plateforme d'intelligence decisionnelle developpee dans le
+                            cadre du cours <strong>Projet de valorisation des donnees</strong>. Elle aide les
+                            investisseurs immobiliers a identifier les meilleures opportunites de location courte duree
+                            (Airbnb) dans le <strong>Canton de Vaud</strong>.
+                        </p>
+                        <p>
+                            L'application croise des donnees Airbnb avec des donnees regionales (prix immobiliers,
+                            demographie, points d'interet) pour produire un <strong>score d'investissement</strong>
+                            oriente investisseur, par commune et par district.
+                        </p>
+                    </div>
+
+                    <!-- ── Sources de donnees ── -->
+                    <div class="about-card glass">
+                        <h3>📊 Sources de donnees</h3>
+                        <p>
+                            Le projet croise <strong>5 sources de donnees</strong> complementaires :
+                        </p>
+                        <ul
+                            style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 8px;">
+                            <li><strong>Inside Airbnb</strong> — listings.csv.gz (5 486 annonces, 79 colonnes) et
+                                calendar.csv.gz (disponibilite journaliere sur 365 jours)</li>
+                            <li><strong>OpenStreetMap (OSM)</strong> — 7 196 points d'interet (musees, restaurants,
+                                centres sportifs, bureaux) via Overpass API</li>
+                            <li><strong>Stat Vaud</strong> — Densite de population par commune (2025), 300 communes
+                                avec population et superficie</li>
+                            <li><strong>Neho / Lookmove</strong> — Prix immobiliers au m² par commune (mars 2026),
+                                250 communes avec prix appartement et maison</li>
+                            <li><strong>GeoJSON</strong> — Decoupage administratif du canton (309 communes, 10
+                                districts) pour le geo-matching</li>
+                        </ul>
+                        <a href="https://insideairbnb.com/fr/get-the-data/" target="_blank" class="about-link"
+                            rel="noopener noreferrer">
+                            Explorer les donnees brutes sur Inside Airbnb ↗
+                        </a>
+                    </div>
+
+                    <!-- ── Pipeline de donnees detaille ── -->
+                    <div class="about-card glass full-width">
+                        <h3>⚙️ Pipeline de traitement des donnees</h3>
+                        <p style="margin-bottom: 16px;">Deux scripts Python transforment les donnees brutes en JSON
+                            optimise pour le dashboard :</p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                            <div>
+                                <h4 style="font-size: 14px; color: var(--airbnb-coral); margin-bottom: 10px;">Script 1 —
+                                    compute_attractivity.py</h4>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+                                    <li>Charge <strong>7 196 POIs</strong> depuis OpenStreetMap (fichier Excel)</li>
+                                    <li>Categorise en 4 facteurs : culture (838), sport (3 455), restaurants (2 117),
+                                        emploi (786)</li>
+                                    <li>Assigne chaque POI a un district via <strong>point-in-polygon</strong>
+                                        (Shapely + GeoJSON)</li>
+                                    <li>Calcule un <strong>score de densite normalisee</strong> (POIs/commune) par
+                                        district</li>
+                                    <li>Ponderations : sport 30%, emploi 30%, culture 25%, restauration 15%</li>
+                                    <li>Export → <code>vaud_attractivity.json</code></li>
+                                </ul>
+
+                                <h4
+                                    style="font-size: 14px; color: var(--airbnb-coral); margin-bottom: 10px; margin-top: 16px;">
+                                    Script 2 — process_airbnb.py</h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 8px;">
+                                    Pipeline principal en 9 etapes :
+                                </p>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+                                    <li><strong>Ingestion :</strong> Lecture de <code>listings.csv.gz</code> (5 486
+                                        annonces, 79 colonnes)</li>
+                                    <li><strong>Nettoyage :</strong> Conversion des prix (suppression $, plafond
+                                        5 000 CHF), normalisation numerique</li>
+                                    <li><strong>Filtrage :</strong> Suppression des listings inactifs
+                                        (<code>estimated_occupancy_l365d = 0</code>) → 2 831 annonces actives</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 14px; color: var(--airbnb-teal); margin-bottom: 10px;">Enrichissement
+                                    croise</h4>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+                                    <li><strong>Attractivite :</strong> Score POI par district (depuis
+                                        compute_attractivity.py)</li>
+                                    <li><strong>Demographie :</strong> Population par commune (Stat Vaud 2025) →
+                                        calcul de la saturation Airbnb/1000 habitants</li>
+                                    <li><strong>Immobilier :</strong> Prix au m² par commune (Neho/Lookmove 2026) →
+                                        calcul du rendement revenu/prix</li>
+                                    <li><strong>Saisonnalite :</strong> Variance mensuelle de l'occupation par listing
+                                        (depuis <code>calendar.csv.gz</code>) → score de stabilite</li>
+                                </ul>
+
+                                <h4
+                                    style="font-size: 14px; color: var(--airbnb-teal); margin-bottom: 10px; margin-top: 16px;">
+                                    Export & Agregation</h4>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+                                    <li><strong>Par listing :</strong> 2 500 annonces avec score, prix, revenu,
+                                        sous-scores → <code>vaud_listings.json</code></li>
+                                    <li><strong>Par commune :</strong> 208 communes avec moyennes, prix m², population,
+                                        saturation → <code>vaud_neighborhoods.json</code></li>
+                                    <li><strong>Par type :</strong> 4 categories de bien →
+                                        <code>vaud_property_types.json</code></li>
+                                    <li><strong>Saisonnier :</strong> 12 mois prix + occupation →
+                                        <code>vaud_seasonal.json</code></li>
+                                </ul>
+
+                                <h4
+                                    style="font-size: 14px; color: var(--airbnb-teal); margin-bottom: 10px; margin-top: 16px;">
+                                    Technologies</h4>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+                                    <li><strong>Backend :</strong> Python, Pandas, NumPy, Shapely, PyMuPDF</li>
+                                    <li><strong>Frontend :</strong> HTML5 / CSS3 / Vanilla JS (ES6+)</li>
+                                    <li><strong>Cartographie :</strong> Leaflet.js + OpenStreetMap</li>
+                                    <li><strong>Graphiques :</strong> Chart.js (bar, line, radar, doughnut)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Score d'investissement detaille ── -->
+                    <div class="about-card glass full-width">
+                        <h3>🎯 Score d'Investissement AirValo — Formule detaillee</h3>
+                        <p style="margin-bottom: 12px;">
+                            Le <strong>Score AirValo (0-100)</strong> est une metrique composite orientee
+                            <strong>investisseur</strong>, calculee pour chaque annonce puis agreee par commune.
+                            Il combine <strong>6 dimensions ponderees</strong>, toutes pertinentes pour la decision
+                            d'investissement :
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px;">
+                            <div
+                                style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                                <div style="font-size: 22px; margin-bottom: 6px;">💵</div>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Revenu potentiel</h4>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">25%</div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Rang percentile
+                                    du revenu annuel reel (Inside Airbnb)</p>
+                            </div>
+                            <div
+                                style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                                <div style="font-size: 22px; margin-bottom: 6px;">📅</div>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Taux d'occupation</h4>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">20%</div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Jours occupes /
+                                    365, demande effective</p>
+                            </div>
+                            <div
+                                style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                                <div style="font-size: 22px; margin-bottom: 6px;">🎯</div>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Attractivite du lieu</h4>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">20%</div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Densite de POIs :
+                                    culture, sport, restaurants, emploi (OSM)</p>
+                            </div>
+                            <div
+                                style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                                <div style="font-size: 22px; margin-bottom: 6px;">📊</div>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Saturation du marche</h4>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">15%</div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Airbnb par
+                                    1000 habitants (inverse) — Stat Vaud 2025</p>
+                            </div>
+                            <div
+                                style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                                <div style="font-size: 22px; margin-bottom: 6px;">🏠</div>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Rendement immobilier</h4>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">10%</div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Revenu Airbnb /
+                                    prix au m² de la commune (Neho 2026)</p>
+                            </div>
+                            <div
+                                style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                                <div style="font-size: 22px; margin-bottom: 6px;">📈</div>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Stabilite saisonniere</h4>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">10%</div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Inverse de la
+                                    variance mensuelle d'occupation (calendar.csv)</p>
+                            </div>
+                        </div>
+
+                        <div
+                            style="margin-top: 20px; padding: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; border-left: 4px solid var(--airbnb-coral);">
+                            <h4 style="font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">Formule exacte :</h4>
+                            <code
+                                style="font-size: 13px; color: var(--airbnb-coral); line-height: 1.8; display: block;">
+                                Score = Revenu_pct × 0.25 + (Occupation/365) × 0.20 + Attractivite × 0.20 + (1 − Saturation/max) × 0.15 + Rendement_pct × 0.10 + Stabilite × 0.10
+                            </code>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                                Chaque sous-score est normalise sur [0, 100]. Le revenu et le rendement utilisent un
+                                <strong>rang percentile</strong>. La saturation est <strong>inversee</strong> : moins il
+                                y a d'Airbnb par habitant, mieux c'est pour l'investisseur. La stabilite est
+                                l'<strong>inverse de la variance</strong> d'occupation mensuelle.
+                            </p>
+                        </div>
+
+                        <div
+                            style="margin-top: 16px; padding: 16px; background: rgba(0, 166, 153, 0.05); border: 1px solid rgba(0, 166, 153, 0.2); border-radius: 12px; border-left: 4px solid var(--airbnb-teal);">
+                            <h4 style="font-size: 14px; color: var(--airbnb-teal); margin-bottom: 10px;">Pourquoi ces
+                                facteurs ?</h4>
+                            <ul
+                                style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+                                <li><strong>Revenu + Occupation :</strong> Ce que les hotes gagnent reellement et la
+                                    constance de la demande</li>
+                                <li><strong>Attractivite :</strong> La demande structurelle du lieu (touristes,
+                                    travailleurs, sportifs, culture)</li>
+                                <li><strong>Saturation :</strong> Le niveau de concurrence reel rapporte a la population
+                                    locale</li>
+                                <li><strong>Rendement immobilier :</strong> Le rapport entre gains Airbnb et cout
+                                    d'acquisition du bien</li>
+                                <li><strong>Stabilite :</strong> Un revenu previsible toute l'annee, pas seulement en
+                                    haute saison</li>
+                            </ul>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">
+                                <strong>Note :</strong> Les notes Airbnb (cleanliness, communication, etc.) ont ete
+                                volontairement exclues du score. Elles refletent la qualite de l'hote actuel, pas le
+                                potentiel d'investissement du lieu. Un quartier mal note peut etre une opportunite
+                                (marche mal servi).
+                            </p>
+                        </div>
+
+                        <div
+                            style="margin-top: 16px; padding: 12px 16px; background: rgba(255, 180, 0, 0.08); border: 1px solid rgba(255, 180, 0, 0.2); border-radius: 10px;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">
+                                <strong>⚠️ Limites :</strong> Les communes avec tres peu d'annonces (1-2) peuvent avoir
+                                des scores artificiellement eleves ou bas. Les recommandations IA filtrent les communes
+                                avec moins de 3 annonces pour garantir la fiabilite. Les annonces inactives (0 jour
+                                d'occupation) sont exclues du calcul.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="about-card glass team-card">
+                        <h3>👥 L'équipe du projet</h3>
+                        <div class="team-list">
+                            <div class="team-member">
+                                <div class="member-avatar" style="background: transparent; padding: 0;">
+                                    <img src="https://media.licdn.com/dms/image/v2/D4E03AQEtaN6dC-eeYw/profile-displayphoto-crop_800_800/B4EZoaKijVKYAM-/0/1761375563416?e=1775088000&v=beta&t=6HrRzi6txEIqQxZXXcM2FW47lz_gOB-VIXTI0etRb4g"
+                                        alt="Maya"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                </div>
+                                <div class="member-info">
+                                    <strong>Harmouch Maya Hany George</strong>
+                                </div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar" style="background: transparent; padding: 0;">
+                                    <img src="https://media.licdn.com/dms/image/v2/D4E03AQG2KennX7p68g/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1718262364443?e=1775088000&v=beta&t=hNe8TOiG1VZg24foQWlJEP37OG4D-lcQv5lf6dURZso"
+                                        alt="André"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                </div>
+                                <div class="member-info">
+                                    <strong>Santos Almeida André</strong>
+                                </div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar" style="background: transparent; padding: 0;">
+                                    <img src="https://media.licdn.com/dms/image/v2/C4D03AQHGT34mHxAVsQ/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1568713411516?e=1775088000&v=beta&t=aBVN56T32w71sHiOynnYqX3qBcUFmjAe5gxA4n96CC8"
+                                        alt="Ufuk"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                </div>
+                                <div class="member-info">
+                                    <strong>Simsik Ufuk</strong>
+                                </div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar">SG</div>
+                                <div class="member-info">
+                                    <strong>Souck Ndjebakal Gauthier Rostant</strong>
+                                </div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar" style="background: transparent; padding: 0;">
+                                    <img src="https://media.licdn.com/dms/image/v2/D4E03AQE-Tzgc_riivQ/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1710853739935?e=1775088000&v=beta&t=Yt9q142Mw-epfPjhPnk7MlZbPJ1It0N8si8guFK1FGc"
+                                        alt="Sami"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                </div>
+                                <div class="member-info">
+                                    <strong>Musta Sami</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js?v=20260415c"></script>
+</body>
+
+</html>
