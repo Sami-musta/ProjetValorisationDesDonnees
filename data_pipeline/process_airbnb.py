@@ -19,6 +19,12 @@ import math
 import numpy as np
 import fitz  # pymupdf — for real estate PDF
 
+# Shared attractivity helpers (radius-based local scoring + POI loading)
+from compute_attractivity import (
+    load_pois, build_poi_index, local_attractivity, normalize_local_scores,
+    CATEGORIES, WEIGHTS,
+)
+
 # ───────────────────────────────────────────
 # CONFIG
 # ───────────────────────────────────────────
@@ -26,6 +32,7 @@ BASE_DIR = r'c:\Users\samim\Desktop\ProjetValorisationDesDonnees'
 OTHER_DATA = os.path.join(BASE_DIR, 'OtherData')
 VAUD_CFG = {'folder': 'VaudData', 'lat': 46.5197, 'lng': 6.6323, 'zoom': 10}
 OUTPUT_DIR = os.path.join(BASE_DIR, 'webapp', 'data')
+AMTOVZ_PATH = os.path.join(OTHER_DATA, 'AMTOVZ_CSV_LV95.csv')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ───────────────────────────────────────────
@@ -128,6 +135,71 @@ def load_real_estate_prices():
     return price_map
 
 
+# ───────────────────────────────────────────
+# NPA (Swiss postal code) ASSIGNMENT
+# ───────────────────────────────────────────
+def lv95_to_wgs84(E, N):
+    """Convert Swiss LV95 (EPSG:2056) easting/northing to WGS84 lat/lon.
+
+    Uses swisstopo's approximate formula (accuracy ~ a few metres — ample for
+    nearest-locality assignment). Vectorized over numpy arrays.
+    """
+    E = np.asarray(E, dtype=float)
+    N = np.asarray(N, dtype=float)
+    y = (E - 2600000.0) / 1000000.0          # relative to Bern, in Mm
+    x = (N - 1200000.0) / 1000000.0
+    lat = (16.9023892 + 3.238272 * x
+           - 0.270978 * y ** 2 - 0.002528 * x ** 2
+           - 0.0447 * y ** 2 * x - 0.0140 * x ** 3)
+    lon = (2.6779094 + 4.728982 * y
+           + 0.791484 * y * x + 0.1306 * y * x ** 2
+           - 0.0436 * y ** 3)
+    return lat * 100.0 / 36.0, lon * 100.0 / 36.0
+
+
+def load_npa(path=AMTOVZ_PATH, canton='VD'):
+    """Load the official locality directory, filter to one canton, project to WGS84.
+
+    Returns a DataFrame with columns: npa, commune, lat, lon (one row per locality).
+    """
+    if not os.path.exists(path):
+        print(f"  Warning: AMTOVZ file not found at {path}")
+        return None
+    df = pd.read_csv(path, sep=';', encoding='utf-8-sig')
+    df = df[df['Kantonskürzel'] == canton].copy()
+    df = df.dropna(subset=['E', 'N', 'PLZ4'])
+    lat, lon = lv95_to_wgs84(df['E'].values, df['N'].values)
+    out = pd.DataFrame({
+        'npa': df['PLZ4'].astype(int).astype(str).values,
+        'commune': df['Gemeindename'].astype(str).values,
+        'lat': lat,
+        'lon': lon,
+    })
+    print(f"  Loaded {len(out)} NPA localities ({out['npa'].nunique()} distinct) for {canton}")
+    return out
+
+
+def assign_npa(df, npa_df):
+    """Assign each listing the NPA of the nearest AMTOVZ locality point.
+
+    Adds a 'npa' column (string). Vectorized nearest-neighbour in local metres.
+    """
+    if npa_df is None or npa_df.empty:
+        df['npa'] = None
+        return df
+    from compute_attractivity import equirect_xy
+    lx, ly = equirect_xy(df['latitude'].values, df['longitude'].values)
+    nx, ny = equirect_xy(npa_df['lat'].values, npa_df['lon'].values)
+    npa_codes = npa_df['npa'].values
+    assigned = []
+    for i in range(len(lx)):
+        d2 = (nx - lx[i]) ** 2 + (ny - ly[i]) ** 2
+        assigned.append(npa_codes[int(np.argmin(d2))])
+    df['npa'] = assigned
+    print(f"  NPA assigned to {len(df)} listings ({pd.Series(assigned).nunique()} distinct NPA)")
+    return df
+
+
 def load_seasonal_variance(cal_path):
     """Compute seasonal stability score from calendar data.
     Returns a dict: listing_id -> stability_score (0-100, higher = more stable)."""
@@ -206,12 +278,14 @@ def match_commune(airbnb_name, lookup_map):
 # ───────────────────────────────────────────
 # INVESTMENT SCORE (0-100) — INVESTOR-ORIENTED
 # ───────────────────────────────────────────
-def compute_investment_scores(df, attractivity_map, pop_map, price_map, stability_map):
+def compute_investment_scores(df, attractivity_map, pop_map, price_map, stability_map,
+                              poi_index=None):
     """
     Composite score for investors (6 factors):
       1. Revenue potential     (25%) — percentile rank of annual revenue
       2. Occupancy rate        (20%) — days occupied / 365
-      3. Attractivity          (20%) — cultural, sports, restaurant, employment POIs
+      3. Attractivity          (20%) — LOCAL radius score: culture, sports, F&B,
+                                       employment, transport POIs around the listing
       4. Market saturation     (15%) — Airbnb listings per 1000 inhabitants (inverted)
       5. Real estate yield     (10%) — revenue / prix_m2 (higher = better yield)
       6. Seasonal stability    (10%) — low monthly variance = predictable income
@@ -232,25 +306,30 @@ def compute_investment_scores(df, attractivity_map, pop_map, price_map, stabilit
     else:
         scores['occ_score'] = 0
 
-    # 3. Attractivity score (from POI data, per district)
+    # 3. Attractivity score — LOCAL, radius-based around each listing's own coords.
+    #    Replaces the old district-mean inheritance so two listings in the same
+    #    district (e.g. central Lausanne vs periphery) get different scores.
     nh_group_col = 'neighbourhood_group_cleansed' if 'neighbourhood_group_cleansed' in df.columns else 'neighbourhood_group'
-    if attractivity_map and nh_group_col in df.columns:
+    if poi_index is not None:
+        raw = local_attractivity(df['latitude'].values, df['longitude'].values, poi_index)
+        local = normalize_local_scores(raw)
+        local.index = df.index
+        for cat in CATEGORIES:
+            df[f'{cat}_score'] = local[f'{cat}_score']
+        scores['attract_score'] = local['attract_score']
+        print(f"  Local attractivity applied (mean: {scores['attract_score'].mean():.1f}, "
+              f"std: {scores['attract_score'].std():.1f}, "
+              f"transport mean: {df['transport_score'].mean():.1f})")
+    elif attractivity_map and nh_group_col in df.columns:
+        # Fallback: legacy district-mean behaviour.
         scores['attract_score'] = df[nh_group_col].map(
             {k: v['attractivity_score'] for k, v in attractivity_map.items()}
         ).fillna(0)
-        df['cultural_score'] = df[nh_group_col].map(
-            {k: v['cultural_score'] for k, v in attractivity_map.items()}
-        ).fillna(0)
-        df['sports_score'] = df[nh_group_col].map(
-            {k: v['sports_score'] for k, v in attractivity_map.items()}
-        ).fillna(0)
-        df['restaurant_score'] = df[nh_group_col].map(
-            {k: v['restaurant_score'] for k, v in attractivity_map.items()}
-        ).fillna(0)
-        df['employment_score'] = df[nh_group_col].map(
-            {k: v['employment_score'] for k, v in attractivity_map.items()}
-        ).fillna(0)
-        print(f"  Attractivity scores applied (mean: {scores['attract_score'].mean():.1f})")
+        for cat in CATEGORIES:
+            df[f'{cat}_score'] = df[nh_group_col].map(
+                {k: v.get(f'{cat}_score', 0) for k, v in attractivity_map.items()}
+            ).fillna(0)
+        print(f"  Attractivity scores applied (district fallback, mean: {scores['attract_score'].mean():.1f})")
     else:
         scores['attract_score'] = 0
 
@@ -438,6 +517,16 @@ def process_vaud():
     pop_map = load_population_data()
     price_map = load_real_estate_prices()
 
+    # POIs for LOCAL (radius-based) attractivity, projected once into an index.
+    print("  Loading POIs for local attractivity...")
+    poi_df = load_pois()
+    poi_index = build_poi_index(poi_df)
+
+    # NPA assignment from the official locality directory (nearest point).
+    print("  Assigning NPA (postal code) to listings...")
+    npa_df = load_npa()
+    df = assign_npa(df, npa_df)
+
     # Seasonal stability
     cal_path = os.path.join(folder, 'calendar.csv.gz')
     print("  Computing seasonal stability...")
@@ -446,7 +535,8 @@ def process_vaud():
 
     # ── Compute Investment Score ──
     print("\n4. Computing investment scores...")
-    df = compute_investment_scores(df, attractivity_map, pop_map, price_map, stability_map)
+    df = compute_investment_scores(df, attractivity_map, pop_map, price_map, stability_map,
+                                   poi_index=poi_index)
     print(f"  Investment Score: min={df['investment_score'].min()}, max={df['investment_score'].max()}, mean={df['investment_score'].mean():.1f}")
 
     # ── 5. Export listings JSON ──
@@ -472,11 +562,14 @@ def process_vaud():
             'bedrooms': int(r['bedrooms']),
             'accommodates': int(r['accommodates']),
         }
+        if pd.notna(r.get('npa')):
+            listing['npa'] = str(r['npa'])
         if has_attractivity:
             listing['cultural'] = round(float(r.get('cultural_score', 0)), 1)
             listing['sports'] = round(float(r.get('sports_score', 0)), 1)
             listing['restaurant'] = round(float(r.get('restaurant_score', 0)), 1)
             listing['employment'] = round(float(r.get('employment_score', 0)), 1)
+            listing['transport'] = round(float(r.get('transport_score', 0)), 1)
         if 'prix_m2' in r and pd.notna(r['prix_m2']):
             listing['prix_m2'] = round(float(r['prix_m2']), 0)
         if 'gross_yield_pct' in r and pd.notna(r['gross_yield_pct']):
@@ -548,6 +641,50 @@ def process_vaud():
     with open(os.path.join(OUTPUT_DIR, 'vaud_neighborhoods.json'), 'w', encoding='utf-8') as f:
         json.dump(nh_json, f, ensure_ascii=False)
     print(f"  Exported {len(nh_json)} neighborhoods")
+
+    # ── 6b. NPA (postal-code zone) aggregation — the fine "attractivity zone" ──
+    if 'npa' in df.columns and df['npa'].notna().any():
+        agg_spec = dict(
+            count=('id', 'count'),
+            avg_price=('price_clean', 'mean'),
+            avg_revenue=('estimated_revenue_l365d', 'mean'),
+            avg_occupancy=('estimated_occupancy_l365d', 'mean'),
+            avg_score=('investment_score', 'mean'),
+            avg_attract_score=('attract_score', 'mean'),
+        )
+        for cat in CATEGORIES:
+            col = f'{cat}_score'
+            if col in df.columns:
+                agg_spec[f'avg_{cat}_score'] = (col, 'mean')
+        npa_agg = df.groupby('npa').agg(**agg_spec).reset_index()
+        # Dominant commune per NPA (for a human-readable label)
+        dom = df.groupby('npa')['neighbourhood_cleansed'].agg(
+            lambda s: s.mode().iat[0] if not s.mode().empty else ''
+        )
+        npa_agg['commune'] = npa_agg['npa'].map(dom)
+        npa_agg = npa_agg.sort_values('avg_score', ascending=False)
+
+        npa_json = []
+        for _, r in npa_agg.iterrows():
+            entry = {
+                'npa': str(r['npa']),
+                'commune': str(r['commune']),
+                'count': int(r['count']),
+                'avg_price': round(float(r['avg_price']), 0),
+                'avg_revenue': round(float(r['avg_revenue']), 0),
+                'avg_occupancy': round(float(r['avg_occupancy']), 0),
+                'avg_score': round(float(r['avg_score']), 1),
+                'avg_attract_score': round(float(r['avg_attract_score']), 1),
+            }
+            for cat in CATEGORIES:
+                k = f'avg_{cat}_score'
+                if k in npa_agg.columns:
+                    entry[k] = round(float(r[k]), 1)
+            npa_json.append(entry)
+
+        with open(os.path.join(OUTPUT_DIR, 'vaud_npa.json'), 'w', encoding='utf-8') as f:
+            json.dump(npa_json, f, ensure_ascii=False)
+        print(f"  Exported {len(npa_json)} NPA zones")
 
     # ── 7. Property Type breakdown ──
     pt_agg = df.groupby('room_type').agg(

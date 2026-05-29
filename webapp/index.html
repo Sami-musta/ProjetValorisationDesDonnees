@@ -379,10 +379,15 @@
                         <div><span class="dl">Occupation</span><span class="dv" id="detail-occupancy">-</span></div>
                         <div><span class="dl">Prix m²</span><span class="dv" id="detail-prix-m2">-</span></div>
                         <div><span class="dl">Type</span><span class="dv" id="detail-type">-</span></div>
+                        <div><span class="dl">NPA</span><span class="dv" id="detail-npa">-</span></div>
                     </div>
                     <div id="detail-attractivity" class="detail-attractivity hidden">
-                        <div class="detail-attract-label">Attractivité du district</div>
+                        <div class="detail-attract-label">Attractivité locale (rayon autour du bien)</div>
                         <div class="detail-attract-bars" id="detail-attract-bars"></div>
+                        <div class="detail-radius-legend">
+                            <span><span class="drl-dot drl-attract"></span>Zone analysée · 1500 m</span>
+                            <span><span class="drl-dot drl-transit"></span>Proximité transports · 1000 m</span>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -618,7 +623,7 @@
                                     <span class="radio-label">Chambre privée</span>
                                 </button>
                             </div>
-                            <span class="sim-help">Vous louez l'intégralité du logement, ou seulement une chambre chez vous&nbsp;?</span>
+                            <span class="sim-help" id="sim-room-help">Vous louez l'intégralité du logement, ou seulement une chambre chez vous&nbsp;?</span>
                         </div>
 
                         <!-- Budget de lancement -->
@@ -659,6 +664,42 @@
                             <span class="sim-help" id="sim-budget-help">Budget utilisé pour calculer le remboursement de votre mise de départ.</span>
                         </div>
 
+                        <!-- Situation immobilière -->
+                        <div class="sim-field">
+                            <label>Situation immobilière</label>
+                            <div class="sim-radio-group" id="sim-property-mode">
+                                <button type="button" class="sim-radio active" data-mode="own">
+                                    <span class="radio-icon">🔑</span>
+                                    <span class="radio-label">Je possède déjà le bien</span>
+                                </button>
+                                <button type="button" class="sim-radio" data-mode="buy">
+                                    <span class="radio-icon">🏷️</span>
+                                    <span class="radio-label">J'achète le bien</span>
+                                </button>
+                            </div>
+
+                            <!-- Prix d'achat (mode achat uniquement) -->
+                            <div class="sim-number-field" id="sim-purchase-wrap" hidden>
+                                <label for="sim-purchase">Prix d'achat du bien</label>
+                                <div class="sim-input-wrap">
+                                    <span class="sim-input-prefix">CHF</span>
+                                    <input type="number" id="sim-purchase" class="sim-number" min="0" step="10000" placeholder="850000" inputmode="numeric">
+                                </div>
+                            </div>
+
+                            <!-- Charges annuelles (les deux modes) -->
+                            <div class="sim-number-field" id="sim-charges-wrap">
+                                <label for="sim-charges" id="sim-charges-label">Charges annuelles (hypothèque, charges, loyer)</label>
+                                <div class="sim-input-wrap">
+                                    <span class="sim-input-prefix">CHF</span>
+                                    <input type="number" id="sim-charges" class="sim-number" min="0" step="500" placeholder="0" inputmode="numeric">
+                                    <span class="sim-input-suffix">/an</span>
+                                </div>
+                            </div>
+
+                            <span class="sim-help" id="sim-property-help">Vous êtes déjà propriétaire&nbsp;: le coût immobilier est nul. Indiquez vos charges annuelles pour obtenir un ROI net.</span>
+                        </div>
+
                         <button type="button" class="sim-submit" id="sim-submit">
                             <span>Lancer la simulation</span>
                             <span class="btn-arrow" aria-hidden="true">
@@ -682,8 +723,8 @@
             <!-- ════════ VUE : ATTRACTIVITÉ ════════ -->
             <section class="view" id="view-attractivity">
                 <div class="view-header">
-                    <h1>Attractivité des districts — Canton de Vaud</h1>
-                    <p class="view-subtitle">Score composite basé sur 4 facteurs : culture, sport, restauration et emploi</p>
+                    <h1>Attractivité du territoire — Canton de Vaud</h1>
+                    <p class="view-subtitle">Score composite sur 5 facteurs : culture, sport, restauration, emploi et transports. L'attractivité de chaque bien est calculée localement (rayon autour du bien), puis agrégée par district et par code postal (NPA).</p>
                 </div>
 
                 <!-- Weight explanation -->
@@ -694,6 +735,64 @@
 
                 <!-- District ranking -->
                 <div class="attractivity-ranking" id="attractivity-ranking"></div>
+
+                <!-- NPA explorer (fine postal-code zones, filterable) -->
+                <div class="npa-section" id="npa-section">
+                    <div class="panel-header" style="margin: 28px 0 14px;">
+                        <h3>Explorateur par code postal (NPA)</h3>
+                        <p class="view-subtitle" style="margin:0;">Granularité fine : chaque NPA agrège l'attractivité <strong>locale</strong> de ses annonces (rayon autour du bien), avec leur accessibilité transports. Filtrez, triez et cherchez pour analyser une zone précise.</p>
+                    </div>
+
+                    <details class="npa-method">
+                        <summary>❓ Comment ces scores sont-ils calculés&nbsp;? (ex. «&nbsp;Culture&nbsp;35&nbsp;»)</summary>
+                        <div class="npa-method-body">
+                            <p>Chaque chiffre est un <strong>score relatif de 0 à 100</strong>, <strong>pas un nombre de lieux</strong>. Il se calcule en 3 étapes&nbsp;:</p>
+                            <ol>
+                                <li><strong>On compte les lieux autour de la zone</strong> — pour la culture&nbsp;: musées, galeries, attractions, bibliothèques… situés dans un <strong>rayon de 1,5&nbsp;km</strong>.</li>
+                                <li><strong>Plus c'est proche, plus ça compte</strong> — un musée à 200&nbsp;m pèse plus qu'à 1,4&nbsp;km (décroissance par distance).</li>
+                                <li><strong>On classe par rapport au canton</strong> — le total est ramené sur 0→100&nbsp;: <strong>100&nbsp;= la zone la mieux dotée du canton</strong>, <strong>0&nbsp;= la moins dotée</strong>.</li>
+                            </ol>
+                            <p style="margin:0;">Donc «&nbsp;Culture&nbsp;35&nbsp;» = bas du classement cantonal (peu de lieux culturels à proximité)&nbsp;; «&nbsp;Sport&nbsp;51&nbsp;» = à peu près dans la moyenne. Les <strong>transports</strong> utilisent un rayon réduit (gare&nbsp;≤&nbsp;1&nbsp;km, tram&nbsp;≤&nbsp;700&nbsp;m, bus&nbsp;≤&nbsp;400&nbsp;m). Le <strong>grand chiffre</strong> est la moyenne pondérée des 5&nbsp;facteurs (emploi&nbsp;25&nbsp;%, sport&nbsp;22&nbsp;%, culture&nbsp;20&nbsp;%, transports&nbsp;20&nbsp;%, resto&nbsp;13&nbsp;%).</p>
+                        </div>
+                    </details>
+
+                    <div class="npa-controls glass">
+                        <div class="npa-ctrl">
+                            <label for="npa-search">Recherche</label>
+                            <input type="search" id="npa-search" class="npa-input" placeholder="Code postal ou commune (ex. 1003, Lausanne)" autocomplete="off">
+                        </div>
+                        <div class="npa-ctrl">
+                            <label for="npa-sort">Trier par</label>
+                            <select id="npa-sort" class="npa-select">
+                                <option value="attract">Attractivité locale</option>
+                                <option value="transport">Accessibilité transports</option>
+                                <option value="score">Score d'investissement</option>
+                                <option value="revenue">Revenu annuel moyen</option>
+                                <option value="occupancy">Occupation moyenne</option>
+                                <option value="price">Prix /nuit moyen</option>
+                                <option value="count">Nombre d'annonces</option>
+                            </select>
+                        </div>
+                        <div class="npa-ctrl">
+                            <label for="npa-min-count">Annonces min.</label>
+                            <select id="npa-min-count" class="npa-select">
+                                <option value="1">Toutes (≥ 1)</option>
+                                <option value="3" selected>≥ 3 (fiable)</option>
+                                <option value="5">≥ 5</option>
+                                <option value="10">≥ 10</option>
+                            </select>
+                        </div>
+                        <div class="npa-ctrl npa-ctrl-count">
+                            <span class="npa-count" id="npa-count">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Legend explaining the numbers shown on each card -->
+                    <div class="npa-legend" id="npa-legend"></div>
+
+                    <div class="npa-ranking" id="npa-ranking"></div>
+                    <div class="npa-more" id="npa-more"></div>
+                </div>
 
                 <!-- Charts row -->
                 <div class="charts-row" style="margin-top: 24px;">
@@ -790,20 +889,22 @@
                     <div class="about-card glass">
                         <h3>📊 Sources de donnees</h3>
                         <p>
-                            Le projet croise <strong>5 sources de donnees</strong> complementaires :
+                            Le projet croise <strong>6 sources de donnees</strong> complementaires :
                         </p>
                         <ul
                             style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 8px;">
                             <li><strong>Inside Airbnb</strong> — listings.csv.gz (5 486 annonces, 79 colonnes) et
                                 calendar.csv.gz (disponibilite journaliere sur 365 jours)</li>
-                            <li><strong>OpenStreetMap (OSM)</strong> — 7 196 points d'interet (musees, restaurants,
-                                centres sportifs, bureaux) via Overpass API</li>
+                            <li><strong>OpenStreetMap (OSM)</strong> — 11 000 points d'interet (musees, restaurants,
+                                centres sportifs, bureaux, <strong>gares, arrets de tram et de bus</strong>) via Overpass API</li>
                             <li><strong>Stat Vaud</strong> — Densite de population par commune (2025), 300 communes
                                 avec population et superficie</li>
                             <li><strong>Neho / Lookmove</strong> — Prix immobiliers au m² par commune (mars 2026),
                                 250 communes avec prix appartement et maison</li>
                             <li><strong>GeoJSON</strong> — Decoupage administratif du canton (309 communes, 10
                                 districts) pour le geo-matching</li>
+                            <li><strong>Repertoire officiel des localites (AMTOVZ, swisstopo)</strong> — 542 localites
+                                vaudoises avec code postal (NPA) et coordonnees, pour rattacher chaque bien a son NPA</li>
                         </ul>
                         <a href="https://insideairbnb.com/fr/get-the-data/" target="_blank" class="about-link"
                             rel="noopener noreferrer">
@@ -823,15 +924,17 @@
                                     compute_attractivity.py</h4>
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
-                                    <li>Charge <strong>7 196 POIs</strong> depuis OpenStreetMap (fichier Excel)</li>
-                                    <li>Categorise en 4 facteurs : culture (838), sport (3 455), restaurants (2 117),
-                                        emploi (786)</li>
-                                    <li>Assigne chaque POI a un district via <strong>point-in-polygon</strong>
-                                        (Shapely + GeoJSON)</li>
-                                    <li>Calcule un <strong>score de densite normalisee</strong> (POIs/commune) par
-                                        district</li>
-                                    <li>Ponderations : sport 30%, emploi 30%, culture 25%, restauration 15%</li>
-                                    <li>Export → <code>vaud_attractivity.json</code></li>
+                                    <li>Charge <strong>11 030 POIs</strong> depuis OpenStreetMap (fichier Excel)</li>
+                                    <li>Categorise en <strong>5 facteurs</strong> : culture (838), sport (3 451),
+                                        restaurants (2 117), emploi (852) et <strong>transports (3 772 : gares, trams,
+                                        bus)</strong></li>
+                                    <li>Expose un <strong>moteur de score par rayon</strong> reutilise par le script 2 :
+                                        somme ponderee des POIs autour d'un point, avec decroissance par distance</li>
+                                    <li>Produit aussi un agregat par district (point-in-polygon, Shapely + GeoJSON)
+                                        pour la vue macro</li>
+                                    <li>Ponderations : emploi 25%, sport 22%, culture 20%, <strong>transports 20%</strong>,
+                                        restauration 13%</li>
+                                    <li>Export → <code>vaud_attractivity.json</code>, <code>attractivity_weights.json</code></li>
                                 </ul>
 
                                 <h4
@@ -855,8 +958,12 @@
                                     croise</h4>
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
-                                    <li><strong>Attractivite :</strong> Score POI par district (depuis
-                                        compute_attractivity.py)</li>
+                                    <li><strong>Attractivite LOCALE :</strong> calculee pour chaque annonce dans un
+                                        <strong>rayon autour de ses coordonnees</strong> (1 500 m pour culture / sport /
+                                        resto / emploi ; rayon reduit pour les transports), et non plus heritee de la
+                                        moyenne du district</li>
+                                    <li><strong>Code postal (NPA) :</strong> chaque bien est rattache au NPA de la
+                                        localite la plus proche (AMTOVZ, conversion LV95 → WGS84)</li>
                                     <li><strong>Demographie :</strong> Population par commune (Stat Vaud 2025) →
                                         calcul de la saturation Airbnb/1000 habitants</li>
                                     <li><strong>Immobilier :</strong> Prix au m² par commune (Neho/Lookmove 2026) →
@@ -871,9 +978,11 @@
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
                                     <li><strong>Par listing :</strong> 2 500 annonces avec score, prix, revenu,
-                                        sous-scores → <code>vaud_listings.json</code></li>
-                                    <li><strong>Par commune :</strong> 208 communes avec moyennes, prix m², population,
+                                        sous-scores locaux + NPA → <code>vaud_listings.json</code></li>
+                                    <li><strong>Par commune :</strong> 204 communes avec moyennes, prix m², population,
                                         saturation → <code>vaud_neighborhoods.json</code></li>
+                                    <li><strong>Par code postal (NPA) :</strong> 228 zones avec attractivite locale,
+                                        transports et financier → <code>vaud_npa.json</code></li>
                                     <li><strong>Par type :</strong> 4 categories de bien →
                                         <code>vaud_property_types.json</code></li>
                                     <li><strong>Saisonnier :</strong> 12 mois prix + occupation →
@@ -924,10 +1033,10 @@
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
                                 <div style="font-size: 22px; margin-bottom: 6px;">🎯</div>
-                                <h4 style="font-size: 13px; margin-bottom: 4px;">Attractivite du lieu</h4>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Attractivite locale</h4>
                                 <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">20%</div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Densite de POIs :
-                                    culture, sport, restaurants, emploi (OSM)</p>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">POIs dans un rayon
+                                    autour du bien : culture, sport, resto, emploi, <strong>transports</strong> (OSM)</p>
                             </div>
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
@@ -1002,6 +1111,61 @@
                                 des scores artificiellement eleves ou bas. Les recommandations IA filtrent les communes
                                 avec moins de 3 annonces pour garantir la fiabilite. Les annonces inactives (0 jour
                                 d'occupation) sont exclues du calcul.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ── Nouveautés : analyse locale fine ── -->
+                    <div class="about-card glass full-width">
+                        <h3>🆕 Analyse locale fine — ce qui a évolué</h3>
+                        <p style="margin-bottom: 16px;">
+                            L'attractivité ne se calcule plus comme une <strong>moyenne de district</strong> (où toutes
+                            les annonces d'un même district partageaient le même score). Elle est désormais
+                            <strong>propre à chaque bien</strong>, ce qui distingue par exemple le centre de Lausanne de
+                            sa périphérie.
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <div style="background: var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid var(--airbnb-coral);">
+                                <h4 style="font-size: 14px; margin-bottom: 8px;">📍 Score par rayon (granularité fine)</h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+                                    Pour chaque bien, on additionne les POIs présents dans un <strong>rayon de 1 500 m</strong>
+                                    autour de ses coordonnées, avec une <strong>décroissance par distance</strong> (un musée
+                                    à 200 m compte plus qu'à 1 400 m). Le score reflète donc l'environnement réel du bien.
+                                </p>
+                            </div>
+                            <div style="background: var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid #0ea5e9;">
+                                <h4 style="font-size: 14px; margin-bottom: 8px;">🚆 Facteur Transports (rayon réduit)</h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+                                    Nouveau 5<sup>e</sup> facteur (20%). L'accessibilité est mesurée sur un
+                                    <strong>rayon réduit</strong> : gare ≤ 1 000 m (poids fort), tram ≤ 700 m, bus ≤ 400 m.
+                                    La proximité immédiate d'une gare est un critère majeur relevé sur le terrain.
+                                </p>
+                            </div>
+                            <div style="background: var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid var(--airbnb-teal);">
+                                <h4 style="font-size: 14px; margin-bottom: 8px;">🏷️ Rattachement au code postal (NPA)</h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+                                    Chaque bien est rattaché à son <strong>NPA</strong> via le répertoire officiel des
+                                    localités (swisstopo). L'onglet Attractivité propose un <strong>explorateur par NPA</strong>
+                                    (recherche, tri, filtres) pour analyser finement chaque zone postale.
+                                </p>
+                            </div>
+                            <div style="background: var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid #FFB400;">
+                                <h4 style="font-size: 14px; margin-bottom: 8px;">🗺️ Rayon visible sur la carte</h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+                                    En cliquant une annonce sur la carte, deux cercles s'affichent : la
+                                    <strong>zone analysée (1 500 m)</strong> et la <strong>proximité transports (1 000 m)</strong>,
+                                    pour visualiser exactement le périmètre pris en compte par le score.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 16px; padding: 12px 16px; background: rgba(255, 90, 95, 0.05); border: 1px solid rgba(255, 90, 95, 0.18); border-radius: 10px;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">
+                                <strong>Pondération de l'attractivité (5 facteurs) :</strong> emploi 25% · sport 22% ·
+                                culture 20% · transports 20% · restauration 13%. Chaque sous-score est normalisé sur
+                                [0, 100] (échelle logarithmique) puis combiné. Le simulateur bénéficie automatiquement de
+                                cette granularité locale.
                             </p>
                         </div>
                     </div>
