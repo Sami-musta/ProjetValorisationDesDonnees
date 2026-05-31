@@ -1,0 +1,5376 @@
+{
+ "meta": {
+  "source": "Analyse finale des commentaires Airbnb (avis voyageurs)",
+  "scope": "Canton de Vaud",
+  "note": "Pourcentages = part des commentaires mentionnant un theme; ils ne totalisent pas 100%. 'Logements avec avis' = logements presents dans le fichier de commentaires, PAS le nombre d annonces actives."
+ },
+ "globalThemes": [
+  {
+   "theme": "Confort / équipements",
+   "mentions": 50.3,
+   "frictions": 14.7
+  },
+  {
+   "theme": "Communication hôte / accueil",
+   "mentions": 44.6,
+   "frictions": 11.7
+  },
+  {
+   "theme": "Vue / paysage",
+   "mentions": 36.8,
+   "frictions": 10.8
+  },
+  {
+   "theme": "Localisation",
+   "mentions": 28.5,
+   "frictions": 8.8
+  },
+  {
+   "theme": "Propreté",
+   "mentions": 19.4,
+   "frictions": 5.6
+  },
+  {
+   "theme": "Transports / accès",
+   "mentions": 15.7,
+   "frictions": 6.3
+  },
+  {
+   "theme": "Check-in / arrivée",
+   "mentions": 15.0,
+   "frictions": 5.4
+  },
+  {
+   "theme": "Calme / bruit",
+   "mentions": 12.3,
+   "frictions": 4.1
+  },
+  {
+   "theme": "Restaurants / commerces",
+   "mentions": 5.7,
+   "frictions": 2.4
+  },
+  {
+   "theme": "Ski / nature",
+   "mentions": 5.2,
+   "frictions": 1.8
+  },
+  {
+   "theme": "Prix / valeur",
+   "mentions": 5.0,
+   "frictions": 1.9
+  },
+  {
+   "theme": "Parking",
+   "mentions": 4.2,
+   "frictions": 1.8
+  }
+ ],
+ "sentiment": {
+  "positif": 51.6,
+  "negatif": 5.2,
+  "mixte": 15.8,
+  "neutre": 27.4
+ },
+ "byType": {
+  "Entire home/apt": {
+   "avis": 50372,
+   "logementsAvecAvis": 1240,
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 55.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 42.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 41.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 16.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.2
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Private room": {
+   "avis": 20365,
+   "logementsAvecAvis": 412,
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 54.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 31.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 12.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 11.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Hotel room": {
+   "avis": 554,
+   "logementsAvecAvis": 4,
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 51.1
+    },
+    {
+     "label": "Localisation",
+     "pct": 36.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 34.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 26.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 16.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Shared room": {
+   "avis": 353,
+   "logementsAvecAvis": 4,
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 37.1
+    },
+    {
+     "label": "Propreté",
+     "pct": 28.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 25.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 6.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  }
+ },
+ "byCommune": {
+  "Lausanne": {
+   "avis": 14413,
+   "logementsAvecAvis": 393,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 55.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.4
+    },
+    {
+     "label": "Localisation",
+     "pct": 42.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 17.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 13.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Montreux": {
+   "avis": 6501,
+   "logementsAvecAvis": 107,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 52.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 51.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 17.0
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: confort / équipements."
+  },
+  "Leysin": {
+   "avis": 3473,
+   "logementsAvecAvis": 54,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 58.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 50.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 37.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 15.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 13.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Ollon": {
+   "avis": 3329,
+   "logementsAvecAvis": 159,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 63.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 46.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 17.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Château-d'Oex": {
+   "avis": 2712,
+   "logementsAvecAvis": 43,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 59.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 44.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 42.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 10.8
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Gryon": {
+   "avis": 1930,
+   "logementsAvecAvis": 68,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 66.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 51.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 15.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 13.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Ormont-Dessus": {
+   "avis": 1810,
+   "logementsAvecAvis": 53,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 65.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 45.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 17.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 13.4
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Lutry": {
+   "avis": 1666,
+   "logementsAvecAvis": 32,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 51.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 50.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 47.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 14.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Bourg-en-Lavaux": {
+   "avis": 1494,
+   "logementsAvecAvis": 18,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 56.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 46.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 39.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 19.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 17.1
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Vevey": {
+   "avis": 1262,
+   "logementsAvecAvis": 46,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 60.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 50.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 20.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 17.1
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Bussigny": {
+   "avis": 1225,
+   "logementsAvecAvis": 9,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 49.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.6
+    },
+    {
+     "label": "Propreté",
+     "pct": 33.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Vully-les-Lacs": {
+   "avis": 1222,
+   "logementsAvecAvis": 15,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 34.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 34.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 20.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 8.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Nyon": {
+   "avis": 1216,
+   "logementsAvecAvis": 29,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 34.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 10.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Morges": {
+   "avis": 1012,
+   "logementsAvecAvis": 15,
+   "fiabilite": "Très bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 53.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 45.7
+    },
+    {
+     "label": "Localisation",
+     "pct": 27.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Rivaz": {
+   "avis": 966,
+   "logementsAvecAvis": 7,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 58.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 38.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 34.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 15.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 13.0
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "La Tour-de-Peilz": {
+   "avis": 926,
+   "logementsAvecAvis": 17,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 53.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 53.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 13.3
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: confort / équipements."
+  },
+  "Rossinière": {
+   "avis": 830,
+   "logementsAvecAvis": 15,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 59.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 42.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 20.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 14.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Le Mont-sur-Lausanne": {
+   "avis": 796,
+   "logementsAvecAvis": 15,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 47.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.8
+    },
+    {
+     "label": "Propreté",
+     "pct": 21.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Ormont-Dessous": {
+   "avis": 758,
+   "logementsAvecAvis": 12,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 66.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 39.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 17.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Villeneuve (Vaud)": {
+   "avis": 753,
+   "logementsAvecAvis": 4,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 48.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 47.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 41.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Yverdon-les-Bains": {
+   "avis": 707,
+   "logementsAvecAvis": 10,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 51.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 39.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 20.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 7.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Chavannes-près-Renens": {
+   "avis": 700,
+   "logementsAvecAvis": 12,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 47.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 45.1
+    },
+    {
+     "label": "Localisation",
+     "pct": 26.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Chardonne": {
+   "avis": 682,
+   "logementsAvecAvis": 16,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 65.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 51.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 21.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 19.9
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Saint-Cergue": {
+   "avis": 679,
+   "logementsAvecAvis": 9,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 55.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 54.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 36.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Aigle": {
+   "avis": 677,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 55.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 35.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 22.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Bex": {
+   "avis": 643,
+   "logementsAvecAvis": 8,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 59.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 43.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 38.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.4
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Blonay": {
+   "avis": 570,
+   "logementsAvecAvis": 9,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 51.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 46.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Perroy": {
+   "avis": 550,
+   "logementsAvecAvis": 7,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 48.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 44.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Essertes": {
+   "avis": 527,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 58.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 42.1
+    },
+    {
+     "label": "Propreté",
+     "pct": 33.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 8.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 7.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Epalinges": {
+   "avis": 501,
+   "logementsAvecAvis": 13,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 53.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.5
+    },
+    {
+     "label": "Localisation",
+     "pct": 35.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.8
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Pully": {
+   "avis": 489,
+   "logementsAvecAvis": 21,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 58.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 57.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 48.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Prilly": {
+   "avis": 463,
+   "logementsAvecAvis": 32,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 57.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 52.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 31.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Avenches": {
+   "avis": 462,
+   "logementsAvecAvis": 7,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 43.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 28.8
+    },
+    {
+     "label": "Localisation",
+     "pct": 26.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 9.3
+    },
+    {
+     "label": "Localisation",
+     "pct": 5.6
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Cudrefin": {
+   "avis": 461,
+   "logementsAvecAvis": 10,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 41.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 34.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 27.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Sainte-Croix": {
+   "avis": 436,
+   "logementsAvecAvis": 11,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 54.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 39.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 31.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 10.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Lavey-Morcles": {
+   "avis": 422,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 49.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 31.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.4
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Saint-Saphorin (Lavaux)": {
+   "avis": 420,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 56.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 51.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 51.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 19.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 16.9
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Belmont-sur-Lausanne": {
+   "avis": 409,
+   "logementsAvecAvis": 6,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 54.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 49.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 31.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Renens (Vaud)": {
+   "avis": 399,
+   "logementsAvecAvis": 26,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 52.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.1
+    },
+    {
+     "label": "Localisation",
+     "pct": 32.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Cossonay": {
+   "avis": 377,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 49.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 41.6
+    },
+    {
+     "label": "Propreté",
+     "pct": 24.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 10.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Mont-sur-Rolle": {
+   "avis": 364,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 55.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 53.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 43.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 15.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 15.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Rougemont": {
+   "avis": 356,
+   "logementsAvecAvis": 17,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 63.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 50.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 36.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 17.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Saint-Sulpice (Vaud)": {
+   "avis": 355,
+   "logementsAvecAvis": 25,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 63.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 54.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 53.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 15.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 14.9
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Cheseaux-Noréaz": {
+   "avis": 342,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 32.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 29.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 26.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 5.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 5.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: vue / paysage."
+  },
+  "Cuarnens": {
+   "avis": 332,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 62.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 52.7
+    },
+    {
+     "label": "Propreté",
+     "pct": 34.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 12.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Jongny": {
+   "avis": 316,
+   "logementsAvecAvis": 6,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 58.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 58.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 56.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 19.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 18.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Le Chenit": {
+   "avis": 315,
+   "logementsAvecAvis": 8,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 47.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 30.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 10.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Rennaz": {
+   "avis": 308,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 58.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.2
+    },
+    {
+     "label": "Localisation",
+     "pct": 26.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 12.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Veytaux": {
+   "avis": 308,
+   "logementsAvecAvis": 6,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 59.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 51.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 20.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 17.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Ecublens (Vaud)": {
+   "avis": 300,
+   "logementsAvecAvis": 13,
+   "fiabilite": "Bonne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 52.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 49.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 34.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Savigny": {
+   "avis": 295,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 31.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.1
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Orbe": {
+   "avis": 293,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 45.4
+    },
+    {
+     "label": "Localisation",
+     "pct": 28.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 12.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Chevroux": {
+   "avis": 281,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 34.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 29.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 17.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 7.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 7.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Le Lieu": {
+   "avis": 258,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 47.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 43.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 11.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 9.7
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Apples": {
+   "avis": 252,
+   "logementsAvecAvis": 4,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 54.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 37.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 21.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Corcelles-près-Concise": {
+   "avis": 248,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 55.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 25.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 22.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 5.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Echandens": {
+   "avis": 248,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 43.1
+    },
+    {
+     "label": "Propreté",
+     "pct": 29.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Faoug": {
+   "avis": 245,
+   "logementsAvecAvis": 4,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 27.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 26.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 14.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 7.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 6.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: communication hôte / accueil."
+  },
+  "Assens": {
+   "avis": 223,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 57.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 28.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 23.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 9.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Bullet": {
+   "avis": 220,
+   "logementsAvecAvis": 6,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 59.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 39.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Corsier-sur-Vevey": {
+   "avis": 216,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 60.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 56.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 41.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Valbroye": {
+   "avis": 205,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 38.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 32.2
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 18.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 6.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Saint-Prex": {
+   "avis": 202,
+   "logementsAvecAvis": 10,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 62.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 55.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 49.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Concise": {
+   "avis": 200,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 37.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 15.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 5.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 5.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Fontaines-sur-Grandson": {
+   "avis": 183,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 65.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 31.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 19.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 5.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Duillier": {
+   "avis": 172,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 45.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 44.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 29.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 7.6
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Essertines-sur-Rolle": {
+   "avis": 167,
+   "logementsAvecAvis": 4,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 43.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 36.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "L'Abbaye": {
+   "avis": 160,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 60.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 54.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 47.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 11.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.1
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Gilly": {
+   "avis": 159,
+   "logementsAvecAvis": 4,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 47.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 45.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 16.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "L'Isle": {
+   "avis": 158,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 26.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 25.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Etoy": {
+   "avis": 149,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 59.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 40.3
+    },
+    {
+     "label": "Localisation",
+     "pct": 31.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 17.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 13.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Echichens": {
+   "avis": 146,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 56.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 50.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 30.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 17.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 17.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Mathod": {
+   "avis": 142,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 59.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 32.4
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 21.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 7.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Yvonand": {
+   "avis": 142,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 33.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 30.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 19.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 3.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 2.8
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Grandson": {
+   "avis": 138,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 42.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 37.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Donneloye": {
+   "avis": 136,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 55.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 30.1
+    },
+    {
+     "label": "Propreté",
+     "pct": 13.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 5.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 5.1
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Champvent": {
+   "avis": 131,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 60.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 41.2
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 32.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 16.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 13.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Puidoux": {
+   "avis": 127,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 59.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 43.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 15.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 13.4
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Chexbres": {
+   "avis": 126,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 63.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 54.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 42.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 11.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.7
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Gland": {
+   "avis": 124,
+   "logementsAvecAvis": 7,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 62.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 51.6
+    },
+    {
+     "label": "Localisation",
+     "pct": 37.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Gingins": {
+   "avis": 116,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 69.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 9.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Bonvillars": {
+   "avis": 113,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 35.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 31.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 22.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 18.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 15.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Corseaux": {
+   "avis": 113,
+   "logementsAvecAvis": 7,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 54.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 54.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 16.8
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: confort / équipements."
+  },
+  "Tolochenaz": {
+   "avis": 113,
+   "logementsAvecAvis": 4,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 54.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 34.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 22.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Le Vaud": {
+   "avis": 108,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 44.4
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 35.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 28.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.3
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 7.4
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Montagny-près-Yverdon": {
+   "avis": 107,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 49.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 43.9
+    },
+    {
+     "label": "Localisation",
+     "pct": 36.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.1
+    },
+    {
+     "label": "Localisation",
+     "pct": 12.1
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Longirod": {
+   "avis": 106,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 49.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 48.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 19.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 9.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Bremblens": {
+   "avis": 105,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 56.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 49.5
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 36.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 12.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 9.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Lully (Vaud)": {
+   "avis": 102,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 58.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 54.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 53.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 14.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 12.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: vue / paysage."
+  },
+  "Romainmôtier-Envy": {
+   "avis": 102,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 43.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 39.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 7.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Sullens": {
+   "avis": 102,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Moyenne",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 66.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 29.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 18.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 13.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Rolle": {
+   "avis": 97,
+   "logementsAvecAvis": 8,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 45.4
+    },
+    {
+     "label": "Localisation",
+     "pct": 29.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Bournens": {
+   "avis": 92,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 41.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 30.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 30.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 7.6
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 7.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Montcherand": {
+   "avis": 89,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 61.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 30.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 10.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Préverenges": {
+   "avis": 87,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 57.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 51.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 46.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Aclens": {
+   "avis": 84,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 52.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.8
+    },
+    {
+     "label": "Propreté",
+     "pct": 29.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 26.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 19.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Genolier": {
+   "avis": 84,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Localisation",
+     "pct": 54.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 52.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 21.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 17.9
+    }
+   ],
+   "interpretation": "Marché où l’emplacement est un facteur central de l’expérience voyageur.",
+   "conseil": "Mettre en avant les distances exactes, les points d’intérêt proches et l’accessibilité. Point à surveiller: confort / équipements."
+  },
+  "Paudex": {
+   "avis": 84,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 60.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 41.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 40.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 17.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 15.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Trélex": {
+   "avis": 84,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 41.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 40.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 11.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Lucens": {
+   "avis": 83,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 45.8
+    },
+    {
+     "label": "Localisation",
+     "pct": 32.5
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 30.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 4.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 4.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Crassier": {
+   "avis": 81,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 65.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 43.2
+    },
+    {
+     "label": "Propreté",
+     "pct": 29.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 4.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Ependes (Vaud)": {
+   "avis": 81,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 29.6
+    },
+    {
+     "label": "Propreté",
+     "pct": 19.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Villars-sous-Yens": {
+   "avis": 76,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.8
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 56.6
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 35.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Penthalaz": {
+   "avis": 73,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 57.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 32.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 19.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 4.1
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Moiry": {
+   "avis": 65,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 63.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 44.6
+    },
+    {
+     "label": "Propreté",
+     "pct": 27.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 12.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 9.2
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Noville": {
+   "avis": 65,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 41.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 26.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 7.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 7.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Marchissy": {
+   "avis": 62,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 43.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 40.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 17.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 12.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Romanel-sur-Morges": {
+   "avis": 61,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 60.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 45.9
+    },
+    {
+     "label": "Propreté",
+     "pct": 19.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Buchillon": {
+   "avis": 59,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 64.4
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 54.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 50.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 25.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 22.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Lignerolle": {
+   "avis": 58,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 62.1
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 24.1
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 10.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 17.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Goumoëns": {
+   "avis": 57,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 59.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 33.3
+    },
+    {
+     "label": "Propreté",
+     "pct": 26.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 7.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 5.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Etagnières": {
+   "avis": 55,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 60.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 41.8
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 25.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.1
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 5.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Arzier-Le Muids": {
+   "avis": 54,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 53.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 51.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 46.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 20.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 16.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: communication hôte / accueil."
+  },
+  "Chavannes-de-Bogis": {
+   "avis": 53,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 62.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 34.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 30.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 11.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Denges": {
+   "avis": 50,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 42.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 32.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 18.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 16.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Vallorbe": {
+   "avis": 50,
+   "logementsAvecAvis": 6,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 44.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 28.0
+    },
+    {
+     "label": "Propreté",
+     "pct": 26.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Saint-Légier-La Chiésaz": {
+   "avis": 46,
+   "logementsAvecAvis": 6,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 56.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 37.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 19.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.9
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: vue / paysage."
+  },
+  "Yens": {
+   "avis": 41,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 48.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 43.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 43.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.8
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Tévenon": {
+   "avis": 40,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 47.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 37.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 10.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Corcelles-le-Jorat": {
+   "avis": 38,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 52.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 39.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 31.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 10.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Lonay": {
+   "avis": 37,
+   "logementsAvecAvis": 3,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 59.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 56.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 48.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 10.8
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 10.8
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Chavornay": {
+   "avis": 35,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 42.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 34.3
+    },
+    {
+     "label": "Localisation",
+     "pct": 22.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 5.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Crans-près-Céligny": {
+   "avis": 31,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 29.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 29.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 19.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 12.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Froideville": {
+   "avis": 31,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 71.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 51.6
+    },
+    {
+     "label": "Propreté",
+     "pct": 35.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Founex": {
+   "avis": 30,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 66.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 46.7
+    },
+    {
+     "label": "Propreté",
+     "pct": 26.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Crissier": {
+   "avis": 29,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 48.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 34.5
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 13.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 10.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.9
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Daillens": {
+   "avis": 27,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 55.6
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 55.6
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 37.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 22.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 18.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Jorat-Menthue": {
+   "avis": 26,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 65.4
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 61.5
+    },
+    {
+     "label": "Localisation",
+     "pct": 46.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 34.6
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 34.6
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Oulens-sous-Echallens": {
+   "avis": 23,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 52.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 47.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 43.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: communication hôte / accueil."
+  },
+  "Villars-Sainte-Croix": {
+   "avis": 23,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 78.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 39.1
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 39.1
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 8.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 8.7
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Jouxtens-Mézery": {
+   "avis": 21,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 52.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.3
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 9.5
+    },
+    {
+     "label": "Propreté",
+     "pct": 9.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Montanaire": {
+   "avis": 21,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 61.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 61.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 9.5
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Onnens (Vaud)": {
+   "avis": 20,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 35.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 20.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 15.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Moudon": {
+   "avis": 18,
+   "logementsAvecAvis": 5,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 38.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 22.2
+    },
+    {
+     "label": "Propreté",
+     "pct": 22.2
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 11.1
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Saint-George": {
+   "avis": 17,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 52.9
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 35.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 29.4
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 11.8
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 5.9
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Bougy-Villars": {
+   "avis": 16,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 62.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 31.2
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 25.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 12.5
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.5
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: confort / équipements."
+  },
+  "Bofflens": {
+   "avis": 15,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 26.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 13.3
+    },
+    {
+     "label": "Propreté",
+     "pct": 13.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Luins": {
+   "avis": 15,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 73.3
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 33.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 26.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 13.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 6.7
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Vullierens": {
+   "avis": 13,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 76.9
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 69.2
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 30.8
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 46.2
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 38.5
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Forel (Lavaux)": {
+   "avis": 12,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 41.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 41.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 8.3
+    },
+    {
+     "label": "Localisation",
+     "pct": 8.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: vue / paysage."
+  },
+  "Oron": {
+   "avis": 12,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 66.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 16.7
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 8.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Coppet": {
+   "avis": 11,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Localisation",
+     "pct": 63.6
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 36.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 27.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 9.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 9.1
+    }
+   ],
+   "interpretation": "Marché où l’emplacement est un facteur central de l’expérience voyageur.",
+   "conseil": "Mettre en avant les distances exactes, les points d’intérêt proches et l’accessibilité. Point à surveiller: confort / équipements."
+  },
+  "Aubonne": {
+   "avis": 10,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 60.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 60.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 40.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 20.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 20.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: communication hôte / accueil."
+  },
+  "Burtigny": {
+   "avis": 10,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 20.0
+    },
+    {
+     "label": "Propreté",
+     "pct": 20.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour."
+  },
+  "Givrins": {
+   "avis": 10,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 60.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 30.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 20.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 20.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 20.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Trey": {
+   "avis": 10,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Prix / valeur",
+     "pct": 20.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 10.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 0.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où rapport qualité-prix ressort comme thème important.",
+   "conseil": "Justifier le prix par les équipements, la localisation et la qualité de l’expérience."
+  },
+  "Mies": {
+   "avis": 8,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 100.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 87.5
+    },
+    {
+     "label": "Localisation",
+     "pct": 87.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 37.5
+    },
+    {
+     "label": "Localisation",
+     "pct": 37.5
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Servion": {
+   "avis": 8,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 62.5
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 25.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 12.5
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour."
+  },
+  "Eysins": {
+   "avis": 7,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 71.4
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 42.9
+    },
+    {
+     "label": "Check-in / arrivée",
+     "pct": 42.9
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Yvorne": {
+   "avis": 7,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 57.1
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 42.9
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 28.6
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 14.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 14.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Cheseaux-sur-Lausanne": {
+   "avis": 6,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 16.7
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: communication hôte / accueil."
+  },
+  "Gimel": {
+   "avis": 6,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Vue / paysage",
+     "pct": 100.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 66.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 66.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 33.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    }
+   ],
+   "interpretation": "Marché où le cadre, la vue et l'expérience visuelle ressortent fortement.",
+   "conseil": "Mettre fortement en avant les photos, la vue, le cadre et l’expérience locale. Point à surveiller: confort / équipements."
+  },
+  "Prangins": {
+   "avis": 6,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Localisation",
+     "pct": 50.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 33.3
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    },
+    {
+     "label": "Localisation",
+     "pct": 33.3
+    }
+   ],
+   "interpretation": "Marché où l’emplacement est un facteur central de l’expérience voyageur.",
+   "conseil": "Mettre en avant les distances exactes, les points d’intérêt proches et l’accessibilité. Point à surveiller: vue / paysage."
+  },
+  "Corbeyrier": {
+   "avis": 5,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 80.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 40.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 40.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 20.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 20.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Chigny": {
+   "avis": 3,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 66.7
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 33.3
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.3
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: confort / équipements."
+  },
+  "Echallens": {
+   "avis": 3,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Propreté",
+     "pct": 66.7
+    },
+    {
+     "label": "Check-in / arrivée",
+     "pct": 66.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.3
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où la propreté ressort clairement dans les commentaires voyageurs.",
+   "conseil": "Maintenir un standard de ménage très élevé et le rendre visible dans l’annonce."
+  },
+  "Grandevent": {
+   "avis": 3,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 66.7
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 66.7
+    },
+    {
+     "label": "Propreté",
+     "pct": 66.7
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 33.3
+    },
+    {
+     "label": "Propreté",
+     "pct": 33.3
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: communication hôte / accueil."
+  },
+  "Commugny": {
+   "avis": 2,
+   "logementsAvecAvis": 2,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 50.0
+    },
+    {
+     "label": "Transports / accès",
+     "pct": 50.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 50.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  },
+  "Maracon": {
+   "avis": 2,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    },
+    {
+     "label": "Check-in / arrivée",
+     "pct": 50.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration."
+  },
+  "Tannay": {
+   "avis": 2,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Localisation",
+     "pct": 100.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 50.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 50.0
+    }
+   ],
+   "interpretation": "Marché où l’emplacement est un facteur central de l’expérience voyageur.",
+   "conseil": "Mettre en avant les distances exactes, les points d’intérêt proches et l’accessibilité. Point à surveiller: confort / équipements."
+  },
+  "Ballaigues": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 100.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 0.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Confort / équipements",
+     "pct": 100.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration. Point à surveiller: confort / équipements."
+  },
+  "Begnins": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 0.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 0.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour."
+  },
+  "Corcelles-près-Payerne": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 0.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 0.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 0.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration."
+  },
+  "Jorat-Mézières": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Localisation",
+     "pct": 100.0
+    },
+    {
+     "label": "Transports / accès",
+     "pct": 100.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour."
+  },
+  "Lavigny": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Confort / équipements",
+     "pct": 0.0
+    },
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 0.0
+    },
+    {
+     "label": "Vue / paysage",
+     "pct": 0.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où la qualité du logement et le confort influencent fortement l’expérience.",
+   "conseil": "Investir dans le confort visible: literie, équipements, cuisine, espace et décoration."
+  },
+  "Montricher": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Propreté",
+     "pct": 100.0
+    },
+    {
+     "label": "Check-in / arrivée",
+     "pct": 100.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    },
+    {
+     "label": "Aucun signal fort",
+     "pct": 0.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour."
+  },
+  "Roche (Vaud)": {
+   "avis": 1,
+   "logementsAvecAvis": 1,
+   "fiabilite": "Très faible",
+   "themes": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 100.0
+    },
+    {
+     "label": "Confort / équipements",
+     "pct": 0.0
+    }
+   ],
+   "frictions": [
+    {
+     "label": "Communication hôte / accueil",
+     "pct": 100.0
+    },
+    {
+     "label": "Calme / bruit",
+     "pct": 100.0
+    }
+   ],
+   "interpretation": "Marché où l’accueil et la relation hôte-voyageur ressortent fortement.",
+   "conseil": "Soigner la réactivité, les instructions, l’accueil et la communication avant/après séjour. Point à surveiller: communication hôte / accueil."
+  }
+ }
+}

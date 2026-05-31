@@ -1,9 +1,10 @@
 {
   "weights": {
-    "cultural": 0.25,
-    "sports": 0.3,
-    "restaurant": 0.15,
-    "employment": 0.3
+    "cultural": 0.2,
+    "sports": 0.22,
+    "restaurant": 0.13,
+    "employment": 0.25,
+    "transport": 0.2
   },
   "categories": {
     "cultural": {
@@ -29,6 +30,12 @@
       "description": "Bureaux, centres de conférence, universités, coworking",
       "color": "#3498db",
       "icon": "💼"
+    },
+    "transport": {
+      "label": "Transports",
+      "description": "Gares, arrêts de tram et de bus (accessibilité)",
+      "color": "#0ea5e9",
+      "icon": "🚆"
     }
   }
 }

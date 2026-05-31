@@ -7,14 +7,88 @@ let activeCity = 'vaud';
 let activeView = 'overview';
 let map = null;
 let mapMarkers = [];
+let radiusLayer = null;          // geographic circles showing the attractivity reach
 let charts = {};
 const cityData = {};
+
+// Radii (metres) MUST mirror the data pipeline (compute_attractivity.py):
+// amenities use a 1500 m radius, transit accessibility a reduced ~1000 m (train).
+const MAP_RADII = { attract: 1500, transit: 1000 };
 
 const CITY_META = {
     geneva: { lat: 46.2044, lng: 6.1432, zoom: 12, label: 'Genève' },
     zurich: { lat: 47.3769, lng: 8.5417, zoom: 12, label: 'Zurich' },
     vaud:   { lat: 46.5197, lng: 6.6323, zoom: 10, label: 'Vaud' },
 };
+
+// ═══════════════════════════════════════════
+// SENTIMENT / EXPÉRIENCE VOYAGEURS
+// Themes come from the NLP analysis of Airbnb guest comments
+// (data/vaud_sentiment.json). Each theme gets an icon + colour so the
+// map card, the attractivity view and the simulator share one visual language.
+// ═══════════════════════════════════════════
+const THEME_META = {
+    'Confort / équipements':        { icon: '🛋️', color: '#FF5A5F' },
+    'Communication hôte / accueil': { icon: '💬', color: '#0ea5e9' },
+    'Vue / paysage':                { icon: '🏔️', color: '#27ae60' },
+    'Localisation':                 { icon: '📍', color: '#9b59b6' },
+    'Propreté':                     { icon: '🧼', color: '#16a085' },
+    'Transports / accès':           { icon: '🚆', color: '#2980b9' },
+    'Check-in / arrivée':           { icon: '🔑', color: '#e67e22' },
+    'Calme / bruit':                { icon: '🔇', color: '#7f8c8d' },
+    'Restaurants / commerces':      { icon: '🍽️', color: '#d35400' },
+    'Ski / nature':                 { icon: '⛷️', color: '#3498db' },
+    'Prix / valeur':                { icon: '💰', color: '#f39c12' },
+    'Parking':                      { icon: '🅿️', color: '#34495e' },
+};
+const themeMeta = label => THEME_META[label] || { icon: '•', color: '#9aa0a6' };
+
+// Reliability of a commune's sample (number of reviews) → colour + tooltip.
+// Mirrors the « Fiabilité » column in the analysis document.
+const FIABILITE_META = {
+    'Très bonne': { color: '#27ae60', hint: 'Échantillon large — lecture solide.' },
+    'Bonne':      { color: '#2ecc71', hint: 'Bon volume d’avis — lecture fiable.' },
+    'Moyenne':    { color: '#f39c12', hint: 'Volume modéré — tendance indicative.' },
+    'Faible':     { color: '#e67e22', hint: 'Peu d’avis — à interpréter avec prudence.' },
+    'Très faible':{ color: '#e74c3c', hint: 'Très peu d’avis — signal fragile.' },
+};
+const fiabiliteMeta = label => FIABILITE_META[label] || { color: '#9aa0a6', hint: '' };
+
+// Accessor: sentiment record for a commune (matches listing.nh / neighbourhood).
+function getCommuneSentiment(commune) {
+    return cityData[activeCity]?.sentiment?.byCommune?.[commune] || null;
+}
+
+// Build the shared « Expérience voyageurs » block for one commune.
+// Used by the map detail card and the simulator result.
+function communeSentimentHtml(commune, { compact = false } = {}) {
+    const s = getCommuneSentiment(commune);
+    if (!s) return '';
+    const fm = fiabiliteMeta(s.fiabilite);
+    const themesHtml = (s.themes || []).slice(0, 3).map(t => {
+        const m = themeMeta(t.label);
+        return `<span class="sent-theme" title="${t.label} — mentionné dans ${t.pct.toFixed(0)}% des avis">
+                    <span class="sent-ico">${m.icon}</span>${t.label}
+                    <span class="sent-pct" style="color:${m.color}">${t.pct.toFixed(0)}%</span>
+                </span>`;
+    }).join('');
+    const frictions = (s.frictions || []).filter(f => f.pct > 0).slice(0, 2);
+    const frictionsHtml = frictions.length
+        ? frictions.map(f => `<span class="sent-friction" title="${f.label} — signal négatif dans ${f.pct.toFixed(0)}% des avis">⚠️ ${f.label} <em>${f.pct.toFixed(0)}%</em></span>`).join('')
+        : `<span class="sent-friction sent-friction-none">Aucune friction marquée</span>`;
+    return `
+        <div class="sent-block${compact ? ' sent-compact' : ''}">
+            <div class="sent-head">
+                <span class="sent-title">💬 Expérience voyageurs</span>
+                <span class="sent-fiab" style="--fc:${fm.color}" title="Fiabilité de l'échantillon : ${fm.hint} (${s.avis.toLocaleString('fr-CH')} avis)">${s.fiabilite}</span>
+            </div>
+            <div class="sent-themes-label">Ce que les voyageurs remarquent</div>
+            <div class="sent-themes">${themesHtml}</div>
+            <div class="sent-frictions">${frictionsHtml}</div>
+            ${s.conseil ? `<div class="sent-conseil"><span class="sent-conseil-tag">Conseil</span>${s.conseil}</div>` : ''}
+            <div class="sent-source">Basé sur ${s.avis.toLocaleString('fr-CH')} avis Airbnb (${s.logementsAvecAvis} logement${s.logementsAvecAvis > 1 ? 's' : ''} commenté${s.logementsAvecAvis > 1 ? 's' : ''}) — non le nombre d'annonces actives.</div>
+        </div>`;
+}
 
 // Chart.js global config
 Chart.defaults.font.family = "'Inter', sans-serif";
@@ -337,12 +411,16 @@ async function loadCity(cityId) {
             // Load attractivity data for Vaud
             if (cityId === 'vaud') {
                 try {
-                    const [attractivity, weights] = await Promise.all([
+                    const [attractivity, weights, npa, sentiment] = await Promise.all([
                         fetch('data/vaud_attractivity.json', noCache).then(r => r.json()),
                         fetch('data/attractivity_weights.json', noCache).then(r => r.json()),
+                        fetch('data/vaud_npa.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
+                        fetch('data/vaud_sentiment.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
                     ]);
                     cityData[cityId].attractivity = attractivity;
                     cityData[cityId].attractivityWeights = weights;
+                    cityData[cityId].npa = npa;
+                    cityData[cityId].sentiment = sentiment;
                 } catch (e) { console.warn('Attractivity data not available:', e); }
             }
         } catch (e) { console.error('Erreur chargement:', cityId, e); return; }
@@ -528,6 +606,12 @@ function initMap() {
     map = L.map('map-container', { zoomControl: false, attributionControl: false }).setView([meta.lat, meta.lng], meta.zoom);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
+    // Dedicated pane for the attractivity rings, placed BELOW the marker layer
+    // (overlayPane z-index = 400) so their semi-transparent fill never steals
+    // clicks from the listing dots sitting inside the radius. Tooltips on the
+    // rings still work wherever they aren't covered by a dot.
+    map.createPane('radiusPane');
+    map.getPane('radiusPane').style.zIndex = 350;
 }
 
 function renderMap() {
@@ -535,6 +619,7 @@ function renderMap() {
     const data = cityData[activeCity];
     if (!data?.listings) return;
     mapMarkers.forEach(m => map.removeLayer(m)); mapMarkers = [];
+    clearRadius();
 
     const colorBy = document.getElementById('map-color-by')?.value || 'score';
     const roomFilter = document.getElementById('map-room-type')?.value || 'all';
@@ -626,9 +711,45 @@ function renderMapLegend(metricKey) {
     `;
 }
 
+// Draw the geographic analysis radius around the selected listing so the user
+// can SEE the zone the attractivity score is computed over (and the tighter
+// transit-proximity ring). Cleared and redrawn on every selection.
+function clearRadius() {
+    if (radiusLayer && map) { map.removeLayer(radiusLayer); radiusLayer = null; }
+}
+function showAttractivityRadius(l) {
+    if (!map || l?.lat == null || l?.lng == null) return;
+    clearRadius();
+    const center = [l.lat, l.lng];
+    const outer = L.circle(center, {
+        pane: 'radiusPane',
+        radius: MAP_RADII.attract,
+        color: '#FF5A5F', weight: 1.5, opacity: 0.7,
+        fillColor: '#FF5A5F', fillOpacity: 0.07,
+    });
+    const transit = L.circle(center, {
+        pane: 'radiusPane',
+        radius: MAP_RADII.transit,
+        color: '#0ea5e9', weight: 1.5, opacity: 0.8,
+        fillColor: '#0ea5e9', fillOpacity: 0.05,
+        dashArray: '5 5',
+    });
+    const pin = L.circleMarker(center, {
+        pane: 'radiusPane',
+        radius: 4, color: '#fff', weight: 2,
+        fillColor: '#FF5A5F', fillOpacity: 1,
+    });
+    outer.bindTooltip(`Zone d'attractivité analysée · ${MAP_RADII.attract} m`, { sticky: true });
+    transit.bindTooltip(`Proximité transports (gare ≤ ${MAP_RADII.transit} m)`, { sticky: true });
+    radiusLayer = L.layerGroup([outer, transit, pin]).addTo(map);
+    // Frame the zone so the radius is clearly visible.
+    map.fitBounds(outer.getBounds(), { padding: [40, 40], maxZoom: 15 });
+}
+
 function showMapDetail(l) {
     const card = document.getElementById('map-detail');
     if (!card) return;
+    showAttractivityRadius(l);
     card.classList.remove('hidden');
     // Some Airbnb hosts write titles all-lowercase ("chambre privée dans villa
     // paisible") which reads like a comment. Force a proper sentence start —
@@ -650,6 +771,7 @@ function showMapDetail(l) {
             { label: 'Sport', score: l.sports, color: '#27ae60' },
             { label: 'Resto', score: l.restaurant, color: '#e67e22' },
             { label: 'Emploi', score: l.employment, color: '#3498db' },
+            { label: 'Transport', score: l.transport ?? 0, color: '#0ea5e9' },
         ];
         barsDiv.innerHTML = factors.map(f => `
             <div class="da-bar">
@@ -666,6 +788,12 @@ function showMapDetail(l) {
     document.getElementById('detail-type').textContent = l.type;
     const prixEl = document.getElementById('detail-prix-m2');
     if (prixEl) prixEl.textContent = l.prix_m2 ? 'CHF ' + Number(l.prix_m2).toLocaleString() : '—';
+    const npaEl = document.getElementById('detail-npa');
+    if (npaEl) npaEl.textContent = l.npa || '—';
+
+    // Guest-experience block (sentiment) for the listing's commune.
+    const sentEl = document.getElementById('detail-sentiment');
+    if (sentEl) sentEl.innerHTML = communeSentimentHtml(l.nh, { compact: true });
 }
 
 // ═══════════════════════════════════════════
@@ -893,13 +1021,192 @@ function renderAttractivity() {
     // Render weight bars
     renderWeightBars(weightsConfig);
 
+    // Render the canton-wide guest-experience (sentiment) block
+    renderExperienceVoyageurs(data.sentiment);
+
     // Render district ranking cards
     renderDistrictCards(attractivity, weightsConfig);
+
+    // Render fine NPA ranking
+    renderNpaRanking(data.npa, weightsConfig);
 
     // Render charts
     renderAttractivityRadar(attractivity, weightsConfig);
     renderAttractivityBar(attractivity);
     renderPoiStackedChart(attractivity, weightsConfig);
+}
+
+// Canton-wide guest-experience block: per-theme mention bars with the
+// friction share highlighted, plus the global sentiment split and the
+// analyst's reading note. Driven by data/vaud_sentiment.json.
+function renderExperienceVoyageurs(sentiment) {
+    const section = document.getElementById('experience-section');
+    if (!section) return;
+    if (!sentiment?.globalThemes?.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+
+    const themes = [...sentiment.globalThemes].sort((a, b) => b.mentions - a.mentions);
+    const maxMentions = Math.max(...themes.map(t => t.mentions), 1);
+    const themesEl = document.getElementById('exp-themes');
+    if (themesEl) {
+        themesEl.innerHTML = themes.map(t => {
+            const m = themeMeta(t.theme);
+            const w = (t.mentions / maxMentions) * 100;             // bar width relative to top theme
+            const fr = t.mentions > 0 ? (t.frictions / t.mentions) * 100 : 0; // friction share of the bar
+            return `
+                <div class="exp-theme-row" title="${t.theme} : mentionné dans ${t.mentions.toFixed(1)}% des avis, dont ${t.frictions.toFixed(1)}% en friction">
+                    <span class="exp-theme-name"><span class="exp-theme-ico">${m.icon}</span>${t.theme}</span>
+                    <div class="exp-theme-track">
+                        <div class="exp-theme-fill" style="width:${w.toFixed(1)}%;background:${m.color}">
+                            <div class="exp-theme-friction" style="width:${fr.toFixed(1)}%"></div>
+                        </div>
+                    </div>
+                    <span class="exp-theme-val">${t.mentions.toFixed(0)}%<em>${t.frictions.toFixed(0)}% friction</em></span>
+                </div>`;
+        }).join('');
+    }
+
+    // Global sentiment split (positif / mixte / neutre / négatif)
+    const sentEl = document.getElementById('exp-sentiment');
+    const sm = sentiment.sentiment;
+    if (sentEl && sm) {
+        const segs = [
+            { k: 'positif', label: 'Positif', color: '#27ae60' },
+            { k: 'mixte',   label: 'Mixte',   color: '#f39c12' },
+            { k: 'neutre',  label: 'Neutre',  color: '#9aa0a6' },
+            { k: 'negatif', label: 'Négatif', color: '#e74c3c' },
+        ].filter(s => sm[s.k] != null);
+        sentEl.innerHTML = `
+            <div class="exp-sent-title">Tonalité globale des avis</div>
+            <div class="exp-sent-bar">
+                ${segs.map(s => `<span style="width:${sm[s.k]}%;background:${s.color}" title="${s.label} : ${sm[s.k]}%"></span>`).join('')}
+            </div>
+            <div class="exp-sent-legend">
+                ${segs.map(s => `<span><span class="exp-sent-dot" style="background:${s.color}"></span>${s.label} <strong>${sm[s.k]}%</strong></span>`).join('')}
+            </div>`;
+    }
+
+    const noteEl = document.getElementById('exp-note');
+    if (noteEl) {
+        noteEl.innerHTML = `<strong>À lire avec recul&nbsp;:</strong> les avis Airbnb sont structurellement très positifs. Les <em>thèmes</em> (ce dont on parle) et les <em>frictions</em> (ce qui agace) sont plus actionnables que la tonalité brute. ${sentiment.meta?.note ? `<br><span class="exp-note-src">${sentiment.meta.note}</span>` : ''}`;
+    }
+}
+
+// Sort keys → accessor on an NPA aggregate row.
+const NPA_SORTERS = {
+    attract:   z => z.avg_attract_score ?? 0,
+    transport: z => z.avg_transport_score ?? 0,
+    score:     z => z.avg_score ?? 0,
+    revenue:   z => z.avg_revenue ?? 0,
+    occupancy: z => z.avg_occupancy ?? 0,
+    price:     z => z.avg_price ?? 0,
+    count:     z => z.count ?? 0,
+};
+
+function renderNpaRanking(npaData, config) {
+    const section = document.getElementById('npa-section');
+    const container = document.getElementById('npa-ranking');
+    if (!container) return;
+    if (!Array.isArray(npaData) || !npaData.length) {
+        if (section) section.style.display = 'none';
+        return;
+    }
+    if (section) section.style.display = '';
+    wireNpaExplorer();
+
+    const cats = config.categories;
+
+    // Legend — explains every number shown on a card.
+    const legendEl = document.getElementById('npa-legend');
+    if (legendEl) {
+        const chips = Object.values(cats).map(cat =>
+            `<span class="npa-leg-item"><span class="npa-leg-dot" style="background:${cat.color}"></span>${cat.icon} ${cat.label}</span>`
+        ).join('');
+        legendEl.innerHTML = `
+            <span class="npa-leg-note"><strong>Comment lire :</strong> le grand chiffre = score d'attractivité local moyen de la zone <strong>/100</strong>. Chaque pastille = sous-score <strong>/100</strong> d'un facteur (plus c'est haut, mieux la zone est dotée) :</span>
+            <span class="npa-leg-cats">${chips}</span>`;
+    }
+    const query   = (document.getElementById('npa-search')?.value || '').trim().toLowerCase();
+    const sortKey = document.getElementById('npa-sort')?.value || 'attract';
+    const minCount = parseInt(document.getElementById('npa-min-count')?.value || '3', 10);
+    const sorter = NPA_SORTERS[sortKey] || NPA_SORTERS.attract;
+
+    let rows = npaData.filter(z => z.count >= minCount);
+    if (query) {
+        rows = rows.filter(z =>
+            String(z.npa).toLowerCase().includes(query) ||
+            (z.commune || '').toLowerCase().includes(query)
+        );
+    }
+    rows.sort((a, b) => sorter(b) - sorter(a));
+
+    const countEl = document.getElementById('npa-count');
+    if (countEl) countEl.textContent = `${rows.length} zone${rows.length > 1 ? 's' : ''}`;
+
+    const moreEl = document.getElementById('npa-more');
+    if (!rows.length) {
+        container.innerHTML = `<div class="npa-empty">Aucune zone NPA ne correspond à ces critères.</div>`;
+        if (moreEl) moreEl.innerHTML = '';
+        return;
+    }
+
+    // Collapsed by default: show the top NPA_COLLAPSED, reveal the rest on demand.
+    const visible = npaExpanded ? rows : rows.slice(0, NPA_COLLAPSED);
+
+    container.innerHTML = visible.map((z, i) => {
+        const attract = z.avg_attract_score ?? 0;
+        const bars = Object.entries(cats).map(([key, cat]) => {
+            const s = z[`avg_${key}_score`] ?? 0;
+            return `<div class="npa-chip" title="${cat.label} : ${s.toFixed(0)}/100 — densité dans un rayon, comparée au canton (100 = la mieux dotée, 0 = la moins dotée)">
+                        <span class="npa-chip-dot" style="background:${cat.color}"></span>
+                        <span class="npa-chip-ico">${cat.icon}</span>
+                        <span class="npa-chip-val">${s.toFixed(0)}</span>
+                    </div>`;
+        }).join('');
+        return `
+            <div class="npa-card">
+                <div class="npa-card-rank">${i + 1}</div>
+                <div class="npa-card-id">
+                    <span class="npa-card-code">${z.npa} · <span class="npa-card-commune">${z.commune || ''}</span></span>
+                    <span class="npa-card-meta">${z.count} annonce${z.count > 1 ? 's' : ''} · ${Math.round(z.avg_price)} CHF/nuit · ${Math.round(z.avg_revenue).toLocaleString('fr-CH')} CHF/an · ${Math.round(z.avg_occupancy)} j/an · invest. ${z.avg_score.toFixed(0)}</span>
+                </div>
+                <div class="npa-card-score" style="color:${getScoreColor(attract)}" title="Attractivité locale moyenne /100">${attract.toFixed(0)}<span>/100</span></div>
+                <div class="npa-card-chips">${bars}</div>
+            </div>`;
+    }).join('');
+
+    // Expand / collapse control.
+    if (moreEl) {
+        const hidden = rows.length - visible.length;
+        if (rows.length <= NPA_COLLAPSED) {
+            moreEl.innerHTML = '';
+        } else if (npaExpanded) {
+            moreEl.innerHTML = `<button type="button" class="npa-more-btn" id="npa-toggle">Réduire la liste ▲</button>`;
+        } else {
+            moreEl.innerHTML = `<button type="button" class="npa-more-btn" id="npa-toggle">Voir les ${hidden} zones restantes ▾</button>`;
+        }
+        document.getElementById('npa-toggle')?.addEventListener('click', () => {
+            npaExpanded = !npaExpanded;
+            const data = cityData[activeCity];
+            if (data?.npa && data?.attractivityWeights) renderNpaRanking(data.npa, data.attractivityWeights);
+        });
+    }
+}
+
+const NPA_COLLAPSED = 8;     // zones shown before "voir plus"
+let npaExpanded = false;
+let npaExplorerWired = false;
+function wireNpaExplorer() {
+    if (npaExplorerWired) return;
+    npaExplorerWired = true;
+    const rerun = () => {
+        npaExpanded = false;   // any filter change collapses back to the top zones
+        const data = cityData[activeCity];
+        if (data?.npa && data?.attractivityWeights) renderNpaRanking(data.npa, data.attractivityWeights);
+    };
+    document.getElementById('npa-search')?.addEventListener('input', rerun);
+    document.getElementById('npa-sort')?.addEventListener('change', rerun);
+    document.getElementById('npa-min-count')?.addEventListener('change', rerun);
 }
 
 function renderWeightBars(config) {
@@ -962,7 +1269,7 @@ function renderDistrictCards(attractivity, config) {
             </div>
             <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted);">
                 ${d.n_communes} communes | ${d.total_pois} POIs
-                (${d.cultural_count} culture, ${d.sports_count} sport, ${d.restaurant_count} resto, ${d.employment_count} emploi)
+                (${d.cultural_count} culture, ${d.sports_count} sport, ${d.restaurant_count} resto, ${d.employment_count} emploi, ${d.transport_count ?? 0} transport)
             </div>
         `;
         container.appendChild(card);
@@ -1039,7 +1346,7 @@ function renderAttractivityBar(attractivity) {
                     callbacks: {
                         afterLabel: (ctx) => {
                             const d = sorted[ctx.dataIndex];
-                            return `Culture: ${d.cultural_score.toFixed(0)} | Sport: ${d.sports_score.toFixed(0)} | Resto: ${d.restaurant_score.toFixed(0)} | Emploi: ${d.employment_score.toFixed(0)}`;
+                            return `Culture: ${d.cultural_score.toFixed(0)} | Sport: ${d.sports_score.toFixed(0)} | Resto: ${d.restaurant_score.toFixed(0)} | Emploi: ${d.employment_score.toFixed(0)} | Transport: ${(d.transport_score ?? 0).toFixed(0)}`;
                         }
                     }
                 }
@@ -1133,11 +1440,14 @@ const BUDGET_PRESETS = {
 };
 
 let simState = {
-    commune:     null,
-    roomType:    'Entire home/apt',
-    profile:     'appt2p',      // key of PROPERTY_PROFILES
-    setupBudget: 13000,         // mid-value of Confort preset
-    wired:       false,
+    commune:      null,
+    roomType:     'Entire home/apt',
+    profile:      'appt2p',      // key of PROPERTY_PROFILES
+    setupBudget:  13000,         // mid-value of Confort preset
+    propertyMode: 'own',         // 'own' = déjà propriétaire, 'buy' = achat du bien
+    purchasePrice: 0,            // prix d'achat de l'immobilier (mode 'buy')
+    annualCharges: 0,            // charges annuelles CHF/an (hypothèque, charges, loyer)
+    wired:        false,
 };
 
 function populateSimulatorCommunes() {
@@ -1195,6 +1505,7 @@ function setupSimulator() {
             document.querySelectorAll('#sim-profile .sim-profile-tile').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             simState.profile = btn.dataset.profile;
+            updateRoomTypeForProfile();
         });
     });
 
@@ -1216,9 +1527,82 @@ function setupSimulator() {
         });
     });
 
+    // Property situation toggle (own vs buy)
+    document.querySelectorAll('#sim-property-mode .sim-radio').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#sim-property-mode .sim-radio').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            simState.propertyMode = btn.dataset.mode;
+            updatePropertyFields();
+        });
+    });
+
+    // Purchase price input
+    const purchaseInput = document.getElementById('sim-purchase');
+    if (purchaseInput) {
+        purchaseInput.addEventListener('input', () => {
+            simState.purchasePrice = Math.max(0, Number(purchaseInput.value) || 0);
+        });
+    }
+
+    // Annual charges input
+    const chargesInput = document.getElementById('sim-charges');
+    if (chargesInput) {
+        chargesInput.addEventListener('input', () => {
+            simState.annualCharges = Math.max(0, Number(chargesInput.value) || 0);
+        });
+    }
+
+    updatePropertyFields();
+    updateRoomTypeForProfile();
+
     // Submit
     const submit = document.getElementById('sim-submit');
     if (submit) submit.addEventListener('click', runSimulator);
+}
+
+// A studio has a single room, so "Private room" makes no sense — force and
+// lock "Entire home/apt" whenever the studio profile is selected.
+function updateRoomTypeForProfile() {
+    const privateBtn = document.querySelector('#sim-room-type .sim-radio[data-value="Private room"]');
+    const entireBtn  = document.querySelector('#sim-room-type .sim-radio[data-value="Entire home/apt"]');
+    const help       = document.getElementById('sim-room-help');
+    if (!privateBtn || !entireBtn) return;
+
+    const isStudio = simState.profile === 'studio';
+    privateBtn.disabled = isStudio;
+    privateBtn.classList.toggle('is-disabled', isStudio);
+
+    if (isStudio) {
+        privateBtn.classList.remove('active');
+        entireBtn.classList.add('active');
+        simState.roomType = 'Entire home/apt';
+    }
+    if (help) {
+        help.innerHTML = isStudio
+            ? 'Un studio se loue forcément en entier — la chambre privée n\'est pas applicable.'
+            : 'Vous louez l\'intégralité du logement, ou seulement une chambre chez vous&nbsp;?';
+    }
+}
+
+// Show/hide the purchase-price field and adapt help text to the chosen mode.
+function updatePropertyFields() {
+    const purchaseWrap = document.getElementById('sim-purchase-wrap');
+    const help         = document.getElementById('sim-property-help');
+    const chargesLabel = document.getElementById('sim-charges-label');
+    const isBuy = simState.propertyMode === 'buy';
+
+    if (purchaseWrap) purchaseWrap.hidden = !isBuy;
+    if (chargesLabel) {
+        chargesLabel.textContent = isBuy
+            ? 'Charges annuelles (intérêts hypothécaires, charges)'
+            : 'Charges annuelles (hypothèque, charges, loyer)';
+    }
+    if (help) {
+        help.innerHTML = isBuy
+            ? 'Le prix d\'achat entre dans le ROI global. Les charges annuelles réduisent le revenu net.'
+            : 'Vous êtes déjà propriétaire&nbsp;: le coût immobilier est nul. Indiquez vos charges annuelles pour obtenir un ROI net.';
+    }
 }
 
 function updateCommuneHelp() {
@@ -1247,6 +1631,35 @@ function quantile(arr, q) {
     const base = Math.floor(pos);
     const rest = pos - base;
     return s[base + 1] !== undefined ? s[base] + rest * (s[base + 1] - s[base]) : s[base];
+}
+
+// ── ROI helper ──
+// Returns the annual return rate (%) and payback duration for a given
+// investment and annual return. Guards against div-by-zero / negative cashflow.
+function computeRoi(investment, annualReturn) {
+    if (!investment || investment <= 0) {
+        return { pctLabel: '—', paybackLabel: '—', sub: 'Investissement non renseigné.' };
+    }
+    if (annualReturn == null || annualReturn <= 0) {
+        return {
+            pctLabel: annualReturn < 0 ? 'négatif' : '0 %',
+            paybackLabel: '—',
+            sub: annualReturn < 0
+                ? 'Charges supérieures au revenu — projet déficitaire.'
+                : 'Revenu net insuffisant pour un retour.',
+        };
+    }
+    const pct    = (annualReturn / investment) * 100;
+    const months = (investment / annualReturn) * 12;
+    const paybackLabel = months < 12
+        ? `${months.toFixed(1)} mois`
+        : `${(months / 12).toFixed(1)} ans`;
+    const sub = months < 12  ? 'Remboursement en moins d\'un an — excellent.'
+              : months < 24  ? 'Remboursement sous 2 ans — très bon.'
+              : months < 48  ? 'Remboursement entre 2 et 4 ans — correct.'
+              : months < 120 ? 'Remboursement entre 4 et 10 ans.'
+              :                'Remboursement long — vérifiez vos hypothèses.';
+    return { pct, pctLabel: `${pct.toFixed(1)} %/an`, paybackLabel, sub };
 }
 
 // ── Comp selection: progressively widen the filter until we have enough ──
@@ -1394,22 +1807,23 @@ function runSimulator() {
     const revHigh= Math.round(quantile(revenues, 0.75));
     const avgScore = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
 
-    // Payback (months). Guard against div-by-zero.
-    const paybackMonths = revMed > 0 ? (simState.setupBudget / revMed) * 12 : null;
-    const paybackLabel = paybackMonths == null
-        ? '—'
-        : (paybackMonths < 12
-            ? `${paybackMonths.toFixed(1)} mois`
-            : `${(paybackMonths / 12).toFixed(1)} ans`);
-    const paybackSub = paybackMonths == null
-        ? 'Revenu projeté insuffisant pour calculer le payback.'
-        : (paybackMonths < 12
-            ? 'Remboursement en moins d\'un an — excellent.'
-            : paybackMonths < 24
-                ? 'Remboursement sous 2 ans — très bon.'
-                : paybackMonths < 48
-                    ? 'Remboursement entre 2 et 4 ans — correct.'
-                    : 'Remboursement long — vérifiez vos hypothèses.');
+    // ── ROI computations ──
+    // Setup ROI: return on the launch outlay only, measured on gross revenue.
+    // General ROI: return on total capital (setup + property purchase),
+    // measured on net revenue (gross − annual charges).
+    const purchasePrice = simState.propertyMode === 'buy' ? Math.max(0, simState.purchasePrice || 0) : 0;
+    const annualCharges = Math.max(0, simState.annualCharges || 0);
+    const netRevenue    = revMed - annualCharges;
+
+    const roiSetup   = computeRoi(simState.setupBudget, revMed);
+    const roiGeneral = computeRoi(simState.setupBudget + purchasePrice, netRevenue);
+
+    const totalCapital = simState.setupBudget + purchasePrice;
+    const roiHint = purchasePrice > 0
+        ? `Global = revenu net (− CHF ${annualCharges.toLocaleString('fr-CH')} de charges) sur CHF ${totalCapital.toLocaleString('fr-CH')} (setup + achat).`
+        : (annualCharges > 0
+            ? `Vous possédez déjà le bien : global = revenu net (− CHF ${annualCharges.toLocaleString('fr-CH')} de charges) sur la mise de lancement.`
+            : 'Vous possédez déjà le bien : le coût immobilier est nul. Ajoutez vos charges annuelles pour un ROI net.');
 
     const confidence  = confidenceFromScope(scope, comps.length);
     const scopeMsg    = scopeLabel(scope);
@@ -1456,6 +1870,7 @@ function runSimulator() {
                     <span class="sim-pill">${prof.icon} ${prof.label}</span>
                     <span class="sim-pill">${roomLabel}</span>
                     <span class="sim-pill">Setup ${budgetPreset.range}</span>
+                    <span class="sim-pill">${purchasePrice > 0 ? `🏷️ Achat CHF ${purchasePrice.toLocaleString('fr-CH')}` : '🔑 Bien possédé'}</span>
                 </div>
             </div>
             <div class="sim-confidence" data-level="${confidence.level}">
@@ -1508,11 +1923,23 @@ function runSimulator() {
                 <div class="sim-card-hint">Revenu brut, avant frais Airbnb (~3%), charges et impôts.</div>
             </div>
 
-            <!-- Payback -->
+            <!-- ROI : Setup vs Global -->
             <div class="sim-card glass reveal-up" style="animation-delay:.2s">
-                <span class="eyebrow">Remboursement du setup</span>
-                <div class="sim-big-number">${paybackLabel}</div>
-                <div class="sim-card-hint">${paybackSub}</div>
+                <span class="eyebrow">Rentabilité (ROI)</span>
+                <div class="sim-roi-split">
+                    <div class="sim-roi-block">
+                        <span class="sim-roi-tag">Setup seul</span>
+                        <span class="sim-roi-pct">${roiSetup.pctLabel}</span>
+                        <span class="sim-roi-pb">Remboursement&nbsp;: <strong>${roiSetup.paybackLabel}</strong></span>
+                    </div>
+                    <div class="sim-roi-divider"></div>
+                    <div class="sim-roi-block">
+                        <span class="sim-roi-tag">Global ${purchasePrice > 0 ? '(avec achat)' : '(bien possédé)'}</span>
+                        <span class="sim-roi-pct">${roiGeneral.pctLabel}</span>
+                        <span class="sim-roi-pb">Remboursement&nbsp;: <strong>${roiGeneral.paybackLabel}</strong></span>
+                    </div>
+                </div>
+                <div class="sim-card-hint">${roiHint}</div>
             </div>
         </div>
 
@@ -1528,6 +1955,16 @@ function runSimulator() {
                 <strong style="color:${getScoreColor(avgScore)}">${avgScore}<span class="sim-unit">/100</span></strong>
             </div>
         </div>
+
+        ${getCommuneSentiment(simState.commune) ? `
+        <!-- À savoir dans cette zone (sentiment voyageurs) -->
+        <div class="sim-sentiment-panel glass reveal-up" style="animation-delay:.28s">
+            <div class="sim-comps-header">
+                <span class="eyebrow">À savoir dans cette zone</span>
+                <h3>Ce que les voyageurs valorisent à ${simState.commune}</h3>
+            </div>
+            ${communeSentimentHtml(simState.commune)}
+        </div>` : ''}
 
         <!-- Top comparables -->
         <div class="sim-comps-panel glass reveal-up" style="animation-delay:.3s">

@@ -27,11 +27,15 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'webapp', 'data')
 
 # Weights for each factor (must sum to 1.0)
 WEIGHTS = {
-    'cultural':   0.25,   # Cultural offerings
-    'sports':     0.30,   # Sports & leisure (high impact on overnight stays)
-    'restaurant': 0.15,   # Restaurants (people eat but don't necessarily sleep)
-    'employment': 0.30,   # Employment attractiveness (business travelers stay overnight)
+    'cultural':   0.20,   # Cultural offerings
+    'sports':     0.22,   # Sports & leisure (high impact on overnight stays)
+    'restaurant': 0.13,   # Restaurants (people eat but don't necessarily sleep)
+    'employment': 0.25,   # Employment attractiveness (business travelers stay overnight)
+    'transport':  0.20,   # Public transit accessibility (major field-feedback criterion)
 }
+
+# Canonical list of attractivity categories (order matters for display)
+CATEGORIES = ['cultural', 'sports', 'restaurant', 'employment', 'transport']
 
 # POI category definitions
 CULTURAL_TOURISM = ['museum', 'gallery', 'artwork', 'attraction', 'viewpoint', 'theme_park', 'alpine_hut']
@@ -53,6 +57,20 @@ EMPLOYMENT_OFFICE_TYPES = [
     'yes',  # generic office
 ]
 EMPLOYMENT_AMENITY = ['conference_centre', 'university']
+
+# Transport — public transit accessibility.
+# Sub-types carry both a base weight (importance of the infrastructure) and a
+# REDUCED radius (immediate proximity matters far more than for amenities).
+TRANSPORT_RAILWAY = ['station', 'halt', 'tram_stop']
+#   sub_type -> (base_weight, radius_m). Train > tram > bus.
+TRANSPORT_TYPES = {
+    'train': {'weight': 3.0, 'radius': 1000.0},   # railway station / halt
+    'tram':  {'weight': 2.0, 'radius': 700.0},    # tram stop
+    'bus':   {'weight': 1.0, 'radius': 400.0},    # bus stop
+}
+
+# Radius (metres) + linear decay for the four "amenity" categories.
+AMENITY_RADIUS_M = 1500.0
 
 
 # ───────────────────────────────────────────
@@ -176,17 +194,123 @@ def load_pois():
         pois.append({'lat': r['@lat'], 'lon': r['@lon'], 'category': 'employment',
                      'type': r['amenity'], 'name': r.get('name', '')})
 
+    # --- Transport ---
+    # Trains/trams from the `railway` column, buses from `highway == bus_stop`.
+    rail = tr[tr['railway'].isin(TRANSPORT_RAILWAY)]
+    for _, r in rail.iterrows():
+        sub = 'tram' if r['railway'] == 'tram_stop' else 'train'
+        pois.append({'lat': r['@lat'], 'lon': r['@lon'], 'category': 'transport',
+                     'type': r['railway'], 'sub_type': sub,
+                     'weight': TRANSPORT_TYPES[sub]['weight'], 'name': r.get('name', '')})
+
+    bus = tr[tr['highway'] == 'bus_stop']
+    for _, r in bus.iterrows():
+        pois.append({'lat': r['@lat'], 'lon': r['@lon'], 'category': 'transport',
+                     'type': 'bus_stop', 'sub_type': 'bus',
+                     'weight': TRANSPORT_TYPES['bus']['weight'], 'name': r.get('name', '')})
+
     print(f"  Total POIs loaded: {len(pois)}")
     poi_df = pd.DataFrame(pois)
     if 'weight' not in poi_df.columns:
         poi_df['weight'] = 1.0
     poi_df['weight'] = poi_df['weight'].fillna(1.0)
+    if 'sub_type' not in poi_df.columns:
+        poi_df['sub_type'] = None
 
-    for cat in ['cultural', 'sports', 'restaurant', 'employment']:
+    for cat in CATEGORIES:
         count = len(poi_df[poi_df['category'] == cat])
         print(f"    {cat}: {count} POIs")
 
     return poi_df
+
+
+# ───────────────────────────────────────────
+# LOCAL (RADIUS-BASED) ATTRACTIVITY
+# ───────────────────────────────────────────
+# These helpers are imported by process_airbnb.py to score each listing from
+# its OWN coordinates (fine granularity) instead of inheriting a district mean.
+
+EARTH_M_PER_DEG_LAT = 110540.0          # metres per degree of latitude
+def _m_per_deg_lon(lat0):
+    return 111320.0 * np.cos(np.radians(lat0))
+
+
+def equirect_xy(lat, lon, lat0=46.5, lon0=6.6):
+    """Project lat/lon to local metres via equirectangular approx (fine for <2km)."""
+    lat = np.asarray(lat, dtype=float)
+    lon = np.asarray(lon, dtype=float)
+    x = (lon - lon0) * _m_per_deg_lon(lat0)
+    y = (lat - lat0) * EARTH_M_PER_DEG_LAT
+    return x, y
+
+
+def build_poi_index(poi_df, lat0=46.5, lon0=6.6):
+    """Pre-project POIs to local metres and bucket arrays per category.
+
+    Returns dict: category -> {'x','y','w', and for transport: 'radius' per POI}.
+    """
+    index = {}
+    for cat in CATEGORIES:
+        sub = poi_df[poi_df['category'] == cat]
+        x, y = equirect_xy(sub['lat'].values, sub['lon'].values, lat0, lon0)
+        entry = {'x': x, 'y': y, 'w': sub['weight'].values.astype(float)}
+        if cat == 'transport':
+            # Per-POI radius from sub_type (train/tram/bus).
+            radii = sub['sub_type'].map(lambda s: TRANSPORT_TYPES.get(s, TRANSPORT_TYPES['bus'])['radius'])
+            entry['radius'] = radii.values.astype(float)
+        index[cat] = entry
+    return index
+
+
+def local_attractivity(lat_arr, lon_arr, poi_index, lat0=46.5, lon0=6.6):
+    """Raw weighted POI mass within radius (linear distance decay) for each point.
+
+    For amenity categories a single AMENITY_RADIUS_M applies. For transport the
+    decay uses each POI's own (reduced) radius, so a far bus stop contributes
+    nothing while a nearby train station contributes strongly.
+
+    Returns a DataFrame with one column per category (raw sums, not normalized).
+    """
+    px, py = equirect_xy(lat_arr, lon_arr, lat0, lon0)
+    n = len(px)
+    out = {cat: np.zeros(n) for cat in CATEGORIES}
+
+    for cat, entry in poi_index.items():
+        ex, ey, ew = entry['x'], entry['y'], entry['w']
+        if len(ex) == 0:
+            continue
+        is_transport = (cat == 'transport')
+        rad = entry['radius'] if is_transport else None
+        max_r = (rad.max() if is_transport else AMENITY_RADIUS_M)
+
+        for i in range(n):
+            # Bounding-box pre-filter to keep the per-point cost small.
+            dx = ex - px[i]
+            dy = ey - py[i]
+            box = (np.abs(dx) <= max_r) & (np.abs(dy) <= max_r)
+            if not box.any():
+                continue
+            dist = np.sqrt(dx[box] ** 2 + dy[box] ** 2)
+            r = rad[box] if is_transport else AMENITY_RADIUS_M
+            decay = np.clip(1.0 - dist / r, 0.0, 1.0)   # linear, 0 beyond radius
+            out[cat][i] += float(np.sum(decay * ew[box]))
+
+    return pd.DataFrame(out, index=range(n))
+
+
+def normalize_local_scores(raw_df):
+    """log1p + min-max normalize each category column to 0-100 (per-listing)."""
+    scored = pd.DataFrame(index=raw_df.index)
+    for cat in CATEGORIES:
+        col = np.log1p(raw_df[cat].astype(float))
+        if col.max() > col.min():
+            scored[f'{cat}_score'] = ((col - col.min()) / (col.max() - col.min()) * 100).round(1)
+        else:
+            scored[f'{cat}_score'] = 50.0
+    scored['attract_score'] = sum(
+        scored[f'{cat}_score'] * WEIGHTS[cat] for cat in CATEGORIES
+    ).round(1)
+    return scored
 
 
 # ───────────────────────────────────────────
@@ -211,7 +335,7 @@ def compute_district_scores(poi_df, districts):
     for district_name in districts.keys():
         d_pois = poi_assigned[poi_assigned['district'] == district_name]
         scores = {}
-        for cat in ['cultural', 'sports', 'restaurant', 'employment']:
+        for cat in CATEGORIES:
             cat_pois = d_pois[d_pois['category'] == cat]
             scores[cat] = cat_pois['weight'].sum()
         # Also count number of communes and total POIs for context
@@ -227,7 +351,7 @@ def compute_district_scores(poi_df, districts):
     # that have many small communes. Log-scaling on absolute counts compresses
     # outliers (Lausanne) without zeroing out everyone else, while still ranking
     # fairly by what matters to an investor: "how many POIs in this district?".
-    for cat in ['cultural', 'sports', 'restaurant', 'employment']:
+    for cat in CATEGORIES:
         col = np.log1p(scores_df[cat].astype(float))
         if col.max() > col.min():
             scores_df[f'{cat}_score'] = ((col - col.min()) / (col.max() - col.min()) * 100).round(1)
@@ -235,15 +359,12 @@ def compute_district_scores(poi_df, districts):
             scores_df[f'{cat}_score'] = 50.0
 
     # Keep density for display/debug
-    for cat in ['cultural', 'sports', 'restaurant', 'employment']:
+    for cat in CATEGORIES:
         scores_df[f'{cat}_density'] = (scores_df[cat] / scores_df['n_communes']).round(2)
 
     # Final attractivity score — weighted combination of per-category log-scores
-    scores_df['attractivity_score'] = (
-        scores_df['cultural_score'] * WEIGHTS['cultural'] +
-        scores_df['sports_score'] * WEIGHTS['sports'] +
-        scores_df['restaurant_score'] * WEIGHTS['restaurant'] +
-        scores_df['employment_score'] * WEIGHTS['employment']
+    scores_df['attractivity_score'] = sum(
+        scores_df[f'{cat}_score'] * WEIGHTS[cat] for cat in CATEGORIES
     ).round(1)
 
     return scores_df, poi_assigned
@@ -265,11 +386,13 @@ def generate_output(scores_df, poi_assigned, districts):
             'sports_count': int(row['sports']),
             'restaurant_count': int(row['restaurant']),
             'employment_count': int(row['employment']),
+            'transport_count': int(row['transport']),
             'total_pois': int(row['total_pois']),
             'cultural_score': float(row['cultural_score']),
             'sports_score': float(row['sports_score']),
             'restaurant_score': float(row['restaurant_score']),
             'employment_score': float(row['employment_score']),
+            'transport_score': float(row['transport_score']),
             'attractivity_score': float(row['attractivity_score']),
         })
 
@@ -292,6 +415,15 @@ def generate_output(scores_df, poi_assigned, districts):
             'name': str(r.get('name', ''))[:50],
             'district': r['district'],
         })
+
+    # Subsample transport (3000+ bus stops) to keep the map payload reasonable.
+    n_transport = sum(1 for p in poi_points if p['cat'] == 'transport')
+    if n_transport > 600:
+        import random as _rnd
+        _rnd.seed(42)
+        keep = [p for p in poi_points if p['cat'] != 'transport']
+        trans = [p for p in poi_points if p['cat'] == 'transport']
+        poi_points = keep + _rnd.sample(trans, 600)
 
     poi_path = os.path.join(OUTPUT_DIR, 'vaud_pois.json')
     with open(poi_path, 'w', encoding='utf-8') as f:
@@ -328,6 +460,12 @@ def generate_output(scores_df, poi_assigned, districts):
                     'color': '#3498db',
                     'icon': '💼'
                 },
+                'transport': {
+                    'label': 'Transports',
+                    'description': 'Gares, arrêts de tram et de bus (accessibilité)',
+                    'color': '#0ea5e9',
+                    'icon': '🚆'
+                },
             }
         }, f, indent=2, ensure_ascii=False)
     print(f"  Exported weights config to {weights_path}")
@@ -361,10 +499,9 @@ def main():
     print("\n" + "=" * 60)
     print("ATTRACTIVITY SCORES BY DISTRICT")
     print("=" * 60)
-    display_cols = ['cultural', 'sports', 'restaurant', 'employment',
-                    'cultural_score', 'sports_score',
-                    'restaurant_score', 'employment_score',
-                    'attractivity_score']
+    display_cols = ['cultural', 'sports', 'restaurant', 'employment', 'transport',
+                    'cultural_score', 'sports_score', 'restaurant_score',
+                    'employment_score', 'transport_score', 'attractivity_score']
     print(scores_df[display_cols].sort_values('attractivity_score', ascending=False).to_string())
 
     # 5. Generate output files
@@ -377,7 +514,8 @@ def main():
     for i, d in enumerate(district_attractivity, 1):
         print(f"  {i}. {d['district']:25s} -> Score: {d['attractivity_score']:5.1f}/100")
         print(f"     Culture: {d['cultural_score']:.0f} | Sport: {d['sports_score']:.0f} | "
-              f"Resto: {d['restaurant_score']:.0f} | Emploi: {d['employment_score']:.0f}")
+              f"Resto: {d['restaurant_score']:.0f} | Emploi: {d['employment_score']:.0f} | "
+              f"Transport: {d['transport_score']:.0f}")
 
     return district_attractivity
 
