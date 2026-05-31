@@ -16,7 +16,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Cache-bust local stylesheet so style edits are picked up without hard-reload -->
-    <link rel="stylesheet" href="style.css?v=20260415c">
+    <link rel="stylesheet" href="style.css?v=20260531c">
 </head>
 
 <body>
@@ -135,10 +135,11 @@
                         <span class="eyebrow">Outil d'aide à la décision · Lancer son Airbnb</span>
                         <h1 class="hero-title" id="overview-title">Lancez votre Airbnb en Vaud, en vous appuyant sur la donnée.</h1>
                         <p class="hero-lead">
-                            AirValo agrège <strong>2 568 annonces Airbnb actives</strong>, <strong>8 500 points
-                            d'intérêt régionaux</strong> et les <strong>prix immobiliers par commune</strong> pour
-                            vous dire, commune par commune, <em>où</em>, <em>quoi</em> et <em>à quel prix</em>
-                            lancer votre location courte durée — et combien elle peut vraiment rapporter.
+                            AirValo agrège <strong>2 568 annonces Airbnb actives</strong>, <strong>71 644 avis
+                            voyageurs analysés</strong>, <strong>8 500 points d'intérêt régionaux</strong> et les
+                            <strong>prix immobiliers par commune</strong> pour vous dire, commune par commune,
+                            <em>où</em>, <em>quoi</em> et <em>à quel prix</em> lancer votre location courte durée —
+                            et combien elle peut vraiment rapporter.
                         </p>
                         <div class="hero-ctas">
                             <button class="btn-cta" data-go-view="simulator">
@@ -156,7 +157,7 @@
                             <div class="step">
                                 <span class="step-num">01 · Données</span>
                                 <span class="step-label">Sources publiques croisées</span>
-                                <span class="step-desc">Inside Airbnb · OpenStreetMap · Lookmove · OFS</span>
+                                <span class="step-desc">Inside Airbnb · avis voyageurs · OpenStreetMap · Lookmove · OFS</span>
                             </div>
                             <div class="step">
                                 <span class="step-num">02 · Score</span>
@@ -229,7 +230,7 @@
 
                 <div class="recommendation-panel glass coral-border">
                     <div class="rec-header">
-                        <div class="rec-badge">✨ Recommandation IA</div>
+                        <div class="rec-badge">✨ Recommandation AirValo</div>
                         <span class="rec-score-help" id="rec-score-help" tabindex="0">
                             Qu'est-ce que le Score ? ℹ️
                             <span class="rec-tooltip">
@@ -248,6 +249,46 @@
                         </span>
                     </div>
                     <div id="recommendation-text">Chargement de l'analyse...</div>
+                </div>
+
+                <!-- Ce que fait AirValo — panorama des fonctionnalités -->
+                <div class="features-panel">
+                    <div class="features-head">
+                        <span class="eyebrow">Tout ce que fait AirValo</span>
+                        <h2>Une plateforme de décision, de la carte au simulateur</h2>
+                    </div>
+                    <div class="features-grid">
+                        <button class="feature-card glass" data-go-view="map">
+                            <span class="feature-ico">🗺️</span>
+                            <h4>Carte interactive</h4>
+                            <p>2 568 annonces géolocalisées, colorées par score, revenu, prix ou occupation. Cliquez un bien pour voir sa zone d'analyse (rayon 1 500 m) et sa proximité transports.</p>
+                        </button>
+                        <button class="feature-card glass" data-go-view="attractivity">
+                            <span class="feature-ico">💬</span>
+                            <h4>Expérience voyageurs <span class="feature-new">Nouveau</span></h4>
+                            <p>Analyse de <strong>71 644 avis Airbnb</strong> : thèmes valorisés, frictions à surveiller et conseil par commune. Pour savoir où investir vos efforts (confort, accueil, vue…).</p>
+                        </button>
+                        <button class="feature-card glass" data-go-view="attractivity">
+                            <span class="feature-ico">🎯</span>
+                            <h4>Attractivité locale</h4>
+                            <p>Score sur 5 facteurs (culture, sport, resto, emploi, transports) calculé au rayon autour de chaque bien, agrégé par district et par code postal (NPA).</p>
+                        </button>
+                        <button class="feature-card glass" data-go-view="analysis">
+                            <span class="feature-ico">📊</span>
+                            <h4>Analyse détaillée</h4>
+                            <p>Filtrez par quartier, type et prix. Comparez les communes, repérez les meilleurs rendements et obtenez une recommandation AirValo fiabilisée.</p>
+                        </button>
+                        <button class="feature-card glass" data-go-view="simulator">
+                            <span class="feature-ico">🧮</span>
+                            <h4>Simulateur de lancement</h4>
+                            <p>Revenu projeté, prix conseillé /nuit, occupation attendue et <strong>ROI / payback</strong> à partir de comparables actifs réels — plus ce que les voyageurs attendent dans la zone.</p>
+                        </button>
+                        <button class="feature-card glass" data-go-view="regulations">
+                            <span class="feature-ico">⚖️</span>
+                            <h4>Règles & partenaires</h4>
+                            <p>Cadre légal vaudois (règle des 90 jours, enregistrement, taxe de séjour) et réseau de partenaires locaux à proposer à nos clients.</p>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -389,6 +430,7 @@
                             <span><span class="drl-dot drl-transit"></span>Proximité transports · 1000 m</span>
                         </div>
                     </div>
+                    <div id="detail-sentiment"></div>
                 </div>
             </section>
 
@@ -518,7 +560,7 @@
                         style="padding: 16px 20px; border: 1px solid var(--airbnb-coral-glow); background: var(--mesh-c1); border-radius: var(--radius-lg);">
                         <h4
                             style="font-size: 13px; color: var(--airbnb-coral); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            ✨ Recommandation IA
+                            ✨ Recommandation AirValo
                         </h4>
                         <p id="ai-rec-text"
                             style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;"></p>
@@ -733,6 +775,21 @@
                     <div class="weight-bars" id="weight-bars"></div>
                 </div>
 
+                <!-- Expérience voyageurs (analyse de sentiment des avis Airbnb) -->
+                <div class="experience-section glass" id="experience-section">
+                    <div class="panel-header">
+                        <h3>💬 Expérience voyageurs — ce que disent les avis</h3>
+                        <p class="view-subtitle" style="margin:0;">Analyse des commentaires Airbnb du canton. Chaque barre = part des avis qui mentionnent un thème ; la portion rouge = part des avis où ce thème est une <strong>friction</strong> (signal négatif). Les pourcentages ne totalisent pas 100&nbsp;% (un avis peut citer plusieurs thèmes).</p>
+                    </div>
+                    <div class="experience-grid">
+                        <div class="exp-themes" id="exp-themes"></div>
+                        <aside class="exp-side">
+                            <div class="exp-sentiment" id="exp-sentiment"></div>
+                            <div class="exp-note" id="exp-note"></div>
+                        </aside>
+                    </div>
+                </div>
+
                 <!-- District ranking -->
                 <div class="attractivity-ranking" id="attractivity-ranking"></div>
 
@@ -823,39 +880,103 @@
             <section class="view" id="view-regulations">
                 <div class="view-header">
                     <h1>⚖️ Réglementations & Réseau d'experts</h1>
-                    <p class="view-subtitle">Cadre légal pour la location courte durée en Suisse</p>
+                    <p class="view-subtitle">Cadre légal de la location courte durée dans le Canton de Vaud, et réseau de partenaires locaux proposés à nos clients.</p>
                 </div>
-                <div class="reg-grid">
-                    <div class="reg-card glass">
-                        <div class="reg-flag">🏳️ Vaud</div>
-                        <h3>Canton de Vaud</h3>
-                        <ul>
-                            <li><strong>Taxe de séjour :</strong> Variable par commune (CHF 1.30 à 5.50)</li>
-                            <li><strong>Montreux :</strong> Restrictions renforcées (protection du parc locatif)</li>
-                            <li><strong>Lausanne :</strong> Enregistrement obligatoire</li>
-                            <li><strong>Rural :</strong> Plus flexible dans les zones non-urbaines</li>
-                        </ul>
-                        <div class="reg-status moderate">🟡 Variable par commune</div>
+                <!-- Règle centrale : les 90 jours -->
+                <div class="reg-highlight glass">
+                    <div class="reg-highlight-num">90<span>jours / an</span></div>
+                    <div class="reg-highlight-body">
+                        <h3>Le seuil clé dans le Canton de Vaud</h3>
+                        <p>Louer un logement en courte durée (type Airbnb) <strong>plus de 90 jours par année civile</strong>
+                        dans un district touché par la pénurie de logements nécessite une <strong>autorisation de
+                        changement d'affectation</strong>, demandée à la commune (Questionnaire particulier n°53).
+                        En-dessous de 90 jours, l'activité reste possible sans changement d'affectation — mais les autres
+                        obligations (enregistrement, taxe de séjour) s'appliquent dès le 1<sup>er</sup> jour.</p>
                     </div>
-                    <div class="reg-card glass expert-card">
-                        <h3>🤝 Réseau d'experts locaux</h3>
-                        <div class="expert-list">
-                            <div class="expert-item">
-                                <strong>Swisspitality</strong>
-                                <span>Conciergerie Airbnb — Genève & Vaud</span>
-                            </div>
-                            <div class="expert-item">
-                                <strong>GuestReady Switzerland</strong>
-                                <span>Gestion complète — Zurich & Genève</span>
-                            </div>
-                            <div class="expert-item">
-                                <strong>Luckey (by Airbnb)</strong>
-                                <span>Gestion location courte durée — Toute la Suisse</span>
-                            </div>
-                            <div class="expert-item">
-                                <strong>Régie du Rhône</strong>
-                                <span>Conseil juridique immobilier — Genève</span>
-                            </div>
+                </div>
+
+                <div class="reg-grid-3">
+                    <!-- Autorisation / changement d'affectation -->
+                    <div class="reg-card glass">
+                        <div class="reg-flag">🏛️ Autorisation</div>
+                        <h3>Changement d'affectation (&gt; 90 j)</h3>
+                        <ul>
+                            <li>Requis dans les districts en pénurie de logements (LDTR / LATC).</li>
+                            <li><strong>Exemptés&nbsp;:</strong> Aigle, Broye-Vully et Jura&#8209;Nord&#8209;vaudois (Yverdon).</li>
+                            <li><strong>Sans autorisation</strong> si&nbsp;: bien habité par le propriétaire / un proche, immeuble de ≤ 2 logements, surface &gt; 150 m², ou logement occupé par le propriétaire dans un immeuble de 3.</li>
+                            <li>Procédure communale (LATC), pouvant impliquer une enquête publique.</li>
+                        </ul>
+                        <div class="reg-status moderate">🟡 Selon district & profil du bien</div>
+                    </div>
+
+                    <!-- Enregistrement & sous-location -->
+                    <div class="reg-card glass">
+                        <div class="reg-flag">📝 Obligations</div>
+                        <h3>Enregistrement & sous-location</h3>
+                        <ul>
+                            <li><strong>Annonce obligatoire</strong> auprès de la commune depuis le 1<sup>er</sup> juillet 2022 (loi sur l'exercice des activités économiques, LEAE).</li>
+                            <li>Les communes tiennent un <strong>registre des loueurs</strong>.</li>
+                            <li><strong>Locataires&nbsp;:</strong> accord préalable écrit du bailleur pour sous-louer. À défaut&nbsp;: résiliation du bail + action en remise de gain.</li>
+                            <li><strong>Copropriété&nbsp;:</strong> vérifier le règlement PPE (l'usage hôtelier peut être restreint).</li>
+                        </ul>
+                        <div class="reg-status restricted">🔴 Obligatoire dès le 1<sup>er</sup> jour</div>
+                    </div>
+
+                    <!-- Taxe de séjour -->
+                    <div class="reg-card glass">
+                        <div class="reg-flag">💰 Taxe de séjour</div>
+                        <h3>Encaissement communal</h3>
+                        <ul>
+                            <li>De compétence <strong>communale</strong> — montant variable selon la commune.</li>
+                            <li>Depuis le 1<sup>er</sup> avril 2023, <strong>Airbnb la collecte et la reverse automatiquement</strong> via l'accord avec l'Union des Communes Vaudoises (UCV).</li>
+                            <li>Au 1<sup>er</sup> février 2025, <strong>144 communes vaudoises</strong> ont rejoint cet accord.</li>
+                            <li><strong>Lausanne / Montreux&nbsp;:</strong> villes touristiques où l'enregistrement et le suivi sont particulièrement contrôlés.</li>
+                        </ul>
+                        <div class="reg-status open">🟢 Automatisée via Airbnb (communes signataires)</div>
+                    </div>
+                </div>
+
+                <div class="reg-sources">
+                    <strong>Sources officielles&nbsp;:</strong>
+                    <a href="https://www.vd.ch/territoire-et-construction/logement/hebergement-airbnb" target="_blank" rel="noopener noreferrer">État de Vaud — Hébergement Airbnb ↗</a>
+                    <a href="https://www.vd.ch/economie/police-cantonale-du-commerce/informations-relatives-aux-locations-de-type-airbnb" target="_blank" rel="noopener noreferrer">Police cantonale du commerce ↗</a>
+                    <a href="https://www.ucv.ch/thematiques/economie-et-finances/airbnb" target="_blank" rel="noopener noreferrer">UCV — Taxe de séjour & Airbnb ↗</a>
+                    <a href="https://www.airbnb.com/help/article/3462" target="_blank" rel="noopener noreferrer">Centre d'aide Airbnb — Vaud ↗</a>
+                    <p class="reg-disclaimer">⚠️ Informations à but indicatif (mises à jour mai 2026). La réglementation évolue et varie d'une commune à l'autre — vérifiez toujours auprès de votre commune avant de lancer votre activité.</p>
+                </div>
+
+                <!-- Réseau de partenaires -->
+                <div class="partners-section">
+                    <div class="view-header" style="margin-top:8px;">
+                        <h2 style="font-size:22px;">🤝 Réseau de partenaires locaux</h2>
+                        <p class="view-subtitle">AirValo noue des <strong>partenariats</strong> avec des acteurs locaux de la location courte durée — conciergeries, gestion, conseil juridique et fiscal — pour les proposer directement à nos clients investisseurs. Un accompagnement clé en main, du cadrage légal à la mise en location.</p>
+                    </div>
+                    <div class="partners-grid">
+                        <div class="partner-card glass">
+                            <div class="partner-tag">Conciergerie</div>
+                            <strong>Swisspitality</strong>
+                            <span>Conciergerie & gestion Airbnb — Genève & Vaud</span>
+                        </div>
+                        <div class="partner-card glass">
+                            <div class="partner-tag">Gestion complète</div>
+                            <strong>GuestReady Switzerland</strong>
+                            <span>Gestion locative courte durée — Suisse romande & alémanique</span>
+                        </div>
+                        <div class="partner-card glass">
+                            <div class="partner-tag">Gestion · Airbnb</div>
+                            <strong>Luckey (by Airbnb)</strong>
+                            <span>Gestion location courte durée — toute la Suisse</span>
+                        </div>
+                        <div class="partner-card glass">
+                            <div class="partner-tag">Conseil juridique</div>
+                            <strong>Régie du Rhône</strong>
+                            <span>Conseil juridique & immobilier — Genève & Vaud</span>
+                        </div>
+                        <div class="partner-card glass partner-cta-card">
+                            <div class="partner-tag">Devenir partenaire</div>
+                            <strong>Vous êtes un acteur local&nbsp;?</strong>
+                            <span>Conciergerie, fiduciaire, notaire, home-staging, photographe… Rejoignez le réseau AirValo et accédez à nos clients investisseurs.</span>
+                            <a class="partner-cta" href="mailto:contact@airvalo.ch?subject=Partenariat%20AirValo">Proposer un partenariat →</a>
                         </div>
                     </div>
                 </div>
@@ -889,12 +1010,15 @@
                     <div class="about-card glass">
                         <h3>📊 Sources de donnees</h3>
                         <p>
-                            Le projet croise <strong>6 sources de donnees</strong> complementaires :
+                            Le projet croise <strong>7 sources de donnees</strong> complementaires :
                         </p>
                         <ul
                             style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 8px;">
                             <li><strong>Inside Airbnb</strong> — listings.csv.gz (5 486 annonces, 79 colonnes) et
                                 calendar.csv.gz (disponibilite journaliere sur 365 jours)</li>
+                            <li><strong>Avis voyageurs Airbnb (reviews)</strong> — <strong>71 644 commentaires</strong>
+                                analyses (themes, frictions et tonalite) sur 167 communes, pour la section
+                                « Experience voyageurs »</li>
                             <li><strong>OpenStreetMap (OSM)</strong> — 11 000 points d'interet (musees, restaurants,
                                 centres sportifs, bureaux, <strong>gares, arrets de tram et de bus</strong>) via Overpass API</li>
                             <li><strong>Stat Vaud</strong> — Densite de population par commune (2025), 300 communes
@@ -1108,7 +1232,7 @@
                             style="margin-top: 16px; padding: 12px 16px; background: rgba(255, 180, 0, 0.08); border: 1px solid rgba(255, 180, 0, 0.2); border-radius: 10px;">
                             <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">
                                 <strong>⚠️ Limites :</strong> Les communes avec tres peu d'annonces (1-2) peuvent avoir
-                                des scores artificiellement eleves ou bas. Les recommandations IA filtrent les communes
+                                des scores artificiellement eleves ou bas. Les recommandations AirValo filtrent les communes
                                 avec moins de 3 annonces pour garantir la fiabilite. Les annonces inactives (0 jour
                                 d'occupation) sont exclues du calcul.
                             </p>
@@ -1155,7 +1279,23 @@
                                 <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0;">
                                     En cliquant une annonce sur la carte, deux cercles s'affichent : la
                                     <strong>zone analysée (1 500 m)</strong> et la <strong>proximité transports (1 000 m)</strong>,
-                                    pour visualiser exactement le périmètre pris en compte par le score.
+                                    pour visualiser exactement le périmètre pris en compte par le score. Les points
+                                    superposés restent <strong>cliquables</strong> même sous un rayon.
+                                </p>
+                            </div>
+                            <div style="background: var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid #0ea5e9; grid-column: 1 / -1;">
+                                <h4 style="font-size: 14px; margin-bottom: 8px;">💬 Expérience voyageurs — analyse de sentiment <span style="font-size:10px;background:#0ea5e9;color:#fff;padding:1px 7px;border-radius:999px;vertical-align:middle;">Nouveau</span></h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+                                    <strong>71 644 avis Airbnb</strong> ont été analysés par traitement du langage pour
+                                    en extraire, sur <strong>167 communes</strong>, les <strong>thèmes valorisés</strong>
+                                    (confort, accueil, vue, localisation…), les <strong>frictions à surveiller</strong>
+                                    et une <strong>tonalité globale</strong> (positif 51,6&nbsp;% · mixte 15,8&nbsp;% ·
+                                    neutre 27,4&nbsp;% · négatif 5,2&nbsp;%). Ces informations apparaissent sur la fiche
+                                    de chaque bien (carte), dans l'onglet Attractivité et dans le résultat du simulateur.
+                                    <br><em>Important&nbsp;: « logements avec avis » désigne les logements présents dans
+                                    le fichier de commentaires, et non le nombre d'annonces actives. Les avis Airbnb étant
+                                    structurellement très positifs, les thèmes et frictions sont plus actionnables que la
+                                    tonalité brute.</em>
                                 </p>
                             </div>
                         </div>

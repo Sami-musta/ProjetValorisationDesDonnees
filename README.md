@@ -1,20 +1,45 @@
 # AirValo — Valorisation des données Airbnb du canton de Vaud
 
 > **Projet académique** — Master of Science HES-SO en Business Administration, orientation *Management des Systèmes d'Information*
-> Application web décisionnelle pour **futurs hôtes Airbnb** en Suisse romande, centrée sur le canton de Vaud.
+> Application web décisionnelle pour **futurs hôtes / investisseurs Airbnb** dans le **canton de Vaud**.
 
-AirValo croise quatre sources de données ouvertes (Inside Airbnb, OFS, Atlas statistique Vaud, OpenStreetMap) pour aider un propriétaire à **évaluer la viabilité d'un lancement Airbnb** : score d'attractivité territoriale, simulation de revenus, comparaison de communes, cadre réglementaire.
+AirValo croise des sources de données ouvertes (Inside Airbnb, avis voyageurs, OpenStreetMap, Atlas statistique Vaud, prix immobiliers, répertoire officiel des localités swisstopo) pour répondre, commune par commune, à trois questions : **où** investir, **quoi** proposer et **à quel prix** — puis **combien** cela peut rapporter. Le tout via un **score d'investissement** orienté investisseur, une **attractivité calculée localement** (rayon autour de chaque bien), une **analyse des avis voyageurs** et un **simulateur de lancement avec ROI**.
 
 ---
 
-## ✨ Fonctionnalités
+## ✨ Ce que fait l'application
 
-- 🗺️ **Carte interactive** choroplèthe du canton (Leaflet.js) — scores par commune, pins des annonces actives, filtres dynamiques
-- 📈 **Analyse détaillée** par commune — prix médian, occupation, revenu annuel, distribution (Chart.js)
-- 🧪 **Simulateur de lancement** — formulaire 4 étapes (commune, profil de bien, type, budget) → revenu projeté P25/P50/P75, délai de rentabilité, confiance
-- 🎯 **Attractivité multi-facteurs** — scoring OSM (culturel 25 % / sport 30 % / restauration 15 % / emploi 30 %)
-- ⚖️ **Règles & fiscalité** — taxes de séjour, déclarations, cadre légal
-- 📱 **Responsive** — desktop / tablette / mobile (breakpoints 640/760/1100/1440 px)
+| Vue | Fonction |
+|-----|----------|
+| 📊 **Aperçu** | KPIs du canton, meilleurs quartiers, revenu par type de bien, recommandation AirValo, panorama des fonctionnalités |
+| 🗺️ **Carte interactive** | 2 568 annonces géolocalisées (Leaflet), colorées par score / revenu / prix / occupation. Clic sur un bien → fiche détaillée + **rayon d'analyse visible** (zone 1 500 m + proximité transports 1 000 m). Les points superposés restent **cliquables** même sous un rayon. |
+| 💬 **Expérience voyageurs** | Analyse de **71 644 avis Airbnb** sur **167 communes** : thèmes valorisés, frictions à surveiller, tonalité globale et conseil par commune. Affichée sur la fiche carte, dans l'onglet Attractivité et dans le simulateur. |
+| 🎯 **Attractivité** | Score local sur **5 facteurs** (culture, sport, restauration, emploi, transports), agrégé par district et par **code postal (NPA)** avec explorateur filtrable (228 zones). |
+| 📈 **Analyse détaillée** | Filtres (quartier, type, prix, score), comparaison des communes, tendances saisonnières, recommandation AirValo fiabilisée. |
+| 🧮 **Simulateur de lancement** | Formulaire (commune, profil, type, budget) → **prix conseillé /nuit** (P25/P50/P75), **occupation attendue**, **revenu projeté**, **ROI & payback** (setup seul vs global), comparables actifs réels + « à savoir dans cette zone ». |
+| ⚖️ **Réglementations & partenaires** | Cadre légal vaudois réel (règle des 90 jours, enregistrement, taxe de séjour) avec sources officielles, et réseau de partenaires locaux. |
+| 🌓 **UX** | Thème clair / sombre, responsive desktop / tablette / mobile. |
+
+---
+
+## 🧮 Score d'investissement AirValo (0–100)
+
+Métrique composite orientée **investisseur**, calculée par annonce puis agrégée par commune. Six facteurs pondérés :
+
+| Facteur | Poids | Mesure |
+|---------|-------|--------|
+| Revenu potentiel | 25 % | Rang percentile du revenu annuel réel (Inside Airbnb) |
+| Taux d'occupation | 20 % | Jours occupés / 365 |
+| Attractivité locale | 20 % | POI dans un rayon autour du bien (5 facteurs OSM) |
+| Saturation du marché | 15 % | Airbnb / 1000 habitants (inversé) |
+| Rendement immobilier | 10 % | Revenu Airbnb / prix au m² de la commune |
+| Stabilité saisonnière | 10 % | Inverse de la variance mensuelle d'occupation |
+
+> Les notes Airbnb (cleanliness, communication…) sont **volontairement exclues** du score : elles reflètent l'hôte actuel, pas le potentiel du lieu. Elles sont en revanche exploitées séparément dans l'**analyse de sentiment** (Expérience voyageurs).
+
+### Attractivité locale — pondération (5 facteurs)
+`emploi 25 % · sport 22 % · culture 20 % · transports 20 % · restauration 13 %`
+Chaque bien reçoit son propre score selon les POI présents dans un **rayon de 1 500 m**, avec décroissance par distance. Les transports utilisent un rayon réduit (gare ≤ 1 000 m, tram ≤ 700 m, bus ≤ 400 m).
 
 ---
 
@@ -23,7 +48,8 @@ AirValo croise quatre sources de données ouvertes (Inside Airbnb, OFS, Atlas st
 ```
 ┌─────────────────────┐      ┌──────────────────────┐      ┌─────────────────────┐
 │  Sources publiques  │ ───▶ │  Pipeline Python     │ ───▶ │  Web app statique   │
-│  (Airbnb, OSM, OFS) │      │  (process + score)   │      │  (HTML/CSS/JS)      │
+│  (Airbnb, avis,     │      │  (process + score    │      │  (HTML/CSS/JS)      │
+│   OSM, OFS, immo)   │      │   + sentiment)       │      │  (JSON statiques)   │
 └─────────────────────┘      └──────────────────────┘      └─────────────────────┘
 ```
 
@@ -31,12 +57,12 @@ AirValo croise quatre sources de données ouvertes (Inside Airbnb, OFS, Atlas st
 
 | Couche        | Techno                                              |
 |---------------|-----------------------------------------------------|
-| Pipeline      | Python 3, pandas, requests (OSM Overpass API)       |
-| Front-end     | HTML5, CSS3, JavaScript **vanilla** (ES6+)          |
+| Pipeline      | Python 3, pandas, NumPy, Shapely, requests (OSM Overpass) |
+| Front-end     | HTML5, CSS3, JavaScript **vanilla** (ES6+) — aucun build |
 | Cartographie  | [Leaflet.js](https://leafletjs.com/) v1.9 + OpenStreetMap |
-| Graphiques    | [Chart.js](https://www.chartjs.org/) v4             |
-| Données       | Fichiers JSON statiques (≈ 5 Mo)                    |
-| Hébergement   | 100 % statique (GitHub Pages, Netlify, Vercel)      |
+| Graphiques    | [Chart.js](https://www.chartjs.org/) v4 (bar, line, radar, doughnut) |
+| Données       | Fichiers JSON statiques |
+| Hébergement   | 100 % statique (GitHub Pages, ou tout serveur statique) |
 
 ---
 
@@ -45,38 +71,33 @@ AirValo croise quatre sources de données ouvertes (Inside Airbnb, OFS, Atlas st
 ```
 .
 ├── data_pipeline/              # Scripts Python de traitement
-│   ├── process_airbnb.py       # Nettoyage des listings Inside Airbnb
-│   ├── compute_attractivity.py # Scoring attractivité via POI OSM
-│   ├── inspect_data.py
-│   └── inspect_detailed.py
+│   ├── process_airbnb.py       # Nettoyage des listings + enrichissement croisé
+│   └── compute_attractivity.py # Scoring attractivité via POI OSM (par rayon)
 │
 ├── webapp/                     # Application web statique
-│   ├── index.html              # Structure sémantique (7 vues)
-│   ├── style.css               # Design system (palette corail)
-│   ├── app.js                  # Logique : routage, cartes, charts, simulateur
+│   ├── index.html              # Structure sémantique (vues : aperçu, carte, analyse, simulateur, attractivité, règles, à propos)
+│   ├── style.css               # Design system (palette corail) + thème sombre
+│   ├── app.js                  # Routage, cartes, charts, simulateur, sentiment
 │   └── data/                   # JSON produits par le pipeline
-│       ├── vaud_*.json         # Vaud (dataset principal)
-│       ├── geneva_*.json       # Genève (comparaison)
-│       ├── zurich_*.json       # Zurich (comparaison)
-│       └── attractivity_weights.json
+│       ├── vaud_listings.json        # 2 500 annonces (score, prix, revenu, sous-scores, NPA)
+│       ├── vaud_neighborhoods.json   # 204 communes agrégées
+│       ├── vaud_npa.json             # 228 zones par code postal
+│       ├── vaud_attractivity.json    # Attractivité par district
+│       ├── vaud_sentiment.json       # Avis voyageurs : thèmes, frictions, tonalité (167 communes)
+│       ├── vaud_property_types.json  # 4 types de bien
+│       ├── vaud_seasonal.json        # Saisonnalité (12 mois)
+│       ├── attractivity_weights.json # Pondérations transparentes
+│       └── geneva_*.json / zurich_*.json  # Villes de comparaison
 │
-├── VaudData/                   # Données brutes Inside Airbnb — Vaud
-├── GenevaData/                 # Données brutes Inside Airbnb — Genève
-├── ZurichData/                 # Données brutes Inside Airbnb — Zurich
-├── OtherData/                  # Données complémentaires (OFS, musées, hôtels…)
-└── 04_ProjectValorisationDonnees.pdf   # Cahier des charges du cours
+├── OtherData/                  # Données brutes complémentaires (OFS, musées, hôtels, transports…)
+└── README.md
 ```
 
 ---
 
 ## 🚀 Lancement en local
 
-### Prérequis
-- Python **3.9+** (pour ré-exécuter le pipeline uniquement)
-- Un navigateur moderne (Chrome, Firefox, Safari, Edge)
-
-### Lancer la web app
-L'application est 100 % statique — aucun build, aucune dépendance Node à installer.
+L'application est **100 % statique** — aucun build, aucune dépendance Node.
 
 ```bash
 cd webapp
@@ -89,28 +110,54 @@ Puis ouvrir [http://localhost:8000](http://localhost:8000).
 
 ```bash
 cd data_pipeline
-python process_airbnb.py        # produit vaud_listings.json, etc.
-python compute_attractivity.py  # produit vaud_attractivity.json, vaud_pois.json
+python process_airbnb.py        # listings, communes, NPA, saisonnalité
+python compute_attractivity.py  # attractivité par rayon + agrégats district
 ```
 
 ---
 
-## 📊 Sources de données
+## 📊 Sources de données (7)
 
-| Source                            | Usage                                       | Licence              |
-|-----------------------------------|---------------------------------------------|----------------------|
-| [Inside Airbnb](http://insideairbnb.com/) | Listings, calendriers, avis (Vaud / GE / ZH) | CC BY 4.0            |
-| [OpenStreetMap](https://www.openstreetmap.org/) (Overpass) | POI (culture, sport, restauration, emploi) | ODbL                 |
-| [OFS](https://www.bfs.admin.ch/)  | Limites communales, données démographiques  | OGD                  |
-| [Atlas statistique Vaud](https://www.vd.ch/themes/statistique-recensement/) | Nuitées hôtels, densité, fréquentation musées | OGD                  |
+| Source | Usage | Licence |
+|--------|-------|---------|
+| [Inside Airbnb](http://insideairbnb.com/) | Listings + calendriers (disponibilité 365 j) | CC BY 4.0 |
+| Avis voyageurs Airbnb (reviews) | Analyse de sentiment : 71 644 commentaires, 167 communes | CC BY 4.0 |
+| [OpenStreetMap](https://www.openstreetmap.org/) (Overpass) | ~11 000 POI : culture, sport, restauration, emploi, **transports** | ODbL |
+| Atlas / Stat Vaud | Densité de population par commune (saturation) | OGD |
+| Neho / Lookmove | Prix immobiliers au m² par commune (rendement) | — |
+| Répertoire officiel des localités (swisstopo / AMTOVZ) | Rattachement de chaque bien à son NPA | OGD |
+| GeoJSON cantonal | Découpage communes / districts (geo-matching) | OGD |
 
 ---
 
-## 🎯 Méthodologie
+## 💬 Analyse de sentiment — méthodologie
 
-- **Scoring d'attractivité** inspiré du *San Francisco Model* — agrégation pondérée de POI par commune, normalisée [0–100]
-- **Simulateur de lancement** — comparaison à la cohorte d'annonces actives, fallback progressif en 5 niveaux (commune-strict → commune-loose → district-strict → district-loose → commune-any) pour garantir un résultat sur toutes les communes du canton
-- **Pondération** transparente et ajustable via `attractivity_weights.json`
+Les **71 644 avis** sont analysés pour extraire, par commune et par type de bien :
 
+- **Thèmes dominants** — part des avis mentionnant un sujet (confort, accueil, vue, localisation, propreté, transports…). *Un avis peut citer plusieurs thèmes — les % ne totalisent pas 100 %.*
+- **Points à surveiller (frictions)** — part des avis où le thème est mentionné avec un signal négatif.
+- **Tonalité globale** — positif 51,6 % · mixte 15,8 % · neutre 27,4 % · négatif 5,2 %.
+- **Fiabilité** — graduée selon le volume d'avis de la commune.
 
+> ⚠️ « Logements avec avis » = logements présents dans le fichier de commentaires, **et non** le nombre d'annonces actives. Les avis Airbnb étant structurellement très positifs, les **thèmes** et **frictions** sont plus actionnables que la tonalité brute.
 
+---
+
+## ⚖️ Cadre réglementaire (Canton de Vaud)
+
+- **Règle des 90 jours** — louer > 90 jours/an dans un district en pénurie de logements exige une **autorisation de changement d'affectation** (commune, LDTR/LATC). Exemptés : Aigle, Broye-Vully, Jura-Nord-vaudois.
+- **Enregistrement** — annonce obligatoire à la commune depuis le 1ᵉʳ juillet 2022 (LEAE) ; registre communal des loueurs.
+- **Sous-location** — accord préalable écrit du bailleur obligatoire.
+- **Taxe de séjour** — communale, **collectée automatiquement par Airbnb** depuis avril 2023 (accord UCV) ; 144 communes signataires au 1ᵉʳ février 2025.
+
+Sources : [État de Vaud](https://www.vd.ch/territoire-et-construction/logement/hebergement-airbnb) · [Police cantonale du commerce](https://www.vd.ch/economie/police-cantonale-du-commerce/informations-relatives-aux-locations-de-type-airbnb) · [UCV](https://www.ucv.ch/thematiques/economie-et-finances/airbnb) · [Centre d'aide Airbnb](https://www.airbnb.com/help/article/3462).
+*Informations indicatives (màj mai 2026) — vérifier auprès de la commune avant tout lancement.*
+
+---
+
+## 🎯 Notes de méthodologie
+
+- **Attractivité par rayon** — agrégation pondérée des POI autour de chaque bien, normalisée [0–100], et non plus héritée de la moyenne du district.
+- **Simulateur** — comparaison à la cohorte d'annonces actives, avec **fallback progressif** (commune-strict → commune-loose → district-strict → district-loose → commune-any) pour garantir un résultat sur toute commune.
+- **Fiabilité** — les recommandations filtrent les communes à moins de 3 annonces ; les annonces inactives (0 jour d'occupation) sont exclues du calcul.
+- **Transparence** — pondérations exposées dans `attractivity_weights.json`.

@@ -21,6 +21,75 @@ const CITY_META = {
     vaud:   { lat: 46.5197, lng: 6.6323, zoom: 10, label: 'Vaud' },
 };
 
+// ═══════════════════════════════════════════
+// SENTIMENT / EXPÉRIENCE VOYAGEURS
+// Themes come from the NLP analysis of Airbnb guest comments
+// (data/vaud_sentiment.json). Each theme gets an icon + colour so the
+// map card, the attractivity view and the simulator share one visual language.
+// ═══════════════════════════════════════════
+const THEME_META = {
+    'Confort / équipements':        { icon: '🛋️', color: '#FF5A5F' },
+    'Communication hôte / accueil': { icon: '💬', color: '#0ea5e9' },
+    'Vue / paysage':                { icon: '🏔️', color: '#27ae60' },
+    'Localisation':                 { icon: '📍', color: '#9b59b6' },
+    'Propreté':                     { icon: '🧼', color: '#16a085' },
+    'Transports / accès':           { icon: '🚆', color: '#2980b9' },
+    'Check-in / arrivée':           { icon: '🔑', color: '#e67e22' },
+    'Calme / bruit':                { icon: '🔇', color: '#7f8c8d' },
+    'Restaurants / commerces':      { icon: '🍽️', color: '#d35400' },
+    'Ski / nature':                 { icon: '⛷️', color: '#3498db' },
+    'Prix / valeur':                { icon: '💰', color: '#f39c12' },
+    'Parking':                      { icon: '🅿️', color: '#34495e' },
+};
+const themeMeta = label => THEME_META[label] || { icon: '•', color: '#9aa0a6' };
+
+// Reliability of a commune's sample (number of reviews) → colour + tooltip.
+// Mirrors the « Fiabilité » column in the analysis document.
+const FIABILITE_META = {
+    'Très bonne': { color: '#27ae60', hint: 'Échantillon large — lecture solide.' },
+    'Bonne':      { color: '#2ecc71', hint: 'Bon volume d’avis — lecture fiable.' },
+    'Moyenne':    { color: '#f39c12', hint: 'Volume modéré — tendance indicative.' },
+    'Faible':     { color: '#e67e22', hint: 'Peu d’avis — à interpréter avec prudence.' },
+    'Très faible':{ color: '#e74c3c', hint: 'Très peu d’avis — signal fragile.' },
+};
+const fiabiliteMeta = label => FIABILITE_META[label] || { color: '#9aa0a6', hint: '' };
+
+// Accessor: sentiment record for a commune (matches listing.nh / neighbourhood).
+function getCommuneSentiment(commune) {
+    return cityData[activeCity]?.sentiment?.byCommune?.[commune] || null;
+}
+
+// Build the shared « Expérience voyageurs » block for one commune.
+// Used by the map detail card and the simulator result.
+function communeSentimentHtml(commune, { compact = false } = {}) {
+    const s = getCommuneSentiment(commune);
+    if (!s) return '';
+    const fm = fiabiliteMeta(s.fiabilite);
+    const themesHtml = (s.themes || []).slice(0, 3).map(t => {
+        const m = themeMeta(t.label);
+        return `<span class="sent-theme" title="${t.label} — mentionné dans ${t.pct.toFixed(0)}% des avis">
+                    <span class="sent-ico">${m.icon}</span>${t.label}
+                    <span class="sent-pct" style="color:${m.color}">${t.pct.toFixed(0)}%</span>
+                </span>`;
+    }).join('');
+    const frictions = (s.frictions || []).filter(f => f.pct > 0).slice(0, 2);
+    const frictionsHtml = frictions.length
+        ? frictions.map(f => `<span class="sent-friction" title="${f.label} — signal négatif dans ${f.pct.toFixed(0)}% des avis">⚠️ ${f.label} <em>${f.pct.toFixed(0)}%</em></span>`).join('')
+        : `<span class="sent-friction sent-friction-none">Aucune friction marquée</span>`;
+    return `
+        <div class="sent-block${compact ? ' sent-compact' : ''}">
+            <div class="sent-head">
+                <span class="sent-title">💬 Expérience voyageurs</span>
+                <span class="sent-fiab" style="--fc:${fm.color}" title="Fiabilité de l'échantillon : ${fm.hint} (${s.avis.toLocaleString('fr-CH')} avis)">${s.fiabilite}</span>
+            </div>
+            <div class="sent-themes-label">Ce que les voyageurs remarquent</div>
+            <div class="sent-themes">${themesHtml}</div>
+            <div class="sent-frictions">${frictionsHtml}</div>
+            ${s.conseil ? `<div class="sent-conseil"><span class="sent-conseil-tag">Conseil</span>${s.conseil}</div>` : ''}
+            <div class="sent-source">Basé sur ${s.avis.toLocaleString('fr-CH')} avis Airbnb (${s.logementsAvecAvis} logement${s.logementsAvecAvis > 1 ? 's' : ''} commenté${s.logementsAvecAvis > 1 ? 's' : ''}) — non le nombre d'annonces actives.</div>
+        </div>`;
+}
+
 // Chart.js global config
 Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = '#717171';
@@ -342,14 +411,16 @@ async function loadCity(cityId) {
             // Load attractivity data for Vaud
             if (cityId === 'vaud') {
                 try {
-                    const [attractivity, weights, npa] = await Promise.all([
+                    const [attractivity, weights, npa, sentiment] = await Promise.all([
                         fetch('data/vaud_attractivity.json', noCache).then(r => r.json()),
                         fetch('data/attractivity_weights.json', noCache).then(r => r.json()),
                         fetch('data/vaud_npa.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
+                        fetch('data/vaud_sentiment.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
                     ]);
                     cityData[cityId].attractivity = attractivity;
                     cityData[cityId].attractivityWeights = weights;
                     cityData[cityId].npa = npa;
+                    cityData[cityId].sentiment = sentiment;
                 } catch (e) { console.warn('Attractivity data not available:', e); }
             }
         } catch (e) { console.error('Erreur chargement:', cityId, e); return; }
@@ -535,6 +606,12 @@ function initMap() {
     map = L.map('map-container', { zoomControl: false, attributionControl: false }).setView([meta.lat, meta.lng], meta.zoom);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
+    // Dedicated pane for the attractivity rings, placed BELOW the marker layer
+    // (overlayPane z-index = 400) so their semi-transparent fill never steals
+    // clicks from the listing dots sitting inside the radius. Tooltips on the
+    // rings still work wherever they aren't covered by a dot.
+    map.createPane('radiusPane');
+    map.getPane('radiusPane').style.zIndex = 350;
 }
 
 function renderMap() {
@@ -645,17 +722,20 @@ function showAttractivityRadius(l) {
     clearRadius();
     const center = [l.lat, l.lng];
     const outer = L.circle(center, {
+        pane: 'radiusPane',
         radius: MAP_RADII.attract,
         color: '#FF5A5F', weight: 1.5, opacity: 0.7,
         fillColor: '#FF5A5F', fillOpacity: 0.07,
     });
     const transit = L.circle(center, {
+        pane: 'radiusPane',
         radius: MAP_RADII.transit,
         color: '#0ea5e9', weight: 1.5, opacity: 0.8,
         fillColor: '#0ea5e9', fillOpacity: 0.05,
         dashArray: '5 5',
     });
     const pin = L.circleMarker(center, {
+        pane: 'radiusPane',
         radius: 4, color: '#fff', weight: 2,
         fillColor: '#FF5A5F', fillOpacity: 1,
     });
@@ -710,6 +790,10 @@ function showMapDetail(l) {
     if (prixEl) prixEl.textContent = l.prix_m2 ? 'CHF ' + Number(l.prix_m2).toLocaleString() : '—';
     const npaEl = document.getElementById('detail-npa');
     if (npaEl) npaEl.textContent = l.npa || '—';
+
+    // Guest-experience block (sentiment) for the listing's commune.
+    const sentEl = document.getElementById('detail-sentiment');
+    if (sentEl) sentEl.innerHTML = communeSentimentHtml(l.nh, { compact: true });
 }
 
 // ═══════════════════════════════════════════
@@ -937,6 +1021,9 @@ function renderAttractivity() {
     // Render weight bars
     renderWeightBars(weightsConfig);
 
+    // Render the canton-wide guest-experience (sentiment) block
+    renderExperienceVoyageurs(data.sentiment);
+
     // Render district ranking cards
     renderDistrictCards(attractivity, weightsConfig);
 
@@ -947,6 +1034,62 @@ function renderAttractivity() {
     renderAttractivityRadar(attractivity, weightsConfig);
     renderAttractivityBar(attractivity);
     renderPoiStackedChart(attractivity, weightsConfig);
+}
+
+// Canton-wide guest-experience block: per-theme mention bars with the
+// friction share highlighted, plus the global sentiment split and the
+// analyst's reading note. Driven by data/vaud_sentiment.json.
+function renderExperienceVoyageurs(sentiment) {
+    const section = document.getElementById('experience-section');
+    if (!section) return;
+    if (!sentiment?.globalThemes?.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+
+    const themes = [...sentiment.globalThemes].sort((a, b) => b.mentions - a.mentions);
+    const maxMentions = Math.max(...themes.map(t => t.mentions), 1);
+    const themesEl = document.getElementById('exp-themes');
+    if (themesEl) {
+        themesEl.innerHTML = themes.map(t => {
+            const m = themeMeta(t.theme);
+            const w = (t.mentions / maxMentions) * 100;             // bar width relative to top theme
+            const fr = t.mentions > 0 ? (t.frictions / t.mentions) * 100 : 0; // friction share of the bar
+            return `
+                <div class="exp-theme-row" title="${t.theme} : mentionné dans ${t.mentions.toFixed(1)}% des avis, dont ${t.frictions.toFixed(1)}% en friction">
+                    <span class="exp-theme-name"><span class="exp-theme-ico">${m.icon}</span>${t.theme}</span>
+                    <div class="exp-theme-track">
+                        <div class="exp-theme-fill" style="width:${w.toFixed(1)}%;background:${m.color}">
+                            <div class="exp-theme-friction" style="width:${fr.toFixed(1)}%"></div>
+                        </div>
+                    </div>
+                    <span class="exp-theme-val">${t.mentions.toFixed(0)}%<em>${t.frictions.toFixed(0)}% friction</em></span>
+                </div>`;
+        }).join('');
+    }
+
+    // Global sentiment split (positif / mixte / neutre / négatif)
+    const sentEl = document.getElementById('exp-sentiment');
+    const sm = sentiment.sentiment;
+    if (sentEl && sm) {
+        const segs = [
+            { k: 'positif', label: 'Positif', color: '#27ae60' },
+            { k: 'mixte',   label: 'Mixte',   color: '#f39c12' },
+            { k: 'neutre',  label: 'Neutre',  color: '#9aa0a6' },
+            { k: 'negatif', label: 'Négatif', color: '#e74c3c' },
+        ].filter(s => sm[s.k] != null);
+        sentEl.innerHTML = `
+            <div class="exp-sent-title">Tonalité globale des avis</div>
+            <div class="exp-sent-bar">
+                ${segs.map(s => `<span style="width:${sm[s.k]}%;background:${s.color}" title="${s.label} : ${sm[s.k]}%"></span>`).join('')}
+            </div>
+            <div class="exp-sent-legend">
+                ${segs.map(s => `<span><span class="exp-sent-dot" style="background:${s.color}"></span>${s.label} <strong>${sm[s.k]}%</strong></span>`).join('')}
+            </div>`;
+    }
+
+    const noteEl = document.getElementById('exp-note');
+    if (noteEl) {
+        noteEl.innerHTML = `<strong>À lire avec recul&nbsp;:</strong> les avis Airbnb sont structurellement très positifs. Les <em>thèmes</em> (ce dont on parle) et les <em>frictions</em> (ce qui agace) sont plus actionnables que la tonalité brute. ${sentiment.meta?.note ? `<br><span class="exp-note-src">${sentiment.meta.note}</span>` : ''}`;
+    }
 }
 
 // Sort keys → accessor on an NPA aggregate row.
@@ -1812,6 +1955,16 @@ function runSimulator() {
                 <strong style="color:${getScoreColor(avgScore)}">${avgScore}<span class="sim-unit">/100</span></strong>
             </div>
         </div>
+
+        ${getCommuneSentiment(simState.commune) ? `
+        <!-- À savoir dans cette zone (sentiment voyageurs) -->
+        <div class="sim-sentiment-panel glass reveal-up" style="animation-delay:.28s">
+            <div class="sim-comps-header">
+                <span class="eyebrow">À savoir dans cette zone</span>
+                <h3>Ce que les voyageurs valorisent à ${simState.commune}</h3>
+            </div>
+            ${communeSentimentHtml(simState.commune)}
+        </div>` : ''}
 
         <!-- Top comparables -->
         <div class="sim-comps-panel glass reveal-up" style="animation-delay:.3s">

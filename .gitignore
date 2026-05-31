@@ -17,6 +17,16 @@ ENV/
 inspect_output.txt
 pdf_content.txt
 read_pdf.py
+
+# ---- Déploiement (non versionné) ----
+netlify.toml
+
+# ---- Documents sources non utilisés par l'app au runtime ----
+# Le CSV brut des avis (~178 Mo) dépasse la limite GitHub ; l'app n'utilise
+# que le JSON dérivé (webapp/data/vaud_sentiment.json), qui reste versionné.
+OtherData/document for sentiment analysis.csv
+OtherData/sentiment analysis airvalo.docx
+
 # ---- OS / Editors ----
 .DS_Store
 Thumbs.db
