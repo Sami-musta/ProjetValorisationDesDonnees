@@ -31,7 +31,7 @@ Métrique composite orientée **investisseur**, calculée par annonce puis agré
 | Revenu potentiel | 25 % | Rang percentile du revenu annuel réel (Inside Airbnb) |
 | Taux d'occupation | 20 % | Jours occupés / 365 |
 | Attractivité locale | 20 % | POI dans un rayon autour du bien (5 facteurs OSM) |
-| Saturation du marché | 15 % | Airbnb / 1000 habitants (inversé) |
+| Saturation du marché | 15 % | Densité locale (Airbnb / aire en ha) / taux d'occupation moyen (inversé) |
 | Rendement immobilier | 10 % | Revenu Airbnb / prix au m² de la commune |
 | Stabilité saisonnière | 10 % | Inverse de la variance mensuelle d'occupation |
 
@@ -62,7 +62,7 @@ Chaque bien reçoit son propre score selon les POI présents dans un **rayon de 
 | Cartographie  | [Leaflet.js](https://leafletjs.com/) v1.9 + OpenStreetMap |
 | Graphiques    | [Chart.js](https://www.chartjs.org/) v4 (bar, line, radar, doughnut) |
 | Données       | Fichiers JSON statiques |
-| Hébergement   | 100 % statique (GitHub Pages, ou tout serveur statique) |
+| Hébergement   | Déploiement CI/CD Netlify (adresse : [https://projet-valorisation-donnees.netlify.app](https://projet-valorisation-donnees.netlify.app)) |
 
 ---
 
@@ -155,9 +155,21 @@ Sources : [État de Vaud](https://www.vd.ch/territoire-et-construction/logement/
 
 ---
 
-## 🎯 Notes de méthodologie
+## 🎯 Notes de méthodologie & UX
 
-- **Attractivité par rayon** — agrégation pondérée des POI autour de chaque bien, normalisée [0–100], et non plus héritée de la moyenne du district.
-- **Simulateur** — comparaison à la cohorte d'annonces actives, avec **fallback progressif** (commune-strict → commune-loose → district-strict → district-loose → commune-any) pour garantir un résultat sur toute commune.
-- **Fiabilité** — les recommandations filtrent les communes à moins de 3 annonces ; les annonces inactives (0 jour d'occupation) sont exclues du calcul.
-- **Transparence** — pondérations exposées dans `attractivity_weights.json`.
+- **Attractivité par rayon** — Agrégation pondérée des POI autour de chaque bien, normalisée [0–100], et non plus héritée de la moyenne du district.
+- **Saturation du marché** — La saturation mesure l'offre par rapport à la demande locale. La formule de calcul est :
+  $$\text{Saturation} = \frac{\text{Densité d'annonces (listings/ha)}}{\text{Taux d'occupation moyen}}$$
+  où le taux d'occupation moyen correspond à $\text{jours occupés} / 365$. Ce score brut est ensuite inversé et normalisé par rapport au maximum observé :
+  $$\text{Score} = 100 - \left(\frac{\text{Saturation}}{\text{Saturation}_{\max}} \times 100\right)$$
+  Ainsi, une saturation faible donne un score proche de 100, synonyme d'opportunité pour l'investisseur.
+- **Seuils et couleurs des scores** — Paliers de score unifiés sur la carte (cercles), les légendes et les fiches pour guider visuellement l'utilisateur :
+  - **Limité** (0–30) : Gris (`#94a3b8`)
+  - **Moyen** (30–50) : Jaune (`#fbbf24`)
+  - **Bon** (50–70) : Sarcelle/Teal (`#00a699`)
+  - **Excellent** (70–100) : Rouge corail (`#FF5A5F`)
+- **Formatage des nombres (Norme Suisse)** — Surcharge globale de `Number.prototype.toLocaleString` pour imposer la simple quote comme séparateur des milliers (ex. `10'000`) et le point pour les décimales sur l'ensemble de l'application (chiffres d'affaires, prix/nuit, graphiques Chart.js).
+- **Passerelle interactive vers la carte** — Lien direct depuis les fiches de biens et le simulateur ("Voir toutes les annonces comparables sur la carte") permettant de basculer instantanément sur l'onglet Carte, de filtrer les marqueurs Leaflet sur les comparables, de recentrer dynamiquement via `map.fitBounds()`, et d'afficher un bandeau de réinitialisation flottant.
+- **Simulateur** — Comparaison à la cohorte d'annonces actives, avec **fallback progressif** (commune-strict → commune-loose → district-strict → district-loose → commune-any) pour garantir un résultat sur toute commune.
+- **Fiabilité** — Les recommandations filtrent les communes à moins de 3 annonces ; les annonces inactives (0 jour d'occupation) sont exclues du calcul.
+- **Transparence** — Pondérations exposées dans `attractivity_weights.json`.
