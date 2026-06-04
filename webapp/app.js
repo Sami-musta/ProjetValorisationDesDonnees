@@ -3,6 +3,17 @@
    French labels, theme toggle, thin chart borders
    ═══════════════════════════════════════════ */
 
+// Force Swiss-style single quote thousands separator for toLocaleString
+const _origToLocaleString = Number.prototype.toLocaleString;
+Number.prototype.toLocaleString = function(locale, options) {
+    if (options) {
+        return _origToLocaleString.call(this, locale, options);
+    }
+    const parts = this.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+    return parts.join('.');
+};
+
 let activeCity = 'vaud';
 let activeView = 'overview';
 let map = null;
@@ -10,6 +21,8 @@ let mapMarkers = [];
 let radiusLayer = null;          // geographic circles showing the attractivity reach
 let charts = {};
 const cityData = {};
+let mapFilterListingIds = null;  // IDs of listings to filter on the map
+let lastSimulationComps = null;  // comps from the last simulation run
 
 // Radii (metres) MUST mirror the data pipeline (compute_attractivity.py):
 // amenities use a 1500 m radius, transit accessibility a reduced ~1000 m (train).
@@ -110,11 +123,41 @@ const C = {
     purpleBg:  'rgba(145, 70, 105, 0.12)',
 };
 
+// Libellés FR pour les types de logement (les données brutes restent en anglais).
+const ROOM_TYPE_FR = {
+    'Entire home/apt': 'Logement entier',
+    'Private room':    'Chambre privée',
+    'Shared room':     'Chambre partagée',
+    'Hotel room':      "Chambre d'hôtel",
+};
+function roomTypeFr(type) {
+    return ROOM_TYPE_FR[type] || type;
+}
+
+// Abréviations de mois EN -> FR pour les axes des graphiques.
+const MONTH_FR = {
+    Jan: 'Janv', Feb: 'Févr', Mar: 'Mars', Apr: 'Avr', May: 'Mai', Jun: 'Juin',
+    Jul: 'Juil', Aug: 'Août', Sep: 'Sept', Oct: 'Oct', Nov: 'Nov', Dec: 'Déc',
+};
+function monthFr(m) {
+    return MONTH_FR[m] || m;
+}
+
 function getChartTextColor() {
     return document.body.getAttribute('data-theme') === 'dark' ? '#A0A8C0' : '#717171';
 }
 function getChartGridColor() {
     return document.body.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+}
+
+// Auto-interpretation under a chart. Disabled as per user request to remove comments under charts.
+function setChartInsight(canvasId, html) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const panel = canvas.closest('.chart-panel') || canvas.parentElement;
+    if (!panel) return;
+    let cap = panel.querySelector(':scope > .chart-insight');
+    if (cap) cap.remove();
 }
 
 // ─── Absolute score color scale (4 tiers, monotonic heat) ───
@@ -123,7 +166,7 @@ function getChartGridColor() {
 const SCORE_TIERS = [
     { min: 0,  max: 30,  color: '#94a3b8', label: 'Limité',    hint: 'Potentiel faible' },
     { min: 30, max: 50,  color: '#fbbf24', label: 'Moyen',     hint: 'À surveiller' },
-    { min: 50, max: 70,  color: '#fb7185', label: 'Bon',       hint: 'Intéressant' },
+    { min: 50, max: 70,  color: '#00a699', label: 'Bon',       hint: 'Intéressant' },
     { min: 70, max: 101, color: '#FF5A5F', label: 'Excellent', hint: 'Top potentiel' },
 ];
 function getScoreColor(score) {
@@ -277,6 +320,7 @@ function setupNavigation() {
     // ── Desktop nav tabs ──
     document.querySelectorAll('.nav-tabs .nav-tab').forEach(tab => {
         tab.addEventListener('click', () => {
+            mapFilterListingIds = null;
             document.querySelectorAll('.nav-tabs .nav-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             // Sync mobile menu
@@ -334,6 +378,7 @@ function setupNavigation() {
     // ── Mobile menu items ──
     document.querySelectorAll('.mobile-menu-item[data-view]').forEach(item => {
         item.addEventListener('click', () => {
+            mapFilterListingIds = null;
             // Update mobile active state
             document.querySelectorAll('.mobile-menu-item').forEach(m => m.classList.remove('active'));
             item.classList.add('active');
@@ -377,6 +422,14 @@ function setupNavigation() {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', () => { document.getElementById(id + '-val').textContent = el.value; renderAnalysis(); });
     });
+
+    const clearMapFilterBtn = document.getElementById('btn-clear-map-filter');
+    if (clearMapFilterBtn) {
+        clearMapFilterBtn.addEventListener('click', () => {
+            mapFilterListingIds = null;
+            renderMap();
+        });
+    }
 }
 
 function switchView(viewId) {
@@ -411,16 +464,18 @@ async function loadCity(cityId) {
             // Load attractivity data for Vaud
             if (cityId === 'vaud') {
                 try {
-                    const [attractivity, weights, npa, sentiment] = await Promise.all([
+                    const [attractivity, weights, npa, sentiment, seasonalByNh] = await Promise.all([
                         fetch('data/vaud_attractivity.json', noCache).then(r => r.json()),
                         fetch('data/attractivity_weights.json', noCache).then(r => r.json()),
                         fetch('data/vaud_npa.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
                         fetch('data/vaud_sentiment.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
+                        fetch('data/vaud_seasonal_by_nh.json', noCache).then(r => r.ok ? r.json() : null).catch(() => null),
                     ]);
                     cityData[cityId].attractivity = attractivity;
                     cityData[cityId].attractivityWeights = weights;
                     cityData[cityId].npa = npa;
                     cityData[cityId].sentiment = sentiment;
+                    cityData[cityId].seasonalByNh = seasonalByNh;
                 } catch (e) { console.warn('Attractivity data not available:', e); }
             }
         } catch (e) { console.error('Erreur chargement:', cityId, e); return; }
@@ -509,29 +564,6 @@ function renderOverview(data) {
     animateValue('kpi-listings', n.toLocaleString());
     renderTopNhChart(neighborhoods.slice(0, 8));
     renderPropertyTypeChart(propertyTypes);
-
-    // AI Recommendation — filter neighborhoods with >= 3 listings for reliability
-    const reliableNh = neighborhoods.filter(n => n.count >= 3);
-    const bestNh = reliableNh.length > 0 ? reliableNh[0] : (neighborhoods.length > 0 ? neighborhoods[0] : null);
-    if (bestNh) {
-        // Find best property type
-        const bestType = propertyTypes.reduce((a, b) => a.avg_revenue > b.avg_revenue ? a : b, propertyTypes[0]);
-        const typeLabels = { 'Entire home/apt': 'logements entiers', 'Private room': 'chambres privées', 'Shared room': 'chambres partagées', 'Hotel room': 'chambres d\'hôtel' };
-        const recommendedType = typeLabels[bestType?.type] || 'logements entiers';
-
-        document.getElementById('recommendation-text').innerHTML =
-            `<p class="rec-content">D'après notre algorithme, <strong>${bestNh.nh}</strong> est le quartier n°1 pour investir` +
-            `${bestNh.count < 10 ? ` <span style="font-size:11px;color:var(--text-muted);">(${bestNh.count} annonces analysées)</span>` : ` parmi ${bestNh.count} annonces`}.` +
-            ` Privilégiez les <strong>${recommendedType}</strong> pour maximiser le rendement.</p>` +
-            `<div class="rec-stats">` +
-                `<div class="rec-stat"><span class="rec-stat-label">Score</span><span class="rec-stat-value">${bestNh.avg_score}/100</span></div>` +
-                `<div class="rec-stat"><span class="rec-stat-label">Revenu annuel moy.</span><span class="rec-stat-value">CHF ${Math.round(bestNh.avg_revenue).toLocaleString()}</span></div>` +
-                `<div class="rec-stat"><span class="rec-stat-label">Occupation</span><span class="rec-stat-value">${Math.round(bestNh.avg_occupancy)} jours/an</span></div>` +
-                (bestNh.prix_m2 ? `<div class="rec-stat"><span class="rec-stat-label">Prix immobilier/m²</span><span class="rec-stat-value">CHF ${bestNh.prix_m2.toLocaleString()}</span></div>` : '') +
-                `<div class="rec-stat"><span class="rec-stat-label">Tarif médian/nuit</span><span class="rec-stat-value">CHF ${bestNh.median_price}</span></div>` +
-            `</div>` +
-            (bestNh.count < 5 ? `<p class="rec-note">* Peu d'annonces dans ce quartier — résultats à interpréter avec prudence.</p>` : '');
-    }
 }
 function animateValue(id, text) {
     const el = document.getElementById(id);
@@ -575,6 +607,16 @@ function renderTopNhChart(nh) {
             }
         }
     });
+    if (nh.length) {
+        const top = nh[0];
+        const richest = [...nh].sort((a, b) => b.avg_revenue - a.avg_revenue)[0];
+        const sameTop = richest.nh === top.nh;
+        setChartInsight('chart-top-nh',
+            `<strong>${top.nh}</strong> est le quartier le mieux noté (<strong>${Number(top.avg_score).toFixed(0)}/100</strong>)` +
+            (sameTop
+                ? `, et c'est aussi celui au revenu annuel moyen le plus élevé (CHF ${Math.round(top.avg_revenue).toLocaleString('fr-CH')}).`
+                : `, tandis que <strong>${richest.nh}</strong> affiche le revenu annuel moyen le plus élevé (CHF ${Math.round(richest.avg_revenue).toLocaleString('fr-CH')}).`));
+    }
 }
 
 function renderPropertyTypeChart(pt) {
@@ -585,7 +627,7 @@ function renderPropertyTypeChart(pt) {
     charts.propType = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: pt.map(p => p.type),
+            labels: pt.map(p => roomTypeFr(p.type)),
             datasets: [{ label: 'Revenu moyen (CHF)', data: pt.map(p => p.avg_revenue),
                 backgroundColor: pt.map((_, i) => colors[i % colors.length]), borderWidth: 0, borderRadius: 8 }]
         },
@@ -596,6 +638,19 @@ function renderPropertyTypeChart(pt) {
             scales: { x: { beginAtZero: true, grid: { color: getChartGridColor() } }, y: { grid: { display: false } } }
         }
     });
+    // Best occupation/revenue balance, ignoring marginal categories (few listings).
+    const meaningful = pt.filter(p => p.count >= 20);
+    const pool = meaningful.length ? meaningful : pt;
+    if (pool.length) {
+        const maxRev = Math.max(...pool.map(p => p.avg_revenue)) || 1;
+        const maxOcc = Math.max(...pool.map(p => p.avg_occupancy)) || 1;
+        const best = [...pool].sort((a, b) =>
+            (b.avg_revenue / maxRev + b.avg_occupancy / maxOcc) -
+            (a.avg_revenue / maxRev + a.avg_occupancy / maxOcc))[0];
+        setChartInsight('chart-property-type',
+            `Les <strong>${roomTypeFr(best.type)}</strong> offrent le meilleur équilibre entre occupation et revenu annuel ` +
+            `(CHF ${Math.round(best.avg_revenue).toLocaleString('fr-CH')}/an pour ${Math.round(best.avg_occupancy)} jours d'occupation).`);
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -629,6 +684,19 @@ function renderMap() {
     let filtered = data.listings.filter(l => l.score >= minScore && l.price >= minPrice);
     if (roomFilter !== 'all') filtered = filtered.filter(l => l.type === roomFilter);
 
+    // Apply simulation filter banner and listings restriction
+    const banner = document.getElementById('map-filter-banner');
+    if (mapFilterListingIds) {
+        filtered = filtered.filter(l => mapFilterListingIds.includes(l.id));
+        if (banner) {
+            banner.classList.remove('hidden');
+            const txt = banner.querySelector('.mfb-text');
+            if (txt) txt.textContent = `🔍 Affichage de ${filtered.length} comparable${filtered.length > 1 ? 's' : ''} de la simulation`;
+        }
+    } else {
+        if (banner) banner.classList.add('hidden');
+    }
+
     // Precompute ABSOLUTE distribution for non-score metrics (computed once on the
     // full canton dataset, NOT on the filtered subset) so the colour of any dot is
     // stable whatever filter the user applies. For 'score' we use fixed tiers.
@@ -637,7 +705,12 @@ function renderMap() {
         : null;
 
     const meta = CITY_META[activeCity];
-    map.setView([meta.lat, meta.lng], meta.zoom);
+    if (mapFilterListingIds && filtered.length > 0) {
+        const points = filtered.map(l => [l.lat, l.lng]);
+        map.fitBounds(points, { padding: [50, 50] });
+    } else {
+        map.setView([meta.lat, meta.lng], meta.zoom);
+    }
 
     filtered.forEach(l => {
         const raw = Number(l[colorBy]) || 0;
@@ -785,7 +858,7 @@ function showMapDetail(l) {
     }
     document.getElementById('detail-revenue').textContent = 'CHF ' + l.revenue.toLocaleString();
     document.getElementById('detail-occupancy').textContent = l.occupancy + ' jours';
-    document.getElementById('detail-type').textContent = l.type;
+    document.getElementById('detail-type').textContent = roomTypeFr(l.type);
     const prixEl = document.getElementById('detail-prix-m2');
     if (prixEl) prixEl.textContent = l.prix_m2 ? 'CHF ' + Number(l.prix_m2).toLocaleString() : '—';
     const npaEl = document.getElementById('detail-npa');
@@ -827,106 +900,109 @@ function renderAnalysis() {
     animateValue('analysis-kpi-occ', n > 0 ? Math.round(sO / n).toString() : '0');
     animateValue('analysis-kpi-score', n > 0 ? (sS / n).toFixed(1) : '0');
 
-    // Neighborhood aggregation from filtered
-    const nhMap = {};
-    filtered.forEach(l => {
-        if (!nhMap[l.nh]) nhMap[l.nh] = { count: 0, sR: 0, sO: 0, sS: 0 };
-        nhMap[l.nh].count++; nhMap[l.nh].sR += l.revenue; nhMap[l.nh].sO += l.occupancy; nhMap[l.nh].sS += l.score;
-    });
-    const filteredNh = Object.entries(nhMap).map(([nh, d]) => ({
-        nh, count: d.count,
-        avg_revenue: d.sR / d.count, avg_occupancy: d.sO / d.count, avg_score: d.sS / d.count,
-    })).sort((a, b) => b.avg_score - a.avg_score);
-
-    // AI Recommendation — prefer neighborhoods with >= 3 listings
-    const recContainer = document.getElementById('ai-recommendation-container');
-    const recText = document.getElementById('ai-rec-text');
-    const reliableFilteredNh = filteredNh.filter(nh => nh.count >= 3);
-    const bestForRec = reliableFilteredNh.length > 0 ? reliableFilteredNh[0] : (filteredNh.length > 0 ? filteredNh[0] : null);
-
-    if (bestForRec) {
-        const best = bestForRec;
-        const bestListings = filtered.filter(l => l.nh === best.nh);
-
-        const prices = [];
-        const typeCounts = {};
-        bestListings.forEach(l => {
-            if (l.price > 0) prices.push(l.price);
-            typeCounts[l.type] = (typeCounts[l.type] || 0) + 1;
-        });
-
-        prices.sort((a, b) => a - b);
-        const medianPrice = prices.length ? prices[Math.floor(prices.length / 2)] : 0;
-
-        const topType = Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])[0];
-        const typeLabels = { 'Entire home/apt': 'logements entiers', 'Private room': 'chambres privées', 'Shared room': 'chambres partagées', 'Hotel room': 'chambres d\'hôtel' };
-        const recommendedType = typeLabels[topType] || 'logements entiers';
-
-        recText.innerHTML =
-            `<p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">` +
-            `D'après notre algorithme, <strong>${best.nh}</strong> se classe n°1 avec un score de <strong style="color:var(--airbnb-coral);">${best.avg_score.toFixed(1)}/100</strong>` +
-            `${best.count < 10 ? ` <span style="font-size:11px;color:var(--text-muted);">(${best.count} annonces)</span>` : ` parmi ${best.count} annonces`}. ` +
-            `Revenu annuel moyen : <strong style="color:var(--airbnb-coral);">CHF ${Math.round(best.avg_revenue).toLocaleString()}</strong> | ` +
-            `Occupation : <strong style="color:var(--airbnb-coral);">${Math.round(best.avg_occupancy)} jours</strong> | ` +
-            `Tarif médian : <strong style="color:var(--airbnb-coral);">CHF ${medianPrice}</strong>. ` +
-            `Privilégiez les <strong style="color:var(--airbnb-coral);">${recommendedType}</strong>.` +
-            `</p>` +
-            (best.count < 5 ? `<p style="font-size:11px;color:var(--text-muted);margin-top:6px;font-style:italic;">* Peu d'annonces — résultats à interpréter avec prudence.</p>` : '');
-        recContainer.style.display = 'block';
-    } else {
-        recContainer.style.display = 'none';
-    }
-
     // Type distribution
     const typeMap = {};
     filtered.forEach(l => { typeMap[l.type] = (typeMap[l.type] || 0) + 1; });
     const filteredTypes = Object.entries(typeMap).map(([type, count]) => ({ type, count }));
 
-    renderSeasonalChart(data.seasonal);
+    // Seasonal occupancy — follows the selected quartier (real per-neighbourhood
+    // calendar data). Falls back to the canton-wide curve when the quartier has
+    // too few listings or "Tous les quartiers" is selected.
+    const nhF = document.getElementById('analysis-nh')?.value || 'all';
+    const byNh = data.seasonalByNh || {};
+    const hasNh = nhF !== 'all' && Array.isArray(byNh[nhF]);
+    const seasonalSeries = hasNh ? byNh[nhF] : (byNh.all || data.seasonal || []);
+    const seasonalLabel = hasNh ? nhF : 'Canton de Vaud';
+    const seasonalNote = (!hasNh && nhF !== 'all') ? ' · données quartier insuffisantes' : '';
+    renderSeasonalChart(seasonalSeries, seasonalLabel, seasonalNote);
+
     renderRadarChart(data.neighborhoods);
     renderDoughnutChart(filteredTypes);
-    renderNhComparisonChart(filteredNh);
 }
 
-function renderSeasonalChart(seasonal) {
+// Seasonal occupancy chart — reacts to the selected quartier.
+// `seasonal` is a 12-month array [{month, occupancy_rate}], `scopeLabel` is the
+// quartier name (or "Canton de Vaud"), `note` an optional caveat.
+function renderSeasonalChart(seasonal, scopeLabel, note) {
     destroyChart('seasonal');
+    const scopeEl = document.getElementById('seasonal-scope');
+    if (scopeEl) scopeEl.textContent = scopeLabel ? `· ${scopeLabel}${note || ''}` : '';
     const ctx = document.getElementById('chart-seasonal');
     if (!ctx || !seasonal?.length) return;
-
-    const hasPrice = seasonal.some(s => s.avg_price > 0);
-    const datasets = [];
-    const scales = { x: { grid: { display: false } } };
-
-    if (hasPrice) {
-        datasets.push({
-            label: 'Prix moyen (CHF)', data: seasonal.map(s => s.avg_price),
-            borderColor: C.coral, backgroundColor: C.coralBg, borderWidth: 2, pointRadius: 3, tension: 0.4, fill: true, yAxisID: 'y'
-        });
-        scales.y = { beginAtZero: true, position: 'left', title: { display: true, text: 'Prix (CHF)' }, grid: { color: getChartGridColor() } };
-    }
-
-    datasets.push({
-        label: 'Taux d\'occupation (%)', data: seasonal.map(s => s.occupancy_rate),
-        borderColor: C.teal, backgroundColor: C.tealBg, borderWidth: 2, pointRadius: 4, tension: 0.4, fill: true,
-        yAxisID: hasPrice ? 'y1' : 'y'
-    });
-
-    if (hasPrice) {
-        scales.y1 = { beginAtZero: true, max: 100, position: 'right', title: { display: true, text: 'Occupation (%)' }, grid: { display: false } };
-    } else {
-        scales.y = { beginAtZero: true, max: 100, position: 'left', title: { display: true, text: 'Occupation (%)' }, grid: { color: getChartGridColor() } };
-    }
-
     charts.seasonal = new Chart(ctx, {
         type: 'line',
-        data: { labels: seasonal.map(s => s.month), datasets },
+        data: {
+            labels: seasonal.map(s => monthFr(s.month)),
+            datasets: [{
+                label: `Taux d'occupation (%)${scopeLabel ? ' — ' + scopeLabel : ''}`,
+                data: seasonal.map(s => s.occupancy_rate),
+                borderColor: C.teal, backgroundColor: C.tealBg,
+                borderWidth: 2, pointRadius: 4, tension: 0.4, fill: true,
+            }]
+        },
         options: {
             responsive: true, maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } } },
-            scales
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, max: 100, title: { display: true, text: 'Occupation (%)' }, grid: { color: getChartGridColor() } }
+            }
         }
     });
+    renderSeasonalStats(seasonal);
+
+    // Auto-interpretation
+    const vals = seasonal.map(s => s.occupancy_rate).filter(v => typeof v === 'number');
+    if (vals.length >= 2) {
+        const best = seasonal.reduce((a, b) => b.occupancy_rate > a.occupancy_rate ? b : a);
+        const worst = seasonal.reduce((a, b) => b.occupancy_rate < a.occupancy_rate ? b : a);
+        const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
+        const cv = mean > 0 ? Math.sqrt(vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length) / mean : 0;
+        const level = cv < 0.10 ? 'faible' : cv < 0.25 ? 'modérée' : 'forte';
+        const advice = cv < 0.10 ? 'revenus réguliers toute l\'année'
+                     : cv < 0.25 ? 'demande assez stable, avec une haute saison marquée'
+                     : 'revenus concentrés sur la haute saison';
+        setChartInsight('chart-seasonal',
+            `À <strong>${scopeLabel || 'l\'échelle du canton'}</strong>, l'occupation est maximale en <strong>${monthFr(best.month)}</strong> ` +
+            `(${Math.round(best.occupancy_rate)}%) et minimale en <strong>${monthFr(worst.month)}</strong> (${Math.round(worst.occupancy_rate)}%) : ` +
+            `saisonnalité ${level} — ${advice}.`);
+    }
+}
+
+// Résumé de saisonnalité : meilleur mois, mois le plus creux et coefficient
+// de variation (écart-type / moyenne) calculés sur le taux d'occupation
+// du quartier sélectionné.
+function renderSeasonalStats(seasonal) {
+    const box = document.getElementById('seasonal-stats');
+    if (!box) return;
+    const vals = seasonal.map(s => s.occupancy_rate).filter(v => typeof v === 'number');
+    if (vals.length < 2) { box.innerHTML = ''; return; }
+
+    const best  = seasonal.reduce((a, b) => b.occupancy_rate > a.occupancy_rate ? b : a);
+    const worst = seasonal.reduce((a, b) => b.occupancy_rate < a.occupancy_rate ? b : a);
+    const mean  = vals.reduce((s, v) => s + v, 0) / vals.length;
+    const std   = Math.sqrt(vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length);
+    const cv    = mean > 0 ? std / mean : 0;
+    const cvPct = Math.round(cv * 100);
+    const level = cv < 0.10 ? 'faible' : cv < 0.25 ? 'modérée' : 'forte';
+
+    box.innerHTML = `
+        <div class="seasonal-stat is-high">
+            <span class="seasonal-stat-label">Meilleur mois</span>
+            <span class="seasonal-stat-value">${monthFr(best.month)} · ${Math.round(best.occupancy_rate)}%</span>
+            <span class="seasonal-stat-hint">Occupation la plus haute</span>
+        </div>
+        <div class="seasonal-stat is-low">
+            <span class="seasonal-stat-label">Mois le plus creux</span>
+            <span class="seasonal-stat-value">${monthFr(worst.month)} · ${Math.round(worst.occupancy_rate)}%</span>
+            <span class="seasonal-stat-hint">Occupation la plus basse</span>
+        </div>
+        <div class="seasonal-stat is-cv">
+            <span class="seasonal-stat-label">Coefficient de variation</span>
+            <span class="seasonal-stat-value">${cvPct}%</span>
+            <span class="seasonal-stat-hint">Saisonnalité ${level} (écart-type / moyenne)</span>
+        </div>`;
 }
 
 function renderRadarChart(neighborhoods) {
@@ -957,6 +1033,20 @@ function renderRadarChart(neighborhoods) {
             plugins: { legend: { labels: { color: '#FF5A5F', font: { weight: 'bold' } } } }
         }
     });
+    // Auto-interpretation: strongest & weakest scoring dimension.
+    const factors = [
+        { k: 'avg_rev_score', label: 'le revenu' },
+        { k: 'avg_occ_score', label: "l'occupation" },
+        { k: 'avg_attract_score', label: "l'attractivité" },
+        { k: 'avg_saturation_score', label: 'la faible saturation' },
+        { k: 'avg_yield_score', label: 'le rendement' },
+        { k: 'avg_stability_score', label: 'la stabilité' },
+    ].map(f => ({ ...f, v: top[f.k] || 0 }));
+    const strong = factors.reduce((a, b) => b.v > a.v ? b : a);
+    const weak = factors.reduce((a, b) => b.v < a.v ? b : a);
+    setChartInsight('chart-radar',
+        `<strong>${top.nh}</strong> se distingue surtout par <strong>${strong.label}</strong> (${Math.round(strong.v)}/100) ` +
+        `et reste plus en retrait sur <strong>${weak.label}</strong> (${Math.round(weak.v)}/100).`);
 }
 
 function renderDoughnutChart(types) {
@@ -968,7 +1058,7 @@ function renderDoughnutChart(types) {
     charts.doughnut = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: types.map(p => p.type),
+            labels: types.map(p => roomTypeFr(p.type)),
             datasets: [{ data: types.map(p => p.count),
                 backgroundColor: types.map((_, i) => colors[i % colors.length]),
                 borderColor: isDark ? 'rgba(22,33,62,0.6)' : 'rgba(255,255,255,0.8)',
@@ -979,34 +1069,12 @@ function renderDoughnutChart(types) {
             plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } }
         }
     });
-}
-
-function renderNhComparisonChart(neighborhoods) {
-    destroyChart('nhComparison');
-    const ctx = document.getElementById('chart-nh-comparison');
-    if (!ctx || !neighborhoods) return;
-    const top = neighborhoods.slice(0, 12);
-    charts.nhComparison = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: top.map(n => n.nh.length > 20 ? n.nh.substring(0, 20) + '…' : n.nh),
-            datasets: [
-                { label: 'Score d\'investissement', data: top.map(n => n.avg_score.toFixed(1)),
-                  backgroundColor: C.coral, borderColor: C.coral, borderWidth: 0, borderRadius: 4, yAxisID: 'y' },
-                { label: 'Revenu moyen (CHF)', data: top.map(n => Math.round(n.avg_revenue)),
-                  backgroundColor: C.teal, borderColor: C.teal, borderWidth: 0, borderRadius: 4, yAxisID: 'y1' },
-            ]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } },
-            scales: {
-                y:  { beginAtZero: true, max: 100, position: 'left',  title: { display: true, text: 'Score' }, grid: { color: getChartGridColor() } },
-                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Revenu (CHF)' }, grid: { display: false } },
-                x:  { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } }
-            }
-        }
-    });
+    const total = types.reduce((s, p) => s + p.count, 0);
+    if (total > 0) {
+        const dom = [...types].sort((a, b) => b.count - a.count)[0];
+        setChartInsight('chart-doughnut',
+            `Les <strong>${roomTypeFr(dom.type)}</strong> dominent l'offre (${Math.round(dom.count / total * 100)}% des annonces filtrées).`);
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -1283,22 +1351,25 @@ function renderAttractivityRadar(attractivity, config) {
     const cats = config.categories;
     const labels = Object.values(cats).map(c => c.label);
     const catKeys = Object.keys(cats);
-    const colors = [C.coral, C.teal, C.orange, C.purple, C.yellow, C.green,
-                    'rgba(100,100,100,0.6)', 'rgba(150,150,150,0.5)', 'rgba(180,180,180,0.4)', 'rgba(200,200,200,0.3)'];
-    const bgColors = [C.coralBg, C.tealBg, C.orangeBg, C.purpleBg, C.yellowBg, C.greenBg,
-                      'rgba(100,100,100,0.1)', 'rgba(150,150,150,0.1)', 'rgba(180,180,180,0.1)', 'rgba(200,200,200,0.1)'];
+    // Distinct palette so every district stays readable (Vaud = 10 districts).
+    const hues = ['#FF5A5F', '#00A699', '#FC642D', '#9b59b6', '#F4B400',
+                  '#27ae60', '#0ea5e9', '#e74c3c', '#8e44ad', '#16a085',
+                  '#d35400', '#2980b9'];
 
-    // Show top 5 districts
-    const top = attractivity.slice(0, 5);
-    const datasets = top.map((d, i) => ({
-        label: d.district,
-        data: catKeys.map(k => d[k + '_score'] || 0),
-        borderColor: colors[i],
-        backgroundColor: bgColors[i],
-        pointBackgroundColor: colors[i],
-        borderWidth: 2,
-        pointRadius: 3,
-    }));
+    // Show ALL districts
+    const top = attractivity;
+    const datasets = top.map((d, i) => {
+        const col = hues[i % hues.length];
+        return {
+            label: d.district,
+            data: catKeys.map(k => d[k + '_score'] || 0),
+            borderColor: col,
+            backgroundColor: col + '22',   // ~13% alpha fill
+            pointBackgroundColor: col,
+            borderWidth: 2,
+            pointRadius: 2.5,
+        };
+    });
 
     charts.attractRadar = new Chart(ctx, {
         type: 'radar',
@@ -1316,6 +1387,18 @@ function renderAttractivityRadar(attractivity, config) {
             plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } }
         }
     });
+    // Which district leads, and on which factor the canton is globally strongest.
+    if (top.length) {
+        const leader = [...top].sort((a, b) => b.attractivity_score - a.attractivity_score)[0];
+        const factorAvg = catKeys.map(k => ({
+            label: cats[k].label,
+            avg: top.reduce((s, d) => s + (d[k + '_score'] || 0), 0) / top.length,
+        })).sort((a, b) => b.avg - a.avg);
+        setChartInsight('chart-attractivity-radar',
+            `<strong>${leader.district}</strong> présente le profil le plus complet. ` +
+            `À l'échelle du canton, <strong>${factorAvg[0].label.toLowerCase()}</strong> est le facteur le mieux doté et ` +
+            `<strong>${factorAvg[factorAvg.length - 1].label.toLowerCase()}</strong> le plus faible.`);
+    }
 }
 
 function renderAttractivityBar(attractivity) {
@@ -1357,6 +1440,12 @@ function renderAttractivityBar(attractivity) {
             }
         }
     });
+    if (sorted.length >= 2) {
+        const gap = (sorted[0].attractivity_score - sorted[1].attractivity_score);
+        setChartInsight('chart-attractivity-bar',
+            `<strong>${sorted[0].district}</strong> est le district le plus attractif (<strong>${Math.round(sorted[0].attractivity_score)}/100</strong>), ` +
+            `${gap >= 1 ? `${Math.round(gap)} pts devant` : 'au coude-à-coude avec'} <strong>${sorted[1].district}</strong>.`);
+    }
 }
 
 function renderPoiStackedChart(attractivity, config) {
@@ -1386,6 +1475,15 @@ function renderPoiStackedChart(attractivity, config) {
             }
         }
     });
+    if (sorted.length) {
+        const t = sorted[0];
+        const topCat = Object.entries(cats)
+            .map(([key, cat]) => ({ label: cat.label, n: t[key + '_count'] || 0 }))
+            .sort((a, b) => b.n - a.n)[0];
+        setChartInsight('chart-poi-stacked',
+            `<strong>${t.district}</strong> concentre le plus de points d'intérêt (${(t.total_pois || 0).toLocaleString('fr-CH')} POIs)` +
+            (topCat ? `, surtout en <strong>${topCat.label.toLowerCase()}</strong>.` : '.'));
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -1778,6 +1876,7 @@ function runSimulator() {
         return;
     }
     const { comps, scope } = findComparables();
+    lastSimulationComps = comps;
     const container = document.getElementById('sim-results');
     if (!container) return;
 
@@ -1986,6 +2085,9 @@ function runSimulator() {
     container.querySelectorAll('[data-go-view]').forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.dataset.goView;
+            if (target === 'map') {
+                mapFilterListingIds = lastSimulationComps ? lastSimulationComps.map(c => c.id) : null;
+            }
             document.querySelectorAll('.nav-tabs .nav-tab').forEach(t => t.classList.remove('active'));
             const navMatch = document.querySelector(`.nav-tabs .nav-tab[data-view="${target}"]`);
             if (navMatch) navMatch.classList.add('active');

@@ -6,7 +6,7 @@ Score composition (6 factors, investor-oriented):
   1. Revenue potential     (25%) — actual earnings from Airbnb data
   2. Occupancy rate        (20%) — demand effectiveness
   3. Attractivity          (20%) — cultural, sports, restaurants, employment POIs
-  4. Market saturation     (15%) — Airbnb listings per 1000 inhabitants (inverted)
+  4. Market saturation     (15%) — density of listings / mean occupancy rate (inverted)
   5. Real estate yield     (10%) — revenue relative to property price (CHF/m²)
   6. Seasonal stability    (10%) — low variance = predictable income
 """
@@ -200,12 +200,14 @@ def assign_npa(df, npa_df):
     return df
 
 
-def load_seasonal_variance(cal_path):
+def load_seasonal_variance(cal_path, active_ids=None):
     """Compute seasonal stability score from calendar data.
     Returns a dict: listing_id -> stability_score (0-100, higher = more stable)."""
     try:
         with gzip.open(cal_path, 'rt', encoding='utf-8') as f:
             cal = pd.read_csv(f, low_memory=False)
+        if active_ids is not None:
+            cal = cal[cal['listing_id'].isin(active_ids)].copy()
         cal['date'] = pd.to_datetime(cal['date'])
         cal['month'] = cal['date'].dt.month
         cal['booked'] = cal['available'].apply(lambda x: 1 if str(x).strip().lower() == 'f' else 0)
@@ -255,13 +257,34 @@ def normalize_commune_name(name):
     return name.lower()
 
 
+COMMUNE_SYNONYMS = {
+    'saint-saphorin (lavaux)': 'St-Saphorin (Lavaux)',
+    'saint-saphorin': 'St-Saphorin (Lavaux)',
+    'st-saphorin': 'St-Saphorin (Lavaux)',
+    'blonay': 'Blonay-Saint-Légier',
+    'saint-légier-la chiésaz': 'Blonay-Saint-Légier',
+    'apples': 'Hautemorges',
+    'cottens (vaud)': 'Hautemorges',
+    'cottens': 'Hautemorges',
+    'essertes': 'Oron',
+    'bioley-orjulaz': 'Assens',
+}
+
 _normalized_lookup_cache = {}
 
 
 def match_commune(airbnb_name, lookup_map):
     """Try to match an Airbnb commune name against a lookup map via normalized keys."""
-    if airbnb_name in lookup_map:
-        return lookup_map[airbnb_name]
+    # Resolve fusions/synonyms first
+    norm_airbnb = normalize_commune_name(airbnb_name)
+    resolved_name = airbnb_name
+    for syn_key, target in COMMUNE_SYNONYMS.items():
+        if normalize_commune_name(syn_key) == norm_airbnb:
+            resolved_name = target
+            break
+
+    if resolved_name in lookup_map:
+        return lookup_map[resolved_name]
 
     # Build/cache normalized lookup for this map
     map_id = id(lookup_map)
@@ -271,7 +294,7 @@ def match_commune(airbnb_name, lookup_map):
         }
     norm_map = _normalized_lookup_cache[map_id]
 
-    normalized = normalize_commune_name(airbnb_name)
+    normalized = normalize_commune_name(resolved_name)
     return norm_map.get(normalized)
 
 
@@ -286,7 +309,7 @@ def compute_investment_scores(df, attractivity_map, pop_map, price_map, stabilit
       2. Occupancy rate        (20%) — days occupied / 365
       3. Attractivity          (20%) — LOCAL radius score: culture, sports, F&B,
                                        employment, transport POIs around the listing
-      4. Market saturation     (15%) — Airbnb listings per 1000 inhabitants (inverted)
+      4. Market saturation     (15%) — density of listings / mean occupancy rate (inverted)
       5. Real estate yield     (10%) — revenue / prix_m2 (higher = better yield)
       6. Seasonal stability    (10%) — low monthly variance = predictable income
     """
@@ -333,23 +356,24 @@ def compute_investment_scores(df, attractivity_map, pop_map, price_map, stabilit
     else:
         scores['attract_score'] = 0
 
-    # 4. Market saturation score (Airbnb listings per 1000 inhabitants, inverted)
+    # 4. Market saturation score (density of listings / occupancy rate)
     if pop_map:
-        # Count listings per commune
+        # Count active listings per commune
         nh_counts = df['neighbourhood_cleansed'].value_counts()
-        # Map commune -> population
-        commune_pop = {}
-        for commune in nh_counts.index:
-            matched = match_commune(commune, pop_map)
-            if matched:
-                commune_pop[commune] = matched['population']
 
-        # Saturation = listings per 1000 inhabitants
+        # Mean occupancy days per commune
+        commune_mean_occ = df.groupby('neighbourhood_cleansed')['estimated_occupancy_l365d'].mean()
+
+        # Saturation = (listings / surface_ha) / (mean_occupancy / 365)
         saturation = {}
         for commune, count in nh_counts.items():
-            pop = commune_pop.get(commune, None)
-            if pop and pop > 0:
-                saturation[commune] = (count / pop) * 1000
+            matched = match_commune(commune, pop_map)
+            if matched and matched.get('surface_ha', 0) > 0:
+                surface = matched['surface_ha']
+                mean_occ = commune_mean_occ.get(commune, 120)
+                avg_occ_rate = max(mean_occ / 365.0, 0.01)  # prevent division by zero
+                density = count / surface
+                saturation[commune] = density / avg_occ_rate
             else:
                 saturation[commune] = None
 
@@ -362,7 +386,7 @@ def compute_investment_scores(df, attractivity_map, pop_map, price_map, stabilit
             scores['saturation_score'] = (100 - (sat_series / sat_series.max() * 100)).clip(0, 100)
         else:
             scores['saturation_score'] = 50
-        df['saturation_per_1000'] = sat_series
+        df['saturation_raw'] = sat_series
         print(f"  Saturation scores applied (mean: {scores['saturation_score'].mean():.1f})")
     else:
         scores['saturation_score'] = 50
@@ -530,7 +554,7 @@ def process_vaud():
     # Seasonal stability
     cal_path = os.path.join(folder, 'calendar.csv.gz')
     print("  Computing seasonal stability...")
-    stability_map, global_monthly = load_seasonal_variance(cal_path)
+    stability_map, global_monthly = load_seasonal_variance(cal_path, active_ids=set(df['id']))
     print(f"  Stability data for {len(stability_map)} listings")
 
     # ── Compute Investment Score ──
@@ -574,8 +598,8 @@ def process_vaud():
             listing['prix_m2'] = round(float(r['prix_m2']), 0)
         if 'gross_yield_pct' in r and pd.notna(r['gross_yield_pct']):
             listing['yield_pct'] = round(float(r['gross_yield_pct']), 2)
-        if 'saturation_per_1000' in r and pd.notna(r['saturation_per_1000']):
-            listing['saturation'] = round(float(r['saturation_per_1000']), 2)
+        if 'saturation_raw' in r and pd.notna(r['saturation_raw']):
+            listing['saturation'] = round(float(r['saturation_raw']), 4)
         listings_json.append(listing)
 
     with open(os.path.join(OUTPUT_DIR, 'vaud_listings.json'), 'w', encoding='utf-8') as f:
@@ -597,6 +621,7 @@ def process_vaud():
         avg_saturation_score=('saturation_score', 'mean'),
         avg_yield_score=('yield_score', 'mean'),
         avg_stability_score=('stability_score', 'mean'),
+        saturation_raw=('saturation_raw', 'mean'),
     ).reset_index()
 
     # Enrich with prix_m2 and population
@@ -605,9 +630,6 @@ def process_vaud():
     )
     nh_agg['population'] = nh_agg['neighbourhood_cleansed'].apply(
         lambda c: match_commune(c, pop_map).get('population') if match_commune(c, pop_map) else None
-    )
-    nh_agg['saturation_per_1000'] = nh_agg.apply(
-        lambda r: (r['count'] / r['population'] * 1000) if r['population'] and r['population'] > 0 else None, axis=1
     )
 
     nh_agg = nh_agg.sort_values('avg_score', ascending=False)
@@ -634,8 +656,8 @@ def process_vaud():
             entry['prix_m2'] = int(r['prix_m2'])
         if pd.notna(r.get('population')):
             entry['population'] = int(r['population'])
-        if pd.notna(r.get('saturation_per_1000')):
-            entry['saturation'] = round(float(r['saturation_per_1000']), 2)
+        if pd.notna(r.get('saturation_raw')):
+            entry['saturation'] = round(float(r['saturation_raw']), 4)
         nh_json.append(entry)
 
     with open(os.path.join(OUTPUT_DIR, 'vaud_neighborhoods.json'), 'w', encoding='utf-8') as f:

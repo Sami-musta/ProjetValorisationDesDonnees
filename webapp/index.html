@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AirValo PROJECT | Intelligence d'investissement Airbnb en Suisse</title>
+    <title>AirValo</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'><path d='M3 9.5L12 3L21 9.5V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V9.5Z' stroke='%23FF5A5F' stroke-width='2' fill='none' /><path d='M9 21V12H15V21' stroke='%23FF5A5F' stroke-width='2' /></svg>">
     <meta name="description"
         content="Plateforme d'intelligence pour investisseurs Airbnb — Canton de Vaud, Suisse">
 
@@ -16,7 +17,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Cache-bust local stylesheet so style edits are picked up without hard-reload -->
-    <link rel="stylesheet" href="style.css?v=20260531c">
+    <link rel="stylesheet" href="style.css?v=20260531f">
 </head>
 
 <body>
@@ -55,12 +56,6 @@
                 <button class="nav-tab hidden" data-view="attractivity" id="nav-tab-attractivity">
                     <span class="tab-icon">🎯</span> Attractivité
                 </button>
-                <button class="nav-tab" data-view="regulations">
-                    <span class="tab-icon">⚖️</span> Règles
-                </button>
-                <button class="nav-tab" data-view="about">
-                    <span class="tab-icon">ℹ️</span> À propos
-                </button>
             </div>
 
             <div class="nav-city-selector">
@@ -88,35 +83,40 @@
                 </div>
             </div>
             <div class="mobile-menu-divider"></div>
-            <!-- Navigation -->
+            <!-- Navigation — parcours principal (aussi en onglets sur desktop) -->
             <div class="mobile-menu-section">
-                <button class="mobile-menu-item active" data-view="overview">
+                <button class="mobile-menu-item mm-core active" data-view="overview">
                     <span class="mobile-menu-icon">📊</span>
                     <span class="mobile-menu-label">Vue d'ensemble</span>
                 </button>
-                <button class="mobile-menu-item" data-view="map">
+                <button class="mobile-menu-item mm-core" data-view="map">
                     <span class="mobile-menu-icon">🗺️</span>
                     <span class="mobile-menu-label">Carte interactive</span>
                 </button>
-                <button class="mobile-menu-item" data-view="analysis">
+                <button class="mobile-menu-item mm-core" data-view="analysis">
                     <span class="mobile-menu-icon">📈</span>
                     <span class="mobile-menu-label">Analyse détaillée</span>
                 </button>
-                <button class="mobile-menu-item" data-view="simulator">
+                <button class="mobile-menu-item mm-core" data-view="simulator">
                     <span class="mobile-menu-icon">🎛️</span>
                     <span class="mobile-menu-label">Simulateur</span>
                 </button>
-                <button class="mobile-menu-item hidden" data-view="attractivity" id="mobile-tab-attractivity">
+                <button class="mobile-menu-item mm-core hidden" data-view="attractivity" id="mobile-tab-attractivity">
                     <span class="mobile-menu-icon">🎯</span>
                     <span class="mobile-menu-label">Attractivité</span>
                 </button>
+            </div>
+            <div class="mobile-menu-divider mm-core-divider"></div>
+            <!-- Ressources — toujours dans le menu (desktop + mobile) -->
+            <div class="mobile-menu-section">
                 <button class="mobile-menu-item" data-view="regulations">
                     <span class="mobile-menu-icon">⚖️</span>
                     <span class="mobile-menu-label">Réglementations</span>
                 </button>
-            </div>
-            <div class="mobile-menu-divider"></div>
-            <div class="mobile-menu-section">
+                <button class="mobile-menu-item" data-view="partners">
+                    <span class="mobile-menu-icon">🤝</span>
+                    <span class="mobile-menu-label">Partenaires</span>
+                </button>
                 <button class="mobile-menu-item" data-view="about">
                     <span class="mobile-menu-icon">ℹ️</span>
                     <span class="mobile-menu-label">À propos</span>
@@ -133,13 +133,13 @@
                 <div class="hero-explainer reveal-up">
                     <div class="hero-inner">
                         <span class="eyebrow">Outil d'aide à la décision · Lancer son Airbnb</span>
-                        <h1 class="hero-title" id="overview-title">Lancez votre Airbnb en Vaud, en vous appuyant sur la donnée.</h1>
+                        <h1 class="hero-title" id="overview-title">Lancez votre Airbnb dans le canton de Vaud, en vous appuyant sur des données réelles.</h1>
                         <p class="hero-lead">
-                            AirValo agrège <strong>2 568 annonces Airbnb actives</strong>, <strong>71 644 avis
-                            voyageurs analysés</strong>, <strong>8 500 points d'intérêt régionaux</strong> et les
-                            <strong>prix immobiliers par commune</strong> pour vous dire, commune par commune,
-                            <em>où</em>, <em>quoi</em> et <em>à quel prix</em> lancer votre location courte durée —
-                            et combien elle peut vraiment rapporter.
+                            AirValo analyse <strong>2 568 annonces Airbnb actives</strong>, <strong>71 644 avis
+                            voyageurs</strong>, <strong>8 500 points d'intérêt régionaux</strong> et les
+                            <strong>prix immobiliers par commune</strong> — revenus, concurrence et attractivité
+                            locale réunis pour vous dire, commune par commune, <em>où</em> investir, <em>quel
+                            logement</em> proposer, <em>à quel prix</em> louer et <em>quel revenu</em> vraiment espérer.
                         </p>
                         <div class="hero-ctas">
                             <button class="btn-cta" data-go-view="simulator">
@@ -226,29 +226,6 @@
                         </div>
                         <div class="chart-container"><canvas id="chart-property-type"></canvas></div>
                     </div>
-                </div>
-
-                <div class="recommendation-panel glass coral-border">
-                    <div class="rec-header">
-                        <div class="rec-badge">✨ Recommandation AirValo</div>
-                        <span class="rec-score-help" id="rec-score-help" tabindex="0">
-                            Qu'est-ce que le Score ? ℹ️
-                            <span class="rec-tooltip">
-                                <strong>Score d'Investissement AirValo (0-100)</strong><br><br>
-                                Notre algorithme combine 6 facteurs :<br>
-                                <strong>1. Revenu (25%)</strong> — Revenu annuel estime par percentile<br>
-                                <strong>2. Occupation (20%)</strong> — Taux d'occupation sur 365 jours<br>
-                                <strong>3. Attractivite (20%)</strong> — Score base sur les POI (culture, sport,
-                                restaurants, emploi)<br>
-                                <strong>4. Saturation (15%)</strong> — Airbnb pour 1000 habitants (inverse)<br>
-                                <strong>5. Rendement (10%)</strong> — Ratio revenu / prix immobilier au m²<br>
-                                <strong>6. Stabilite (10%)</strong> — Regularite saisonniere des revenus<br><br>
-                                <em>Plus le score est eleve, plus le bien est interessant pour un investissement
-                                    locatif.</em>
-                            </span>
-                        </span>
-                    </div>
-                    <div id="recommendation-text">Chargement de l'analyse...</div>
                 </div>
 
                 <!-- Ce que fait AirValo — panorama des fonctionnalités -->
@@ -407,6 +384,12 @@
                 </div>
                 <div id="map-container"></div>
 
+                <!-- Floating simulation filter banner -->
+                <div class="map-filter-banner glass hidden" id="map-filter-banner">
+                    <span class="mfb-text">🔍 Affichage des comparables de la simulation</span>
+                    <button type="button" class="mfb-btn" id="btn-clear-map-filter">Voir toutes les annonces</button>
+                </div>
+
                 <!-- Fixed-position explainer legend rendered by renderMapLegend() -->
                 <div class="map-legend" id="map-legend"></div>
 
@@ -555,28 +538,17 @@
                     </div>
                 </div>
 
-                <div id="ai-recommendation-container" style="display: none; margin-top: 20px;">
-                    <div class="about-card glass full-width"
-                        style="padding: 16px 20px; border: 1px solid var(--airbnb-coral-glow); background: var(--mesh-c1); border-radius: var(--radius-lg);">
-                        <h4
-                            style="font-size: 13px; color: var(--airbnb-coral); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            ✨ Recommandation AirValo
-                        </h4>
-                        <p id="ai-rec-text"
-                            style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;"></p>
-                    </div>
-                </div>
-
                 <div class="analysis-grid" style="margin-top: 20px;">
                     <div class="chart-panel glass full-width">
                         <div class="panel-header">
-                            <h3>📆 Tendances saisonnières — Prix & Occupation</h3>
+                            <h3>📆 Saisonnalité de l'occupation <span id="seasonal-scope" class="panel-scope"></span></h3>
                         </div>
                         <div class="chart-container tall"><canvas id="chart-seasonal"></canvas></div>
+                        <div class="seasonal-stats" id="seasonal-stats"></div>
                     </div>
                     <div class="chart-panel glass">
                         <div class="panel-header">
-                            <h3>⭐ Radar qualité — Meilleur quartier</h3>
+                            <h3>⭐ Radar qualité</h3>
                         </div>
                         <div class="chart-container square"><canvas id="chart-radar"></canvas></div>
                     </div>
@@ -585,13 +557,6 @@
                             <h3>🏠 Répartition des annonces par type</h3>
                         </div>
                         <div class="chart-container square"><canvas id="chart-doughnut"></canvas></div>
-                    </div>
-                    <div class="chart-panel glass full-width">
-                        <div class="panel-header">
-                            <h3 title="Score AirValo sur 100 - Voir onglet 'À propos'">🏘️ Comparaison des quartiers —
-                                Score AirValo vs Revenu (filtré) ℹ️</h3>
-                        </div>
-                        <div class="chart-container tall"><canvas id="chart-nh-comparison"></canvas></div>
                     </div>
                 </div>
             </section>
@@ -879,8 +844,8 @@
             <!-- ════════ VUE : RÉGLEMENTATIONS ════════ -->
             <section class="view" id="view-regulations">
                 <div class="view-header">
-                    <h1>⚖️ Réglementations & Réseau d'experts</h1>
-                    <p class="view-subtitle">Cadre légal de la location courte durée dans le Canton de Vaud, et réseau de partenaires locaux proposés à nos clients.</p>
+                    <h1>⚖️ Réglementations</h1>
+                    <p class="view-subtitle">Cadre légal de la location courte durée dans le Canton de Vaud (règle des 90 jours, enregistrement, taxe de séjour).</p>
                 </div>
                 <!-- Règle centrale : les 90 jours -->
                 <div class="reg-highlight glass">
@@ -945,40 +910,66 @@
                     <p class="reg-disclaimer">⚠️ Informations à but indicatif (mises à jour mai 2026). La réglementation évolue et varie d'une commune à l'autre — vérifiez toujours auprès de votre commune avant de lancer votre activité.</p>
                 </div>
 
-                <!-- Réseau de partenaires -->
-                <div class="partners-section">
-                    <div class="view-header" style="margin-top:8px;">
-                        <h2 style="font-size:22px;">🤝 Réseau de partenaires locaux</h2>
-                        <p class="view-subtitle">AirValo noue des <strong>partenariats</strong> avec des acteurs locaux de la location courte durée — conciergeries, gestion, conseil juridique et fiscal — pour les proposer directement à nos clients investisseurs. Un accompagnement clé en main, du cadrage légal à la mise en location.</p>
+            </section>
+
+            <!-- ════════ VUE : PARTENAIRES ════════ -->
+            <section class="view" id="view-partners">
+                <div class="view-header">
+                    <h1>🤝 Réseau de partenaires locaux</h1>
+                    <p class="view-subtitle">AirValo noue des <strong>partenariats</strong> avec des acteurs locaux de la location courte durée — conciergeries, gestion, conseil juridique et fiscal — pour les proposer directement à nos clients investisseurs. Un accompagnement clé en main, du cadrage légal à la mise en location.</p>
+                </div>
+
+                <!-- Bénéfices du réseau -->
+                <div class="partners-intro">
+                    <div class="partner-benefit glass">
+                        <span class="pb-ico">🔑</span>
+                        <h4>Clé en main</h4>
+                        <p>Du cadrage légal à la mise en ligne, chaque étape couverte par un spécialiste de confiance.</p>
                     </div>
-                    <div class="partners-grid">
-                        <div class="partner-card glass">
-                            <div class="partner-tag">Conciergerie</div>
-                            <strong>Swisspitality</strong>
-                            <span>Conciergerie & gestion Airbnb — Genève & Vaud</span>
-                        </div>
-                        <div class="partner-card glass">
-                            <div class="partner-tag">Gestion complète</div>
-                            <strong>GuestReady Switzerland</strong>
-                            <span>Gestion locative courte durée — Suisse romande & alémanique</span>
-                        </div>
-                        <div class="partner-card glass">
-                            <div class="partner-tag">Gestion · Airbnb</div>
-                            <strong>Luckey (by Airbnb)</strong>
-                            <span>Gestion location courte durée — toute la Suisse</span>
-                        </div>
-                        <div class="partner-card glass">
-                            <div class="partner-tag">Conseil juridique</div>
-                            <strong>Régie du Rhône</strong>
-                            <span>Conseil juridique & immobilier — Genève & Vaud</span>
-                        </div>
-                        <div class="partner-card glass partner-cta-card">
-                            <div class="partner-tag">Devenir partenaire</div>
-                            <strong>Vous êtes un acteur local&nbsp;?</strong>
-                            <span>Conciergerie, fiduciaire, notaire, home-staging, photographe… Rejoignez le réseau AirValo et accédez à nos clients investisseurs.</span>
-                            <a class="partner-cta" href="mailto:contact@airvalo.ch?subject=Partenariat%20AirValo">Proposer un partenariat →</a>
-                        </div>
+                    <div class="partner-benefit glass">
+                        <span class="pb-ico">📍</span>
+                        <h4>Ancrage local</h4>
+                        <p>Des partenaires actifs en Suisse romande, qui connaissent le terrain vaudois et ses communes.</p>
                     </div>
+                    <div class="partner-benefit glass">
+                        <span class="pb-ico">✅</span>
+                        <h4>Sélectionnés</h4>
+                        <p>Des acteurs reconnus de la location courte durée, proposés directement à nos clients investisseurs.</p>
+                    </div>
+                </div>
+
+                <h3 class="partners-subtitle">Nos partenaires</h3>
+                <div class="partners-grid">
+                    <div class="partner-card glass">
+                        <div class="partner-tag">Conciergerie</div>
+                        <strong>Swisspitality</strong>
+                        <span>Conciergerie & gestion Airbnb — Genève & Vaud</span>
+                    </div>
+                    <div class="partner-card glass">
+                        <div class="partner-tag">Gestion complète</div>
+                        <strong>GuestReady Switzerland</strong>
+                        <span>Gestion locative courte durée — Suisse romande & alémanique</span>
+                    </div>
+                    <div class="partner-card glass">
+                        <div class="partner-tag">Gestion · Airbnb</div>
+                        <strong>Luckey (by Airbnb)</strong>
+                        <span>Gestion location courte durée — toute la Suisse</span>
+                    </div>
+                    <div class="partner-card glass">
+                        <div class="partner-tag">Conseil juridique</div>
+                        <strong>Régie du Rhône</strong>
+                        <span>Conseil juridique & immobilier — Genève & Vaud</span>
+                    </div>
+                </div>
+
+                <!-- Appel à partenariat -->
+                <div class="partner-cta-banner glass">
+                    <div class="partner-cta-text">
+                        <div class="partner-tag">Devenir partenaire</div>
+                        <h3>Vous êtes un acteur local de la location courte durée&nbsp;?</h3>
+                        <p>Conciergerie, fiduciaire, notaire, home-staging, photographe, agence immobilière… Rejoignez le réseau AirValo et accédez à nos clients investisseurs dans le canton de Vaud.</p>
+                    </div>
+                    <a class="partner-cta-btn" href="mailto:contact@airvalo.ch?subject=Partenariat%20AirValo">Proposer un partenariat →</a>
                 </div>
             </section>
 
@@ -986,7 +977,7 @@
             <section class="view" id="view-about">
                 <div class="view-header">
                     <h1>ℹ️ AirValo Project</h1>
-                    <p class="view-subtitle">Contexte, pipeline de donnees, methodologie et equipe</p>
+                    <p class="view-subtitle">Contexte, pipeline de données, méthodologie et équipe</p>
                 </div>
 
                 <div class="about-grid">
@@ -994,53 +985,53 @@
                     <div class="about-card glass">
                         <h3>📖 Contexte</h3>
                         <p>
-                            <strong>AirValo</strong> est une plateforme d'intelligence decisionnelle developpee dans le
-                            cadre du cours <strong>Projet de valorisation des donnees</strong>. Elle aide les
-                            investisseurs immobiliers a identifier les meilleures opportunites de location courte duree
+                            <strong>AirValo</strong> est une plateforme d'intelligence décisionnelle développée dans le
+                            cadre du cours <strong>Projet de valorisation des données</strong>. Elle aide les
+                            investisseurs immobiliers à identifier les meilleures opportunités de location courte durée
                             (Airbnb) dans le <strong>Canton de Vaud</strong>.
                         </p>
                         <p>
-                            L'application croise des donnees Airbnb avec des donnees regionales (prix immobiliers,
-                            demographie, points d'interet) pour produire un <strong>score d'investissement</strong>
-                            oriente investisseur, par commune et par district.
+                            L'application croise des données Airbnb avec des données régionales (prix immobiliers,
+                            démographie, points d'intérêt) pour produire un <strong>score d'investissement</strong>
+                            orienté investisseur, par commune et par district.
                         </p>
                     </div>
 
-                    <!-- ── Sources de donnees ── -->
+                    <!-- ── Sources de données ── -->
                     <div class="about-card glass">
-                        <h3>📊 Sources de donnees</h3>
+                        <h3>📊 Sources de données</h3>
                         <p>
-                            Le projet croise <strong>7 sources de donnees</strong> complementaires :
+                            Le projet croise <strong>7 sources de données</strong> complémentaires :
                         </p>
                         <ul
                             style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 8px;">
                             <li><strong>Inside Airbnb</strong> — listings.csv.gz (5 486 annonces, 79 colonnes) et
-                                calendar.csv.gz (disponibilite journaliere sur 365 jours)</li>
+                                calendar.csv.gz (disponibilité journalière sur 365 jours)</li>
                             <li><strong>Avis voyageurs Airbnb (reviews)</strong> — <strong>71 644 commentaires</strong>
-                                analyses (themes, frictions et tonalite) sur 167 communes, pour la section
-                                « Experience voyageurs »</li>
-                            <li><strong>OpenStreetMap (OSM)</strong> — 11 000 points d'interet (musees, restaurants,
-                                centres sportifs, bureaux, <strong>gares, arrets de tram et de bus</strong>) via Overpass API</li>
-                            <li><strong>Stat Vaud</strong> — Densite de population par commune (2025), 300 communes
+                                analysés (thèmes, frictions et tonalité) sur 167 communes, pour la section
+                                « Expérience voyageurs »</li>
+                            <li><strong>OpenStreetMap (OSM)</strong> — 11 000 points d'intérêt (musées, restaurants,
+                                centres sportifs, bureaux, <strong>gares, arrêts de tram et de bus</strong>) via Overpass API</li>
+                            <li><strong>Stat Vaud</strong> — Densité de population par commune (2025), 300 communes
                                 avec population et superficie</li>
                             <li><strong>Neho / Lookmove</strong> — Prix immobiliers au m² par commune (mars 2026),
                                 250 communes avec prix appartement et maison</li>
-                            <li><strong>GeoJSON</strong> — Decoupage administratif du canton (309 communes, 10
-                                districts) pour le geo-matching</li>
-                            <li><strong>Repertoire officiel des localites (AMTOVZ, swisstopo)</strong> — 542 localites
-                                vaudoises avec code postal (NPA) et coordonnees, pour rattacher chaque bien a son NPA</li>
+                            <li><strong>GeoJSON</strong> — Découpage administratif du canton (309 communes, 10
+                                districts) pour le géo-matching</li>
+                            <li><strong>Répertoire officiel des localités (AMTOVZ, swisstopo)</strong> — 542 localités
+                                vaudoises avec code postal (NPA) et coordonnées, pour rattacher chaque bien à son NPA</li>
                         </ul>
                         <a href="https://insideairbnb.com/fr/get-the-data/" target="_blank" class="about-link"
                             rel="noopener noreferrer">
-                            Explorer les donnees brutes sur Inside Airbnb ↗
+                            Explorer les données brutes sur Inside Airbnb ↗
                         </a>
                     </div>
 
-                    <!-- ── Pipeline de donnees detaille ── -->
+                    <!-- ── Pipeline de données détaillé ── -->
                     <div class="about-card glass full-width">
-                        <h3>⚙️ Pipeline de traitement des donnees</h3>
-                        <p style="margin-bottom: 16px;">Deux scripts Python transforment les donnees brutes en JSON
-                            optimise pour le dashboard :</p>
+                        <h3>⚙️ Pipeline de traitement des données</h3>
+                        <p style="margin-bottom: 16px;">Deux scripts Python transforment les données brutes en JSON
+                            optimisé pour le dashboard :</p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
                             <div>
@@ -1049,14 +1040,14 @@
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
                                     <li>Charge <strong>11 030 POIs</strong> depuis OpenStreetMap (fichier Excel)</li>
-                                    <li>Categorise en <strong>5 facteurs</strong> : culture (838), sport (3 451),
-                                        restaurants (2 117), emploi (852) et <strong>transports (3 772 : gares, trams,
+                                    <li>Catégorise en <strong>5 facteurs</strong> : culture (838), sport (3 451),
+                                        restaurants (2 117), emploi (852) et <strong>transports (3 772 : gares, arrêts de tram,
                                         bus)</strong></li>
-                                    <li>Expose un <strong>moteur de score par rayon</strong> reutilise par le script 2 :
-                                        somme ponderee des POIs autour d'un point, avec decroissance par distance</li>
-                                    <li>Produit aussi un agregat par district (point-in-polygon, Shapely + GeoJSON)
+                                    <li>Expose un <strong>moteur de score par rayon</strong> réutilisé par le script 2 :
+                                        somme pondérée des POIs autour d'un point, avec décroissance par distance</li>
+                                    <li>Produit aussi un agrégat par district (point-in-polygon, Shapely + GeoJSON)
                                         pour la vue macro</li>
-                                    <li>Ponderations : emploi 25%, sport 22%, culture 20%, <strong>transports 20%</strong>,
+                                    <li>Pondérations : emploi 25%, sport 22%, culture 20%, <strong>transports 20%</strong>,
                                         restauration 13%</li>
                                     <li>Export → <code>vaud_attractivity.json</code>, <code>attractivity_weights.json</code></li>
                                 </ul>
@@ -1065,49 +1056,48 @@
                                     style="font-size: 14px; color: var(--airbnb-coral); margin-bottom: 10px; margin-top: 16px;">
                                     Script 2 — process_airbnb.py</h4>
                                 <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 8px;">
-                                    Pipeline principal en 9 etapes :
+                                    Pipeline principal en 9 étapes :
                                 </p>
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
                                     <li><strong>Ingestion :</strong> Lecture de <code>listings.csv.gz</code> (5 486
                                         annonces, 79 colonnes)</li>
                                     <li><strong>Nettoyage :</strong> Conversion des prix (suppression $, plafond
-                                        5 000 CHF), normalisation numerique</li>
+                                        5 000 CHF), normalisation numérique</li>
                                     <li><strong>Filtrage :</strong> Suppression des listings inactifs
                                         (<code>estimated_occupancy_l365d = 0</code>) → 2 831 annonces actives</li>
                                 </ul>
                             </div>
                             <div>
                                 <h4 style="font-size: 14px; color: var(--airbnb-teal); margin-bottom: 10px;">Enrichissement
-                                    croise</h4>
+                                    croisé</h4>
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
-                                    <li><strong>Attractivite LOCALE :</strong> calculee pour chaque annonce dans un
-                                        <strong>rayon autour de ses coordonnees</strong> (1 500 m pour culture / sport /
-                                        resto / emploi ; rayon reduit pour les transports), et non plus heritee de la
+                                    <li><strong>Attractivité LOCALE :</strong> calculée pour chaque annonce dans un
+                                        <strong>rayon autour de ses coordonnées</strong> (1 500 m pour culture / sport /
+                                        resto / emploi ; rayon réduit pour les transports), et non plus héritée de la
                                         moyenne du district</li>
-                                    <li><strong>Code postal (NPA) :</strong> chaque bien est rattache au NPA de la
-                                        localite la plus proche (AMTOVZ, conversion LV95 → WGS84)</li>
-                                    <li><strong>Demographie :</strong> Population par commune (Stat Vaud 2025) →
-                                        calcul de la saturation Airbnb/1000 habitants</li>
+                                    <li><strong>Code postal (NPA) :</strong> chaque bien est rattaché au NPA de la
+                                        localité la plus proche (AMTOVZ, conversion LV95 → WGS84)</li>
+                                    <li><strong>Saturation du marché :</strong> Densité (Airbnb / aire de la commune en ha) / taux d'occupation moyen</li>
                                     <li><strong>Immobilier :</strong> Prix au m² par commune (Neho/Lookmove 2026) →
                                         calcul du rendement revenu/prix</li>
-                                    <li><strong>Saisonnalite :</strong> Variance mensuelle de l'occupation par listing
-                                        (depuis <code>calendar.csv.gz</code>) → score de stabilite</li>
+                                    <li><strong>Saisonnalité :</strong> Variance mensuelle de l'occupation par listing
+                                        (depuis <code>calendar.csv.gz</code>) → score de stabilité</li>
                                 </ul>
 
                                 <h4
                                     style="font-size: 14px; color: var(--airbnb-teal); margin-bottom: 10px; margin-top: 16px;">
-                                    Export & Agregation</h4>
+                                    Export & Agrégation</h4>
                                 <ul
                                     style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
                                     <li><strong>Par listing :</strong> 2 500 annonces avec score, prix, revenu,
                                         sous-scores locaux + NPA → <code>vaud_listings.json</code></li>
                                     <li><strong>Par commune :</strong> 204 communes avec moyennes, prix m², population,
                                         saturation → <code>vaud_neighborhoods.json</code></li>
-                                    <li><strong>Par code postal (NPA) :</strong> 228 zones avec attractivite locale,
+                                    <li><strong>Par code postal (NPA) :</strong> 228 zones avec attractivité locale,
                                         transports et financier → <code>vaud_npa.json</code></li>
-                                    <li><strong>Par type :</strong> 4 categories de bien →
+                                    <li><strong>Par type :</strong> 4 catégories de bien →
                                         <code>vaud_property_types.json</code></li>
                                     <li><strong>Saisonnier :</strong> 12 mois prix + occupation →
                                         <code>vaud_seasonal.json</code></li>
@@ -1127,13 +1117,13 @@
                         </div>
                     </div>
 
-                    <!-- ── Score d'investissement detaille ── -->
+                    <!-- ── Score d'investissement détaillé ── -->
                     <div class="about-card glass full-width">
-                        <h3>🎯 Score d'Investissement AirValo — Formule detaillee</h3>
+                        <h3>🎯 Score d'Investissement AirValo — Formule détaillée</h3>
                         <p style="margin-bottom: 12px;">
-                            Le <strong>Score AirValo (0-100)</strong> est une metrique composite orientee
-                            <strong>investisseur</strong>, calculee pour chaque annonce puis agreee par commune.
-                            Il combine <strong>6 dimensions ponderees</strong>, toutes pertinentes pour la decision
+                            Le <strong>Score AirValo (0-100)</strong> est une métrique composite orientée
+                            <strong>investisseur</strong>, calculée pour chaque annonce puis agréée par commune.
+                            Il combine <strong>6 dimensions pondérées</strong>, toutes pertinentes pour la décision
                             d'investissement :
                         </p>
 
@@ -1144,20 +1134,20 @@
                                 <h4 style="font-size: 13px; margin-bottom: 4px;">Revenu potentiel</h4>
                                 <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">25%</div>
                                 <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Rang percentile
-                                    du revenu annuel reel (Inside Airbnb)</p>
+                                    du revenu annuel réel (Inside Airbnb)</p>
                             </div>
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
                                 <div style="font-size: 22px; margin-bottom: 6px;">📅</div>
                                 <h4 style="font-size: 13px; margin-bottom: 4px;">Taux d'occupation</h4>
                                 <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">20%</div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Jours occupes /
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Jours occupés /
                                     365, demande effective</p>
                             </div>
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
                                 <div style="font-size: 22px; margin-bottom: 6px;">🎯</div>
-                                <h4 style="font-size: 13px; margin-bottom: 4px;">Attractivite locale</h4>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Attractivité locale</h4>
                                 <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">20%</div>
                                 <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">POIs dans un rayon
                                     autour du bien : culture, sport, resto, emploi, <strong>transports</strong> (OSM)</p>
@@ -1165,10 +1155,9 @@
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
                                 <div style="font-size: 22px; margin-bottom: 6px;">📊</div>
-                                <h4 style="font-size: 13px; margin-bottom: 4px;">Saturation du marche</h4>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Saturation du marché</h4>
                                 <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">15%</div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Airbnb par
-                                    1000 habitants (inverse) — Stat Vaud 2025</p>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Densité (Airbnb/ha) / Taux d'occupation moyen (score inversé)</p>
                             </div>
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
@@ -1181,7 +1170,7 @@
                             <div
                                 style="background: var(--glass-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
                                 <div style="font-size: 22px; margin-bottom: 6px;">📈</div>
-                                <h4 style="font-size: 13px; margin-bottom: 4px;">Stabilite saisonniere</h4>
+                                <h4 style="font-size: 13px; margin-bottom: 4px;">Stabilité saisonnière</h4>
                                 <div style="font-size: 20px; font-weight: 700; color: var(--airbnb-coral);">10%</div>
                                 <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Inverse de la
                                     variance mensuelle d'occupation (calendar.csv)</p>
@@ -1193,12 +1182,12 @@
                             <h4 style="font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">Formule exacte :</h4>
                             <code
                                 style="font-size: 13px; color: var(--airbnb-coral); line-height: 1.8; display: block;">
-                                Score = Revenu_pct × 0.25 + (Occupation/365) × 0.20 + Attractivite × 0.20 + (1 − Saturation/max) × 0.15 + Rendement_pct × 0.10 + Stabilite × 0.10
+                                Score = Revenu_pct × 0.25 + (Occupation/365) × 0.20 + Attractivité × 0.20 + (1 − Saturation/max) × 0.15 + Rendement_pct × 0.10 + Stabilité × 0.10
                             </code>
                             <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
-                                Chaque sous-score est normalise sur [0, 100]. Le revenu et le rendement utilisent un
-                                <strong>rang percentile</strong>. La saturation est <strong>inversee</strong> : moins il
-                                y a d'Airbnb par habitant, mieux c'est pour l'investisseur. La stabilite est
+                                Chaque sous-score est normalisé sur [0, 100]. Le revenu et le rendement utilisent un
+                                <strong>rang percentile</strong>. La saturation est <strong>inversée</strong> : moins la zone est
+                                saturée en Airbnb par rapport au taux d'occupation, mieux c'est pour l'investisseur. La stabilité est
                                 l'<strong>inverse de la variance</strong> d'occupation mensuelle.
                             </p>
                         </div>
@@ -1209,22 +1198,21 @@
                                 facteurs ?</h4>
                             <ul
                                 style="list-style-type: disc; padding-left: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
-                                <li><strong>Revenu + Occupation :</strong> Ce que les hotes gagnent reellement et la
+                                <li><strong>Revenu + Occupation :</strong> Ce que les hôtes gagnent réellement et la
                                     constance de la demande</li>
-                                <li><strong>Attractivite :</strong> La demande structurelle du lieu (touristes,
+                                <li><strong>Attractivité :</strong> La demande structurelle du lieu (touristes,
                                     travailleurs, sportifs, culture)</li>
-                                <li><strong>Saturation :</strong> Le niveau de concurrence reel rapporte a la population
-                                    locale</li>
-                                <li><strong>Rendement immobilier :</strong> Le rapport entre gains Airbnb et cout
+                                <li><strong>Saturation :</strong> Le niveau de concurrence réel (Airbnb/ha) rapporté au taux d'occupation moyen de la zone</li>
+                                <li><strong>Rendement immobilier :</strong> Le rapport entre gains Airbnb et coût
                                     d'acquisition du bien</li>
-                                <li><strong>Stabilite :</strong> Un revenu previsible toute l'annee, pas seulement en
+                                <li><strong>Stabilité :</strong> Un revenu prévisible toute l'année, pas seulement en
                                     haute saison</li>
                             </ul>
                             <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">
-                                <strong>Note :</strong> Les notes Airbnb (cleanliness, communication, etc.) ont ete
-                                volontairement exclues du score. Elles refletent la qualite de l'hote actuel, pas le
-                                potentiel d'investissement du lieu. Un quartier mal note peut etre une opportunite
-                                (marche mal servi).
+                                <strong>Note :</strong> Les notes Airbnb (cleanliness, communication, etc.) ont été
+                                volontairement exclues du score. Elles reflètent la qualité
+                                d'investissement du lieu. Un quartier mal noté peut être une opportunité
+                                (marché mal servi).
                             </p>
                         </div>
 
