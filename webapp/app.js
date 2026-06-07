@@ -238,7 +238,14 @@ function setupCustomDropdowns() {
             dd.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             // Update trigger text
-            dd.querySelector('.trigger-text').textContent = item.textContent;
+            const titleSpan = item.querySelector('.dd-title');
+            const iconBox = item.querySelector('.dd-icon-box');
+            if (titleSpan) {
+                const icon = iconBox ? iconBox.textContent.trim() + ' ' : '';
+                dd.querySelector('.trigger-text').textContent = icon + titleSpan.textContent.trim();
+            } else {
+                dd.querySelector('.trigger-text').textContent = item.textContent.trim();
+            }
 
             // Close
             dd.classList.remove('open');
@@ -414,10 +421,16 @@ function setupNavigation() {
         if (el) el.addEventListener('change', renderMap);
     });
     // Analysis filters
-    ['analysis-nh', 'analysis-type'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', renderAnalysis);
-    });
+    const analysisNhEl = document.getElementById('analysis-nh');
+    if (analysisNhEl) analysisNhEl.addEventListener('change', renderAnalysis);
+
+    const analysisTypeEl = document.getElementById('analysis-type');
+    if (analysisTypeEl) {
+        analysisTypeEl.addEventListener('change', () => {
+            populateAnalysisNhDropdown();
+            renderAnalysis();
+        });
+    }
     ['analysis-max-price', 'analysis-min-score'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', () => { document.getElementById(id + '-val').textContent = el.value; renderAnalysis(); });
@@ -502,11 +515,39 @@ function populateAnalysisNhDropdown() {
     const sel = document.getElementById('analysis-nh');
     if (!sel) return;
     const data = cityData[activeCity];
-    if (!data?.neighborhoods) return;
+    if (!data?.neighborhoods || !data?.listings) return;
 
-    // Update hidden select
+    // Selected room type
+    const typeF = document.getElementById('analysis-type')?.value || 'all';
+
+    // Find neighborhoods with at least one listing matching the selected room type
+    const validNeighborhoods = new Set();
+    data.listings.forEach(l => {
+        if (typeF === 'all' || l.type === typeF) {
+            validNeighborhoods.add(l.nh);
+        }
+    });
+
+    // Save the current neighborhood selection
+    const currentVal = sel.value;
+
+    // Update hidden select options
     sel.innerHTML = '<option value="all">Tous les quartiers</option>';
-    data.neighborhoods.forEach(n => { const o = document.createElement('option'); o.value = n.nh; o.textContent = n.nh; sel.appendChild(o); });
+    data.neighborhoods.forEach(n => {
+        if (validNeighborhoods.has(n.nh)) {
+            const o = document.createElement('option');
+            o.value = n.nh;
+            o.textContent = n.nh;
+            sel.appendChild(o);
+        }
+    });
+
+    // Restore selection if it's still valid, otherwise fallback to 'all'
+    if (validNeighborhoods.has(currentVal)) {
+        sel.value = currentVal;
+    } else {
+        sel.value = 'all';
+    }
 
     // Update custom dropdown panel
     const dd = document.querySelector('.custom-dropdown[data-for="analysis-nh"]');
@@ -516,19 +557,21 @@ function populateAnalysisNhDropdown() {
 
     // Add "all" option
     const allItem = document.createElement('div');
-    allItem.className = 'dropdown-item active';
+    allItem.className = sel.value === 'all' ? 'dropdown-item active' : 'dropdown-item';
     allItem.dataset.value = 'all';
     allItem.innerHTML = `<div class="dd-icon-box">📍</div><div class="dd-text-box"><span class="dd-title">Tous les quartiers</span><span class="dd-subtitle">Vue globale de la ville</span></div>`;
     panel.appendChild(allItem);
 
-    // Add neighborhood options
+    // Add filtered neighborhood options
     data.neighborhoods.forEach(n => {
-        const item = document.createElement('div');
-        item.className = 'dropdown-item';
-        item.dataset.value = n.nh;
-        const icon = n.avg_score > 60 ? '🌟' : (n.avg_score > 40 ? '⭐' : '📍');
-        item.innerHTML = `<div class="dd-icon-box">${icon}</div><div class="dd-text-box"><span class="dd-title">${n.nh}</span><span class="dd-subtitle">Score : ${n.avg_score.toFixed(1)} | CHF ${Math.round(n.avg_revenue).toLocaleString('fr-CH')}</span></div>`;
-        panel.appendChild(item);
+        if (validNeighborhoods.has(n.nh)) {
+            const item = document.createElement('div');
+            item.className = sel.value === n.nh ? 'dropdown-item active' : 'dropdown-item';
+            item.dataset.value = n.nh;
+            const icon = n.avg_score > 60 ? '🌟' : (n.avg_score > 40 ? '⭐' : '📍');
+            item.innerHTML = `<div class="dd-icon-box">${icon}</div><div class="dd-text-box"><span class="dd-title">${n.nh}</span><span class="dd-subtitle">Score : ${n.avg_score.toFixed(1)} | CHF ${Math.round(n.avg_revenue).toLocaleString('fr-CH')}</span></div>`;
+            panel.appendChild(item);
+        }
     });
 
     // Re-attach click handlers for new items
@@ -540,13 +583,31 @@ function populateAnalysisNhDropdown() {
             panel.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             const titleSpan = item.querySelector('.dd-title');
-            dd.querySelector('.trigger-text').textContent = titleSpan ? titleSpan.textContent : item.textContent;
+            const iconBox = item.querySelector('.dd-icon-box');
+            if (titleSpan) {
+                const icon = iconBox ? iconBox.textContent.trim() + ' ' : '';
+                dd.querySelector('.trigger-text').textContent = icon + titleSpan.textContent.trim();
+            } else {
+                dd.querySelector('.trigger-text').textContent = item.textContent.trim();
+            }
             dd.classList.remove('open');
         });
     });
 
-    // Reset trigger text
-    dd.querySelector('.trigger-text').textContent = 'Tous les quartiers';
+    // Update the trigger text of the custom dropdown
+    const activeItem = panel.querySelector('.dropdown-item.active');
+    if (activeItem) {
+        const titleSpan = activeItem.querySelector('.dd-title');
+        const iconBox = activeItem.querySelector('.dd-icon-box');
+        if (titleSpan) {
+            const icon = iconBox ? iconBox.textContent.trim() + ' ' : '';
+            dd.querySelector('.trigger-text').textContent = icon + titleSpan.textContent.trim();
+        } else {
+            dd.querySelector('.trigger-text').textContent = activeItem.textContent.trim();
+        }
+    } else {
+        dd.querySelector('.trigger-text').textContent = 'Tous les quartiers';
+    }
 }
 
 // ═══════════════════════════════════════════
